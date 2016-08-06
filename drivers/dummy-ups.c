@@ -2,6 +2,7 @@
 
    Copyright (C)
        2005 - 2015  Arnaud Quette <http://arnaud.quette.free.fr/contact.html>
+       2016         Jim Klimov <jimklimov@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@
 #include "dummy-ups.h"
 
 #define DRIVER_NAME	"Device simulation and repeater driver"
-#define DRIVER_VERSION	"0.14"
+#define DRIVER_VERSION	"0.15"
 
 /* driver description structure */
 upsdrv_info_t upsdrv_info =
@@ -48,6 +49,7 @@ upsdrv_info_t upsdrv_info =
 	DRIVER_NAME,
 	DRIVER_VERSION,
 	"Arnaud Quette <arnaud.quette@gmail.com>",
+	"Jim Klimov <jimklimov@gmail.com>",
 	DRV_STABLE,
 	{ NULL }
 };
@@ -423,7 +425,7 @@ static void upsconf_err(const char *errmsg)
 
 /* for dummy mode
  * parse the definition file and process its content
- */ 
+ */
 static int parse_data_file(int upsfd)
 {
 	char	fn[SMALLBUF];
