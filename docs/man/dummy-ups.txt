@@ -69,6 +69,35 @@ It can also be empty, in which case only a basic set of data is available:
 `device.*`, `driver.*`, `ups.mfr`, `ups.model`, `ups.status` as filled by
 the driver itself.
 
+As a special format extension for testing purposes, numeric values can be
+followed by a space-separated specification for randomization around the
+originally specified base value, as follows:
+
+	variable: INT_OR_FLOAT [~(INT_OR_FLOAT;INT_OR_FLOAT)[%][@PROB[%]]]...
+	variable: INT_OR_FLOAT [~INT_OR_FLOAT[%][@PROB[%]]]...
+
+The first format allows to flexibly specify the maximum negative and positive
+deviations from the base value, in percentage or absolute units. The second
+format is a shortcut to set both deviations to the same value. The probability
+suffix is an integer that specifies the chance that this modification will be
+at all applied in this particular cycle (0% == disabled, 100% == always).
+If not specified, the probability for an item is 100%. Several items of either
+format can be present on a line, evaluated in order of appearance and ending
+the evaluation for a cycle as soon as any item hits (e.g. the first item with
+unspecified or explicit 100% probability always hits). If none of the modifier
+specifications won this round, the original base value is used. The resulting
+number is truncated to the integer or floating point precision same as the
+specified base value.
+
+For example:
+
+	input.voltage: 220.0 ~5%@10 ~(15;3.3)@30%
+	input.frequency: 50.0 ~1%
+
+Here (on average) the voltage might be 220.0V +/- 5% in 10% of the cases,
+or from 205.0V to 223.3V in 30% of the other cases, or exactly 220.0V
+otherwise. The frequency here always fluctuates up to 1% around 50Hz.
+
 Some sample definition files are available in the `data` directory of the
 NUT source tree, and generally in the sysconfig directory of your system
 distribution.
@@ -163,6 +192,7 @@ checking enforcement, as well as boundaries or enumeration definition.
 AUTHOR
 ------
 Arnaud Quette
+Jim Klimov
 
 SEE ALSO
 --------
