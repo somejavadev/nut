@@ -87,7 +87,8 @@ the evaluation for a cycle as soon as any item hits (e.g. the first item with
 unspecified or explicit 100% probability always hits). If none of the modifier
 specifications won this round, the original base value is used. The resulting
 number is truncated to the integer or floating point precision same as the
-specified base value.
+specified base value. Invalid tokens are logged and ignored, to provide for
+possible future compatibility.
 
 For example:
 
