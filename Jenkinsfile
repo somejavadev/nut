@@ -60,6 +60,7 @@
                                 steps {
                                     stash("${env.BUILD_TAG}-${env.GIT_COMMIT}-${env.NODE_LABELS}".replace(' ','_').replace('%','_'))
                                     script {
+                                        def subtests = [:]
                                         for (makerecipe in ["distcheck-light","distcheck-light-man","distcheck-dmf-all-yes","distcheck-dmf-no","distcheck-dmf-warnings"
 ,"distcheck-dmf-features-REGEN_NO"
 ,"distcheck-dmf-features-LTDL_YES"
@@ -69,8 +70,7 @@
 ,"distcheck-dmf-features-LUA_NO"
 ,"distcheck-dmf-features-REGEN_YES"
                                         ] ) {
-                                            parallel (
-                                                parblk: {
+                                            subtests["TEST-${makerecipe}@${env.NODE_LABELS}".replace(' ',' && ')] = {
                                                     node("${env.NODE_LABELS}".replace(' ',' && ')) {
                                                         stage ("TEST: ${makerecipe}") {
                                                             echo "UNSTASH for DISTCHECK"
@@ -78,16 +78,10 @@
                                                             echo "MAKE DISTCHECK : ${makerecipe}"
                                                             sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${makerecipe}"
                                                         }
-/*
-                                                        post {
-                                                            failure {
-                                                                echo "OOPS"
-                                                            }
-                                                        }
-*/
                                                     }
                                                 }
-                                            )
+                                            }
+                                        parallel subtests
                                         }
                                     }
                                 }
@@ -95,4 +89,4 @@
                 }
 //            }
 //        }
-}
+
