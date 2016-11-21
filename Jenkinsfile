@@ -1,34 +1,46 @@
 #!groovy
-pipeline {
-        @NonCPS for (buildnode in ["hipster", "debian8"] ) {
-            node("${buildnode}") {
-                agent label:"${buildnode}"
+//for (buildnode in ["hipster", "debian8"] ) {
+//    node("${buildnode}") {
+        pipeline {
+//                agent label:"${buildnode}"
+                agent label:""
+                environment {
+                        PATH="/usr/lib/ccache:${env.PATH}"
+                        CC="/usr/lib/ccache/gcc"
+                        CXX="/usr/lib/ccache/g++"
+                        CCACHE_DIR="/home/jim/.ccache"
+                        CCACHE_BASEDIR="${WORKSPACE}"
+                }
                 stages {
-                        stage ("PREP") {
+                        stage ("PREP-CO") {
                                 steps {
-                                        step ("CHECKOUT") {
-                                                echo "Checkout to ${env.NODE_NAME} : ${WORKSPACE}"
-                                                checkout scm
-                                        }
-
-                                        step ("CLEANUP") {
-                                                echo 'Clean'
-                                                sh 'if [ -s Makefile ] ; then make -k clean >/dev/null 2>&1 ; make -k distclean >/dev/null 2>&1 ; fi'
-                                                sh 'rm -f config.cache config.log config.status'
-                                                sh 'git checkout -- scripts/DMF/dmfnutscan/*.dmf scripts/DMF/dmfsnmp/*.dmf || true'
-                                        }
-
-                                        step ("AUTOGEN") {
-                                                echo 'Autogen'
-                                                sh './autogen.sh'
-                                        }
+                                        echo "Checkout to ${env.NODE_NAME} : ${WORKSPACE}"
+                                        checkout scm
                                 }
                         }
-                        stage ('Configure') {
+
+                        stage ("PREP-CLEAN") {
                                 steps {
-                                        sh 'PATH=/usr/lib/ccache:$PATH CC=/usr/lib/ccache/gcc CXX=/usr/lib/ccache/g++ ./configure --with-snmp --with-neon --with-dev --with-doc=man -C --with-snmp_dmf=yes --with-dmfnutscan-regenerate=yes --with-dmfsnmp-regenerate=yes'
+                                        sh 'if [ -s Makefile ] ; then make -k clean >/dev/null 2>&1 ; make -k distclean >/dev/null 2>&1 ; fi'
+                                        sh 'rm -f config.cache config.log config.status'
+                                        sh 'git checkout -- scripts/DMF/dmfnutscan/*.dmf scripts/DMF/dmfsnmp/*.dmf || true'
                                 }
                         }
+
+                        stage ("PREP-AUTOGEN") {
+                                steps {
+                                        echo 'Autogen'
+                                        sh './autogen.sh'
+                                }
+                        }
+
+                        stage ('Configure-DMF-quick') {
+                                steps {
+//                                        sh 'PATH=/usr/lib/ccache:$PATH CC=/usr/lib/ccache/gcc CXX=/usr/lib/ccache/g++ ./configure --with-snmp --with-neon --with-dev --with-doc=man -C --with-snmp_dmf=yes --with-dmfnutscan-regenerate=yes --with-dmfsnmp-regenerate=yes'
+                                        sh './configure --with-snmp --with-neon --with-dev --with-doc=skip --with-snmp_dmf=yes --with-dmfnutscan-regenerate=no --with-dmfsnmp-regenerate=no'
+                                }
+                        }
+
                         stage ('Build') {
                                 steps {
                                         sh 'gmake -j 4 -k all || { echo ""; echo "================"; echo "=== REMAKE"; gmake -j1 all; }'
@@ -36,10 +48,14 @@ pipeline {
                         }
                         stage ('TestMore') {
                                 steps {
-                                        sh 'gmake distcheck-dmf'
+                                    script {
+                                        ["distcheck-light","distcheck-light-man","distcheck-dmf-features","distcheck-dmf-all-yes","distcheck-dmf-no","distcheck-dmf-warnings","distcheck-dmf"].each {
+                                            sh "gmake ${it}"
+                                        }
+                                    }
                                 }
                         }
                 }
-            }
-        }
+//            }
+//        }
 }
