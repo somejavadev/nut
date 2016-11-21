@@ -91,10 +91,13 @@ pipeline {
                                                 subtests["TEST-${tag_recipe}@${tag_labels}"] = {
                                                     node("${node_labels}") {
                                                         stage ("TEST@${buildnode}: ${tag_recipe}") {
+                                                            echo "WIPE before UNSTASH for DISTCHECK"
+                                                            deleteDir()
                                                             echo "UNSTASH for DISTCHECK"
                                                             unstash("${tag_stashed}")
                                                             echo "MAKE DISTCHECK : ${tag_recipe}"
                                                             sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${tag_recipe}"
+                                                            echo "WIPE after UNSTASH for DISTCHECK"
                                                             deleteDir()
                                                         }
                                                     }
