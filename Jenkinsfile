@@ -69,6 +69,7 @@ pipeline {
                                         script {
                                             def tag_stashed = "${env.BUILD_TAG}-${env.GIT_COMMIT}-${env.NODE_LABELS}".replace(' ','_').replace('%','_')
                                             stash("${tag_stashed}")
+                                            deleteDir()
                                             def subtests = [:]
                                             for (makerecipe in [
  "distcheck-light"
@@ -94,6 +95,7 @@ pipeline {
                                                             unstash("${tag_stashed}")
                                                             echo "MAKE DISTCHECK : ${tag_recipe}"
                                                             sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${tag_recipe}"
+                                                            deleteDir()
                                                         }
                                                     }
                                                 }
