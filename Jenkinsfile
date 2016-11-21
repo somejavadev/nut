@@ -23,6 +23,14 @@
                         stage ("PREP-CLEAN") {
                                 steps {
                                         sh 'if [ -s Makefile ] ; then make -k clean || true; make -k distclean || true; fi; true'
+/*
+                                        script {
+                                                fileExists ([file: "Makefile"]) {
+                                                    sh 'make -k clean || true'
+                                                    sh 'make -k distclean || true'
+                                                }
+                                        }
+*/
                                         sh 'rm -f config.cache config.log config.status || true'
                                         sh 'git checkout -- scripts/DMF/dmfnutscan/*.dmf scripts/DMF/dmfsnmp/*.dmf || true'
                                 }
@@ -50,6 +58,7 @@
                         }
                         stage ('TestMore') {
                                 steps {
+                                    stash("${env.BUILD_TAG}-${env.GIT_COMMIT}-${env.NODE_LABELS}".replace(' ','_').replace('%','_'))
                                     script {
                                         for (makerecipe in ["distcheck-light","distcheck-light-man","distcheck-dmf-all-yes","distcheck-dmf-no","distcheck-dmf-warnings"
 ,"distcheck-dmf-features-REGEN_NO"
@@ -60,10 +69,25 @@
 ,"distcheck-dmf-features-LUA_NO"
 ,"distcheck-dmf-features-REGEN_YES"
                                         ] ) {
-                                            node("${env.NODE_NAME}") {
-                                                echo "MAKE DISTCHECK : ${makerecipe}"
-                                                sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${makerecipe}"
-                                            }
+                                            parallel (
+                                                parblk: {
+                                                    node("${env.NODE_LABELS}".replace(' ',' && ')) {
+                                                        stage ("TEST: ${makerecipe}") {
+                                                            echo "UNSTASH for DISTCHECK"
+                                                            unstash("${env.BUILD_TAG}-${env.GIT_COMMIT}-${env.NODE_LABELS}".replace(' ','_').replace('%','_'))
+                                                            echo "MAKE DISTCHECK : ${makerecipe}"
+                                                            sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${makerecipe}"
+                                                        }
+/*
+                                                        post {
+                                                            failure {
+                                                                echo "OOPS"
+                                                            }
+                                                        }
+*/
+                                                    }
+                                                }
+                                            )
                                         }
                                     }
                                 }
