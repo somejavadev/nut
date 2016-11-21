@@ -19,16 +19,12 @@ pipeline {
                         def buildnode = "${var_buildnode}"
                         subbuilds["${buildnode}"] = {
                             node("${buildnode}") {
-//                                agent label:"${buildnode}"
                                 stage ("PREP-SCM@${buildnode}") {
-//                                    step {
                                         echo "Checkout to ${env.NODE_NAME} : ${env.WORKSPACE}"
                                         checkout scm
-//                                    }
                                 }
 
                                 stage ("PREP-CLEAN@${buildnode}") {
-//                                    step {
                                         sh 'if [ -s Makefile ] ; then make -k clean || true; make -k distclean || true; fi; true'
 /*
                                         script {
@@ -40,32 +36,22 @@ pipeline {
 */
                                         sh 'rm -f config.cache config.log config.status || true'
                                         sh 'git checkout -- scripts/DMF/dmfnutscan/*.dmf scripts/DMF/dmfsnmp/*.dmf || true'
-//                                    }
                                 }
 
                                 stage ("PREP-AUTOGEN@${buildnode}") {
-//                                    step {
                                         echo 'Autogen'
                                         sh './autogen.sh'
-//                                    }
                                 }
 
                                 stage ("Configure-DMF-quick@${buildnode}") {
-//                                    step {
-//                                        sh 'set ; ls -la'
-//                                        sh 'PATH=/usr/lib/ccache:$PATH CC=/usr/lib/ccache/gcc CXX=/usr/lib/ccache/g++ ./configure --with-snmp --with-neon --with-dev --with-doc=man -C --with-snmp_dmf=yes --with-dmfnutscan-regenerate=yes --with-dmfsnmp-regenerate=yes'
                                         sh 'CCACHE_BASEDIR="`pwd`" ./configure --with-snmp --with-neon --with-dev --with-doc=skip --with-snmp_dmf=yes --with-dmfnutscan-regenerate=no --with-dmfsnmp-regenerate=no'
-//                                    }
                                 }
 
                                 stage ("Build@${buildnode}") {
-//                                    step {
                                         sh 'CCACHE_BASEDIR="`pwd`" gmake -j 4 -k all || { echo ""; echo "================"; echo "=== REMAKE"; gmake -j1 all; }'
-//                                    }
                                 }
 
                                 stage ("FanoutTests@${buildnode}") {
-//                                    step {
                                         script {
                                             def tag_stashed = "${env.BUILD_TAG}-${env.GIT_COMMIT}-${env.NODE_LABELS}".replace(' ','_').replace('%','_')
                                             stash("${tag_stashed}")
@@ -107,7 +93,6 @@ pipeline {
                                             }
                                             parallel subtests
                                         }
-//                                    }
                                 }
                             }
                         }
