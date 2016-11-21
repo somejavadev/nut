@@ -95,6 +95,8 @@ pipeline {
                                                             deleteDir()
                                                             echo "UNSTASH for DISTCHECK"
                                                             unstash("${tag_stashed}")
+                                                            echo "Reconfigure (fix up srcdir)"
+                                                            sh 'CCACHE_BASEDIR="`pwd`" ./configure -C --with-snmp --with-neon --with-dev --with-doc=skip --with-snmp_dmf=yes --with-dmfnutscan-regenerate=no --with-dmfsnmp-regenerate=no'
                                                             echo "MAKE DISTCHECK : ${tag_recipe}"
                                                             sh "CCACHE_BASEDIR=\"`pwd`\" gmake ${tag_recipe}"
                                                             echo "WIPE after UNSTASH for DISTCHECK"
