@@ -4,17 +4,10 @@
         pipeline {
 //                agent label:"${buildnode}"
                 agent label:""
-                environment {
-                        PATH="/usr/lib/ccache:${env.PATH}"
-                        CC="/usr/lib/ccache/gcc"
-                        CXX="/usr/lib/ccache/g++"
-                        CCACHE_DIR="/home/jim/.ccache"
-                        CCACHE_BASEDIR="${WORKSPACE}"
-                }
                 stages {
                         stage ("PREP-CO") {
                                 steps {
-                                        echo "Checkout to ${env.NODE_NAME} : ${WORKSPACE}"
+                                        echo "Checkout to ${env.NODE_NAME} : ${env.WORKSPACE}"
                                         checkout scm
                                 }
                         }
@@ -35,6 +28,13 @@
                         }
 
                         stage ('Configure-DMF-quick') {
+                                environment {
+                                        PATH="/usr/lib/ccache:${env.PATH}"
+                                        CC="/usr/lib/ccache/gcc"
+                                        CXX="/usr/lib/ccache/g++"
+                                        CCACHE_DIR="/home/jim/.ccache"
+                                        CCACHE_BASEDIR="${env.WORKSPACE}"
+                                }
                                 steps {
 //                                        sh 'PATH=/usr/lib/ccache:$PATH CC=/usr/lib/ccache/gcc CXX=/usr/lib/ccache/g++ ./configure --with-snmp --with-neon --with-dev --with-doc=man -C --with-snmp_dmf=yes --with-dmfnutscan-regenerate=yes --with-dmfsnmp-regenerate=yes'
                                         sh './configure --with-snmp --with-neon --with-dev --with-doc=skip --with-snmp_dmf=yes --with-dmfnutscan-regenerate=no --with-dmfsnmp-regenerate=no'
@@ -42,11 +42,25 @@
                         }
 
                         stage ('Build') {
+                                environment {
+                                        PATH="/usr/lib/ccache:${env.PATH}"
+                                        CC="/usr/lib/ccache/gcc"
+                                        CXX="/usr/lib/ccache/g++"
+                                        CCACHE_DIR="/home/jim/.ccache"
+                                        CCACHE_BASEDIR="${env.WORKSPACE}"
+                                }
                                 steps {
                                         sh 'gmake -j 4 -k all || { echo ""; echo "================"; echo "=== REMAKE"; gmake -j1 all; }'
                                 }
                         }
                         stage ('TestMore') {
+                                environment {
+                                        PATH="/usr/lib/ccache:${env.PATH}"
+                                        CC="/usr/lib/ccache/gcc"
+                                        CXX="/usr/lib/ccache/g++"
+                                        CCACHE_DIR="/home/jim/.ccache"
+                                        CCACHE_BASEDIR="${env.WORKSPACE}"
+                                }
                                 steps {
                                     script {
                                         ["distcheck-light","distcheck-light-man","distcheck-dmf-features","distcheck-dmf-all-yes","distcheck-dmf-no","distcheck-dmf-warnings","distcheck-dmf"].each {
