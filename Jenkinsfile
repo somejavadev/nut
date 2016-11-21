@@ -19,7 +19,7 @@ pipeline {
                         def buildnode = "${var_buildnode}"
                         subbuilds["${buildnode}"] = {
                             node("${buildnode}") {
-                                agent label:"${buildnode}"
+//                                agent label:"${buildnode}"
                                 stage ("PREP-CO@${buildnode}") {
                                     steps {
                                         echo "Checkout to ${env.NODE_NAME} : ${env.WORKSPACE}"
