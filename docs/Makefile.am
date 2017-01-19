@@ -126,16 +126,26 @@ SPELLCHECK_SRC = $(ALL_TXT_SRC) ../README ../INSTALL.nut ../UPGRADING  ../NEWS \
 	../tools/nut-scanner/README
 
 spellcheck: 
-	@for docsrc in $(SPELLCHECK_SRC); do \
+	@FAILED="" ; for docsrc in $(SPELLCHECK_SRC); do \
 		echo "Spell checking on $$docsrc"; \
-		LANG=C $(ASPELL) -a -t -p $(NUT_SPELL_DICT) < $$docsrc | grep [^*]; \
-	done
+		LANG=C $(ASPELL) -a -t -p $(NUT_SPELL_DICT) < $$docsrc | grep [^*] || \
+			FAILED="$$FAILED $$docsrc"; \
+	done ; \
+	if [ -n "$$FAILED" ]; then \
+		echo "FAILED automatic spellcheck for the following sources: $$FAILED" >&2 ; \
+		exit 1; \
+	fi ; exit 0
 # Interactively spell check all documentation source files
 spellcheck-interactive: 
-	@for docsrc in $(SPELLCHECK_SRC); do\
+	@FAILED="" ; for docsrc in $(SPELLCHECK_SRC); do\
 		echo "Spell checking on $$docsrc"; \
-		LANG=C $(ASPELL) check -p $(NUT_SPELL_DICT) $$docsrc; \
-	done
+		LANG=C $(ASPELL) check -p $(NUT_SPELL_DICT) $$docsrc || \
+			FAILED="$$FAILED $$docsrc"; \
+	done ; \
+	if [ -n "$$FAILED" ]; then \
+		echo "FAILED interactive spellcheck for the following sources: $$FAILED" >&2 ; \
+		exit 1; \
+	fi ; exit 0
 else !HAVE_ASPELL
 spellcheck:
 	@echo "Documentation spell check not available since 'aspell' was not found."
