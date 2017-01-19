@@ -64,6 +64,8 @@ matrix:
         - docbook-xsl-ns
         - libcppunit-dev
         - libcppunit-subunit-dev
+        - aspell
+        - aspell-en
 #  - env: BUILD_TYPE=valgrind
 #    os: linux
 #    dist: trusty

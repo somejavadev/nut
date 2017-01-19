@@ -197,6 +197,13 @@ if [ "$BUILD_TYPE" == "default" ] ||  [ "$BUILD_TYPE" == "default-alldrv" ] || [
     [ -n "$CI_TIME" ] && echo "`date`: listing files installed into the custom DESTDIR..." && \
         find "$INST_PREFIX" -ls || true
 
+    case "$BUILD_TYPE" in
+        "default-withdoc")
+            [ -z "$CI_TIME" ] || echo "`date`: Trying to spellcheck documentation of the currently tested project..."
+            ( cd docs/ && $CI_TIME make VERBOSE=1 spellcheck )
+            ;;
+    esac
+
     if [ "$DO_DISTCHECK" == "no" ] ; then
         echo "Skipping distcheck (doc generation is disabled, it would fail)"
     else
