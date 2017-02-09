@@ -1560,7 +1560,6 @@ static int mge_xml_endelm_cb(void *userdata, int state, const char *nspace, cons
 				inited_phaseinfo_bypass = 1;
 			}
 
-
 			if (inited_phaseinfo_bypass) {
 				dstate_setinfo("input.bypass.phases", "%d", num_bypassphases);
 				upsdebugx(3, "-> calculated non-XML value for NUT variable %s was set to %d",
