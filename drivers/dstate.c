@@ -1027,7 +1027,7 @@ int dstate_detect_phasecount(
 		           *v1n, *v2n, *v3n,
 		           *v12, *v23, *v31,
 		           *c1,  *c2,  *c3,  *c0;
-		char buf[80]; /* For concatenation of "xput_prefix" with items we want to query */
+		char buf[MAX_STRING_SIZE]; /* For concatenation of "xput_prefix" with items we want to query */
 		size_t xput_prefix_len;
 		int bufrw_max;
 		char *bufrw_ptr = NULL;
@@ -1049,6 +1049,7 @@ int dstate_detect_phasecount(
 			upsdebugx(0, "%s(): Bad xput_prefix was passed: it is too long - function skipped", __func__);
 			return -1;
 		}
+		memset(buf, 0, sizeof(buf));
 		strncpy(buf, xput_prefix, sizeof(buf));
 		bufrw_ptr = buf + xput_prefix_len ;
 
