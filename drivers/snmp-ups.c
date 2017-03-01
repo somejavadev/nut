@@ -2229,32 +2229,6 @@ bool_t snmp_ups_walk(int mode)
 					(iterations % SU_STALE_RETRY) != 0)
 				continue;
 	*/
-			/* Filter 1-phase Vs 3-phase according to {input,output,bypass}.phase.
-			 * Non matching items are disabled, and flags are cleared at init
-			 * time */
-			/* Process input phases information */
-			input_phases = &daisychain_info[current_device_number]->input_phases;
-			if (su_info_p->flags & SU_INPHASES) {
-				upsdebugx(1, "Check input_phases (%ld)", *input_phases);
-				if (process_phase_data("input", input_phases, su_info_p) == 1)
-					continue;
-			}
-
-			/* Process output phases information */
-			output_phases = &daisychain_info[current_device_number]->output_phases;
-			if (su_info_p->flags & SU_OUTPHASES) {
-				upsdebugx(1, "Check output_phases (%ld)", *output_phases);
-				if (process_phase_data("output", output_phases, su_info_p) == 1)
-					continue;
-			}
-
-			/* Process bypass phases information */
-			bypass_phases = &daisychain_info[current_device_number]->bypass_phases;
-			if (su_info_p->flags & SU_BYPPHASES) {
-				upsdebugx(1, "Check bypass_phases (%ld)", *bypass_phases);
-				if (process_phase_data("bypass", bypass_phases, su_info_p) == 1)
-					continue;
-			}
 
 			/* process template (outlet, outlet group, inc. daisychain) definition */
 			if (su_info_p->flags & SU_OUTLET) {
@@ -2280,7 +2254,40 @@ bool_t snmp_ups_walk(int mode)
 					status = get_and_process_data(mode, su_info_p);
 //				}
 			}
-		}	/* for (su_info_p... */
+		}	/* for (su_info_p... - collect all data */
+
+		/* Process phase data AFTER we've collected all SNMP info for this
+		/* device into dstates. Loop through all mapping entries for the
+		 * current_device_number AGAIN, just to catch and process all of
+		 * the (possibly numerous) phase-related SNMP-NUT mapping entries.
+		 */
+		for (su_info_p = &snmp_info[0]; su_info_p->info_type != NULL ; su_info_p++) {
+			/* Filter 1-phase Vs 3-phase according to {input,output,bypass}.phase.
+			 * Non matching items are disabled, and flags are cleared at init
+			 * time */
+
+			if (su_info_p->flags & SU_INPHASES) {
+				/* Process input phases information */
+				input_phases = &daisychain_info[current_device_number]->input_phases;
+				upsdebugx(1, "Check input_phases (%ld)", *input_phases);
+				if (process_phase_data("input", input_phases, su_info_p) == 1)
+					continue;
+			} else
+			if (su_info_p->flags & SU_OUTPHASES) {
+				/* Process output phases information */
+				output_phases = &daisychain_info[current_device_number]->output_phases;
+				upsdebugx(1, "Check output_phases (%ld)", *output_phases);
+				if (process_phase_data("output", output_phases, su_info_p) == 1)
+					continue;
+			} else
+			if (su_info_p->flags & SU_BYPPHASES) {
+				/* Process bypass phases information */
+				bypass_phases = &daisychain_info[current_device_number]->bypass_phases;
+				upsdebugx(1, "Check bypass_phases (%ld)", *bypass_phases);
+				if (process_phase_data("bypass", bypass_phases, su_info_p) == 1)
+					continue;
+			}
+		}	/* for (su_info_p... re-run for phase counts */
 
 		if (devices_count > 1) {
 			/* commit the device alarm buffer */
