@@ -120,6 +120,17 @@ alarms_info_t *alarms_info;
 const char *mibname;
 const char *mibvers;
 
+/* If the number of phases is not present in SNMP data as a separate node,
+ * we can still infer it from presence of non-zero data values on several
+ * per-line nodes. */
+static int
+	inited_phaseinfo_in = 0,
+	inited_phaseinfo_bypass = 0,
+	inited_phaseinfo_out = 0,
+	num_inphases = -1,
+	num_bypassphases = -1,
+	num_outphases = -1;
+
 #define DRIVER_NAME	"Generic SNMP UPS driver"
 #define DRIVER_VERSION		"0.99"
 
@@ -2065,20 +2076,38 @@ int process_phase_data(const char* type, long *nb_phases, snmp_info_t *su_info_p
 					*nb_phases = tmpValue;
 				}
 				else {
-					upsdebugx(2, "Can't get %s value. Defaulting to 1 %s.phase", tmpInfo, type);
-					*nb_phases = 1;
+					upsdebugx(2, "Can't get %s value. Defaulting to guessing %s.phase", tmpInfo, type);
+					*nb_phases = -1;
 					/* FIXME: return something or process using default?! */
 				}
 			}
 			else {
-				upsdebugx(2, "No %s entry. Defaulting to 1 %s.phase", tmpInfo, type);
-				*nb_phases = 1;
+				upsdebugx(2, "No %s entry. Defaulting to guessing %s.phase", tmpInfo, type);
+				*nb_phases = -1;
 				/* FIXME: return something or process using default?! */
 			}
 		}
 		else {
 			*nb_phases = atoi(dstate_getinfo(tmpInfo));
 		}
+
+		if (*nb_phases == -1) {
+			/* For phase setup, we assume it does not change during run-time.
+			 * Essentially this means that once we've detected it is N-phase,
+			 * it stays this way for the rest of the driver run/life-time. */
+			/* To change this behavior just flip the maychange flag to "1" */
+
+			*nb_phases = 1; /* WIP to change to the code like below */
+/*
+			dstate_detect_phasecount("input.", 1,
+			        &inited_phaseinfo_in, &num_inphases, 0);
+			dstate_detect_phasecount("input.bypass.", 1,
+			        &inited_phaseinfo_bypass, &num_bypassphases, 0);
+			dstate_detect_phasecount("output.", 1,
+			        &inited_phaseinfo_out, &num_outphases, 0);
+*/
+		}
+
 		/* Publish the number of phase(s) */
 		dstate_setinfo(tmpInfo, "%ld", *nb_phases);
 		upsdebugx(2, "device %i has %ld %s.phases", current_device_number, *nb_phases, type);
