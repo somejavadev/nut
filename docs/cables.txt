@@ -166,7 +166,7 @@ Tripp-Lite
 
 *From Tripp-Lite, via Bryan Kolodziej*
 
-This cable (black 73-0844 cable) is used on various models, using the "Lan 2.2 interface"
-and the genericups driver (upstype=5).
+This cable (black 73-0844 cable) is used on various models, using the
+"Lan 2.2 interface" and the genericups driver (upstype=5).
 
 image::images/cables/73-0724.png[73-0724 cable]
