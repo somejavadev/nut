@@ -39,7 +39,12 @@ during a transition period. The ups.* data will then be removed.
 | device.part         | Device part number (opaque string)         | 123456789
 | device.macaddr      | Physical network address of the device     | 68:b5:99:f5:89:27 
 | device.uptime       | Device uptime in seconds                   | 1782
+| device.count        | Total number of daisychained devices       | 1
 |=====================================================================================
+
+NOTE: When present, device.count implies daisychain support.  For more
+information, refer to the <<daisychain,NUT daisychain support notes>> chapter
+of the user manual and developer guide.
 
 ups: General unit information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -468,12 +473,12 @@ sensor temperature.
 outlet: Smart outlet management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-NOTE: *n* stands for the outlet index. For more information, refer to the
-NUT outlets management and PDU notes chapter of the user manual.
-A special case is "outlet.0" which is equivalent to "outlet" (without
-index), and represent the whole set of outlets of the device. The most
-important data is "outlet.count", used to iterate over the whole set of
-outlets.
+NOTE: *n* stands for the outlet index. A special case is "outlet.0" which is
+equivalent to "outlet" (without index), and represent the whole set of outlets
+of the device. The most important data is "outlet.count", used to iterate over
+the whole set of outlets.
+For more information, refer to the NUT outlets management and PDU notes chapter
+of the user manual.
 
 [options="header"]
 |===============================================================================
@@ -553,6 +558,9 @@ Some specific data to outlet groups exists:
 | Name                           | Description                    | Example value
 | outlet.group.n.type            | Type of outlet group (OPAQUE)  | outlet-section
 | outlet.group.n.count           | Number of outlets in the group | 12
+| outlet.group.n.phase           | Electrical phase to which the
+                                   physical outlet group (Gang) is
+                                   connected to                   | L1
 |=================================================================================
 
 Example:
@@ -565,6 +573,7 @@ Example:
 	outlet.group.1.current.status: good
 	outlet.group.1.id: 1
 	outlet.group.1.name: Branch Circuit A
+	outlet.group.1.phase: L1
 	outlet.group.1.status: on
 	outlet.group.1.voltage: 244.23
 	outlet.group.1.voltage.high.critical: 265.00
