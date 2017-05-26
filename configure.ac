@@ -3,7 +3,7 @@ dnl | Network UPS Tools: configure.ac                                  |
 dnl +------------------------------------------------------------------+
 
 dnl NUT version number is defined here, with a Git suffix in include/nut_version.h
-AC_INIT(nut, 2.7.4.1, [https://github.com/networkupstools/nut/issues])
+AC_INIT([nut], [2.7.4.1], [https://github.com/networkupstools/nut/issues])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR(server/upsd.c)
 AC_CONFIG_MACRO_DIR([m4])
@@ -109,6 +109,8 @@ AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_MKDIR_P
+AC_PROG_LN_S
 AC_PROG_EGREP
 AC_PATH_PROG(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
@@ -117,11 +119,31 @@ AC_C_BIGENDIAN
 AC_C_INLINE
 AC_C_FLEXIBLE_ARRAY_MEMBER
 AC_C_VARARRAYS
-AC_CHECK_FUNCS(flock lockf fcvt fcvtl)
+AC_CHECK_FUNCS(flock lockf fcvt fcvtl pow10 round abs_val)
 AC_CHECK_FUNCS(cfsetispeed tcsendbreak)
 AC_CHECK_FUNCS(seteuid setsid getpassphrase)
 AC_CHECK_FUNCS(on_exit strptime setlogmask)
 AC_CHECK_DECLS(LOG_UPTO, [], [], [#include <syslog.h>])
+
+AC_MSG_CHECKING([whether ln -sr works])
+dnl We need to relative-symlink some files. Or hardlink. Or copy...
+LN_S_R="cp -pR"
+if test "$as_ln_s" = "ln -s" ; then
+    LN_S_R="ln"
+    DIR1="$(mktemp -d "dir1.XXXXX")" && \
+    DIR2="$(mktemp -d "dir2.XXXXX")" && \
+    touch "${DIR1}/a" && \
+    $as_ln_s -r "${DIR1}/a" "${DIR2}/b" && \
+    ls -la "${DIR2}/b" | grep '\.\./' > /dev/null && \
+    LN_S_R="$as_ln_s -r"
+    rm -rf "${DIR1}" "${DIR2}"
+fi
+AC_SUBST([LN_S_R], [${LN_S_R}])
+if test "$LN_S_R" = "ln -s -r" ; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no, using $LN_S_R])
+fi
 
 dnl the following may add stuff to LIBOBJS (is this still needed?)
 AC_CHECK_FUNCS(vsnprintf snprintf, [], [
@@ -231,7 +253,7 @@ dnl check for --with-all (or --without-all, or --with-all=auto) flag
 
 AC_MSG_CHECKING(for --with-all)
 AC_ARG_WITH(all,
-	AS_HELP_STRING([--with-all], [enable serial, usb, snmp, neon, ipmi, powerman, cgi, dev, avahi, linux_i2c]),
+	AS_HELP_STRING([--with-all], [enable serial, usb, snmp, neon, ipmi, powerman, modbus, cgi, dev, avahi, linux_i2c]),
 [
 	if test -n "${withval}"; then
 		dnl Note: we allow "no" as a positive value, because
@@ -241,6 +263,7 @@ AC_ARG_WITH(all,
 		if test -z "${with_snmp}"; then with_snmp="${withval}"; fi
 		if test -z "${with_neon}"; then with_neon="${withval}"; fi
 		if test -z "${with_powerman}"; then with_powerman="${withval}"; fi
+		if test -z "${with_modbus}"; then with_modbus="${withval}"; fi
 		if test -z "${with_cgi}"; then with_cgi="${withval}"; fi
 		if test -z "${with_dev}"; then with_dev="${withval}"; fi
 		if test -z "${with_avahi}"; then with_avahi="${withval}"; fi
@@ -286,6 +309,8 @@ NUT_ARG_WITH([neon], [build and install neon based XML/HTTP driver], [auto])
 NUT_CHECK_LIBNEON
 NUT_ARG_WITH([powerman], [build and install Powerman PDU client driver], [auto])
 NUT_CHECK_LIBPOWERMAN
+NUT_ARG_WITH([modbus], [build and install modbus drivers], [auto])
+NUT_CHECK_LIBMODBUS
 NUT_CHECK_LIBAVAHI
 
 dnl ----------------------------------------------------------------------
@@ -335,21 +360,6 @@ NUT_REPORT_FEATURE([build USB drivers], [${nut_with_usb}], [],
 					[WITH_USB], [Define to enable USB support])
 
 dnl ----------------------------------------------------------------------
-dnl checks related to --with-snmp
-
-dnl ${nut_with_snmp}: any value except "yes" or "no" is treated as "auto".
-if test "${nut_with_snmp}" = "yes" -a "${nut_have_libnetsnmp}" != "yes"; then
-   AC_MSG_ERROR(["Net-SNMP libraries not found, required for SNMP drivers"])
-fi
-
-if test "${nut_with_snmp}" != "no"; then
-   nut_with_snmp="${nut_have_libnetsnmp}"
-fi
-
-NUT_REPORT_FEATURE([build SNMP drivers], [${nut_with_snmp}], [],
-					[WITH_SNMP], [Define to enable SNMP support])
-
-dnl ----------------------------------------------------------------------
 dnl checks related to --with-neon
 
 dnl ${nut_with_neon}: any value except "yes" or "no" is treated as "auto".
@@ -363,6 +373,7 @@ fi
 
 NUT_REPORT_FEATURE([build neon based XML driver], [${nut_with_neon}], [],
 					[WITH_NEON], [Define to enable Neon HTTP support])
+AM_CONDITIONAL([HAVE_NEON], [test "${nut_have_neon}" = "yes"])
 
 dnl ----------------------------------------------------------------------
 dnl checks related to --with-avahi
@@ -395,6 +406,20 @@ fi
 NUT_REPORT_FEATURE([build Powerman PDU client driver], [${nut_with_powerman}], [],
 					[WITH_LIBPOWERMAN], [Define to enable Powerman PDU support])
 
+dnl ----------------------------------------------------------------------
+dnl checks related to --with-modbus
+
+dnl ${nut_with_modbus}: any value except "yes" or "no" is treated as "auto".
+if test "${nut_with_modbus}" = "yes" -a "${nut_have_libmodbus}" != "yes"; then
+   AC_MSG_ERROR(["modbus library not found, required for Modbus driver"])
+fi
+
+if test "${nut_with_modbus}" != "no"; then
+   nut_with_modbus="${nut_have_libmodbus}"
+fi
+
+NUT_REPORT_FEATURE([build Modbus driver], [${nut_with_modbus}], [],
+                                       [WITH_MODBUS], [Define to enable Modbus support])
 dnl ----------------------------------------------------------------------
 dnl Check for with-ipmi, and --with-freeipmi (or --with-openipmi)
 dnl Only one can be enabled at a time, with a preference for FreeIPMI
@@ -1301,6 +1326,55 @@ AM_CONDITIONAL([SYSTEM_AIX], [test "xAIX" = "x`uname -s 2>/dev/null`"])
 dnl processor type
 AC_DEFINE_UNQUOTED(CPU_TYPE, $target_cpu, [Define processor type])
 
+dnl Can use valgrind for memory-leak testing, if present
+AC_PATH_PROGS([VALGRIND], [valgrind], [none])
+with_valgrind="auto"
+AC_MSG_CHECKING(whether to use valgrind for memory-leak testing)
+AC_ARG_WITH(valgrind,
+	AS_HELP_STRING([--with-valgrind=PATH], [whether to use valgrind for memory-leak testing]),
+[
+	case "${withval}" in
+	yes)
+		if test "x$VALGRIND" = "xnone"; then
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(["valgrind requested but not found"])
+		fi
+		with_valgrind="yes"
+		;;
+	auto)
+		with_valgrind="auto"
+		;;
+	no)
+		with_valgrind="no"
+		;;
+	*)
+		AC_PATH_PROGS([VALGRIND], ["${withval}"], [none])
+		if test "x$VALGRIND" = "xnone"; then
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(["valgrind requested but not found"])
+		fi
+		with_valgrind="yes"
+		;;
+	esac
+], [])
+
+if test "x${with_valgrind}" = xauto; then
+	if test "x$VALGRIND" = "xnone"; then
+		with_valgrind="no"
+	else
+		with_valgrind="yes"
+	fi
+fi
+
+if test "x${with_valgrind}" = xyes; then
+	AC_MSG_RESULT(using ${VALGRIND})
+	AC_MSG_NOTICE([Do not forget to build with debug (e.g. pass '-g' in CFLAGS for GCC) for best results with valgrind tests])
+else
+	AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL([HAVE_VALGRIND], [test "x${VALGRIND}" != "xnone"])
+AM_CONDITIONAL([WITH_VALGRIND], [test "x${with_valgrind}" = "xyes"])
+
 dnl expand ${sysconfdir} and write it out
 conftemp="${sysconfdir}"
 eval conftemp=\"${conftemp}\"
@@ -1336,6 +1410,57 @@ eval conftemp=\"${conftemp}\"
 LIBDIR=${conftemp}
 AC_DEFINE_UNQUOTED(LIBDIR, "${conftemp}", [Default path for system libraries])
 
+
+dnl checks related to --with-snmp enabled on command-line
+
+dnl ${nut_with_snmp}: any value except "yes" or "no" is treated as "auto".
+if test "${nut_with_snmp}" = "yes" -a "${nut_have_libnetsnmp}" != "yes"; then
+   AC_MSG_ERROR(["Net-SNMP libraries not found, required for SNMP drivers"])
+fi
+
+if test "${nut_with_snmp}" != "no"; then
+   nut_with_snmp="${nut_have_libnetsnmp}"
+fi
+
+NUT_REPORT_FEATURE([build SNMP drivers], [${nut_with_snmp}], [],
+					[WITH_SNMP], [Define to enable SNMP support])
+AM_CONDITIONAL([HAVE_SNMP], [test "${nut_have_libsnmp}" = "yes"])
+
+
+if test -n "${host_alias}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_HOST_ALIAS, "${host_alias}", [host env spec we run on])
+else
+	if test -n "${host}" ; then
+		AC_DEFINE_UNQUOTED(AUTOTOOLS_HOST_ALIAS, "${host}", [host env spec we run on])
+	fi
+fi
+if test -n "${build_alias}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_BUILD_ALIAS, "${build_alias}", [host env spec we built on])
+else
+	if test -n "${build}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_BUILD_ALIAS, "${build}", [host env spec we built on])
+	fi
+fi
+if test -n "${target_alias}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_TARGET_ALIAS, "${target_alias}", [host env spec we built for])
+else
+	if test -n "${target}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_TARGET_ALIAS, "${target}", [host env spec we built for])
+	fi
+fi
+
+if test -n "${host_cpu}" -a -n "${host_os}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_HOST_SHORT_ALIAS, "${host_cpu}-${host_os}", [host OS short spec we run on])
+fi
+if test -n "${build_cpu}" -a -n "${build_os}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_BUILD_SHORT_ALIAS, "${build_cpu}-${build_os}", [host OS short spec we built on])
+fi
+if test -n "${target_cpu}" -a -n "${target_os}" ; then
+	AC_DEFINE_UNQUOTED(AUTOTOOLS_TARGET_SHORT_ALIAS, "${target_cpu}-${target_os}", [host OS short spec we built for])
+fi
+
+dnl ----------------------------------------------------------------------
+
 dnl Current date
 now=`TZ=UTC date +%Y-%m-%d`
 
@@ -1357,6 +1482,8 @@ AC_SUBST(LIBAVAHI_CFLAGS)
 AC_SUBST(LIBAVAHI_LIBS)
 AC_SUBST(LIBPOWERMAN_CFLAGS)
 AC_SUBST(LIBPOWERMAN_LIBS)
+AC_SUBST(LIBMODBUS_CFLAGS)
+AC_SUBST(LIBMODBUS_LIBS)
 AC_SUBST(LIBIPMI_CFLAGS)
 AC_SUBST(LIBIPMI_LIBS)
 AC_SUBST(DOC_BUILD_LIST)
