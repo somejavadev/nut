@@ -48,7 +48,7 @@ upsdrv_info_t upsdrv_info =
 {
 	DRIVER_NAME,
 	DRIVER_VERSION,
-	"Arnaud Quette <arnaud.quette@gmail.com>",
+	"Arnaud Quette <arnaud.quette@gmail.com>\n" \
 	"Jim Klimov <jimklimov@gmail.com>",
 	DRV_STABLE,
 	{ NULL }
