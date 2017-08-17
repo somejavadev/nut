@@ -41,6 +41,8 @@
 #undef PACKAGE_BUGREPORT
 #include "eaton-mib.c"
 
+int     do_synchronous = 0;
+
 int
 main ()
 {
