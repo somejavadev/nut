@@ -5,7 +5,7 @@
  *
  *  Copyright (C)
  *	2002 - 2014	Arnaud Quette <arnaud.quette@free.fr>
- *	2015 - 2016	Eaton (author: Arnaud Quette <ArnaudQuette@Eaton.com>)
+ *	2015 - 2017	Eaton (author: Arnaud Quette <ArnaudQuette@Eaton.com>)
  *	2017		Eaton (author: Jim Klimov <EvgenyKlimov@Eaton.com>)
  *	2002 - 2006	Dmitry Frolov <frolov@riss-telecom.ru>
  *			J.W. Hoogervorst <jeroen@hoogervorst.net>
@@ -53,7 +53,10 @@
 #include "mge-mib.h"
 #include "netvision-mib.h"
 #include "powerware-mib.h"
-#include "eaton-mib.h"
+#include "eaton-pdu-genesis2-mib.h"
+#include "eaton-pdu-marlin-mib.h"
+#include "eaton-pdu-pulizzi-mib.h"
+#include "eaton-pdu-revelation-mib.h"
 #include "raritan-pdu-mib.h"
 #include "raritan-px2-mib.h"
 #include "baytech-mib.h"
@@ -159,7 +162,7 @@ const char *mibvers;
 #else
 # define DRIVER_NAME	"Generic SNMP UPS driver"
 #endif /* WITH_DMFMIB */
-#define DRIVER_VERSION		"1.00"
+#define DRIVER_VERSION		"1.02"
 
 /* driver description structure */
 upsdrv_info_t	upsdrv_info = {
@@ -1199,7 +1202,7 @@ void su_setinfo(snmp_info_t *su_info_p, const char *value)
 /* FIXME: Replace hardcoded 128 with a macro above (use {SU_}LARGEBUF?),
  *and same macro or sizeof(info_type) below? */
 
-	upsdebugx(1, "entering %s(%s)", __func__, su_info_p->info_type);
+	upsdebugx(1, "entering %s(%s, %s)", __func__, su_info_p->info_type, (value)?value:"");
 
 /* FIXME: This 20 seems very wrong (should be "128", macro or sizeof? see above) */
 	memset(info_type, 0, 20);
@@ -1584,6 +1587,15 @@ const char *su_find_infoval(info_lkp_t *oid2info, long value)
 {
 	info_lkp_t *info_lkp;
 
+	/* First test if we have a generic lookup function */
+	if ( (oid2info != NULL) && (oid2info->fun != NULL) ) {
+		upsdebugx(2, "%s: using generic lookup function", __func__);
+		const char * retvalue = oid2info->fun(value);
+		upsdebugx(2, "%s: got value '%s'", __func__, retvalue);
+		return retvalue;
+	}
+
+	/* Otherwise, use the simple values mapping */
 	for (info_lkp = oid2info; (info_lkp != NULL) &&
 		 (info_lkp->info_value != NULL) && (strcmp(info_lkp->info_value, "NULL")); info_lkp++) {
 
@@ -2538,6 +2550,7 @@ bool_t su_ups_get(snmp_info_t *su_info_p)
 	static char buf[SU_INFOSIZE];
 	bool_t status;
 	long value;
+	double dvalue;
 	const char *strValue = NULL;
 	struct snmp_pdu ** pdu_array;
 	struct snmp_pdu * current_pdu;
@@ -2734,11 +2747,11 @@ bool_t su_ups_get(snmp_info_t *su_info_p)
 				/* Check if there is a need to publish decimal too,
 				 * i.e. if switching to integer does not cause a
 				 * loss of precision */
-				value = value * su_info_p->info_len;
-				if ((int)value == value)
-					snprintf(buf, sizeof(buf), "%i", (int)value);
+				dvalue = value * su_info_p->info_len;
+				if ((int)dvalue == dvalue)
+					snprintf(buf, sizeof(buf), "%i", (int)dvalue);
 				else
-					snprintf(buf, sizeof(buf), "%.2f", (float)value);
+					snprintf(buf, sizeof(buf), "%.2f", (float)dvalue);
 			}
 		}
 	}
