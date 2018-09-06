@@ -354,14 +354,11 @@ NUT_REPORT_FEATURE([build serial drivers], [${nut_with_serial}], [],
 dnl ----------------------------------------------------------------------
 dnl checks related to --with-usb
 
-<<<<<<< HEAD
 dnl ${nut_with_usb}: any value except "yes" or "no" is treated as "auto".
-if test "${nut_with_usb}" = "yes" -a "${nut_have_libusb}" != "yes"; then
-   AC_MSG_ERROR([USB drivers requested, but libusb not found.])
-fi
-=======
+dnl if test "${nut_with_usb}" = "yes" -a "${nut_have_libusb}" != "yes"; then
+dnl    AC_MSG_ERROR([USB drivers requested, but libusb not found.])
+dnl fi
 nut_usb_lib=""
->>>>>>> opensource/libusb-1.0+0.1
 
 if test "${nut_with_usb}" != "no"; then
 	if test "${nut_with_usb}" = "libusb-1.0" -o "${nut_with_usb}" = "libusb-0.1"; then
