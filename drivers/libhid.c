@@ -42,7 +42,7 @@
 	#include "libshut.h"
 	communication_subdriver_t *comm_driver = &shut_subdriver;
 #else
-	#include "libusb.h"
+	#include "nut_libusb.h"
 	communication_subdriver_t *comm_driver = &usb_subdriver;
 #endif
 
@@ -270,13 +270,13 @@ static struct {
  * since it's used to produce sub-drivers "stub" using
  * scripts/subdriver/gen-usbhid-subdriver.sh
  */
-void HIDDumpTree(hid_dev_handle_t udev, usage_tables_t *utab)
+void HIDDumpTree(hid_dev_handle_t udev, HIDDevice_t *hd, usage_tables_t *utab)
 {
 	int	i;
 #ifndef SHUT_MODE
 	/* extract the VendorId for further testing */
-	int vendorID = usb_device((struct usb_dev_handle *)udev)->descriptor.idVendor;
-	int productID = usb_device((struct usb_dev_handle *)udev)->descriptor.idProduct;
+	int vendorID = hd->VendorID;
+	int productID = hd->ProductID;
 #endif
 
 	/* Do not go further if we already know nothing will be displayed.
@@ -491,7 +491,7 @@ int HIDGetEvents(hid_dev_handle_t udev, HIDData_t **event, int eventsize)
 	HIDData_t	*pData;
 
 	/* needs libusb-0.1.8 to work => use ifdef and autoconf */
-	buflen = comm_driver->get_interrupt(udev, buf, interrupt_size ? interrupt_size:sizeof(buf), 250);
+	buflen = comm_driver->get_interrupt(udev, buf, interrupt_size ? interrupt_size:sizeof(buf), 750);
 	if (buflen <= 0) {
 		return buflen;	/* propagate "error" or "no event" code */
 	}

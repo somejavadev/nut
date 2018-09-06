@@ -309,7 +309,6 @@ dnl --with-* options are not given. This is because we cannot predict
 dnl what will be in the --with-drivers argument.
 
 NUT_CHECK_LIBNETSNMP
-NUT_CHECK_LIBUSB
 NUT_ARG_WITH([snmp], [build and install SNMP drivers], [auto])
 NUT_CHECK_LIBNETSNMP
 NUT_ARG_WITH([neon], [build and install neon based XML/HTTP driver], [auto])
@@ -326,7 +325,7 @@ dnl additional USB-related checks
 dnl Solaris 10/11 USB handling (need librt and libusb runtime path)
 dnl HPUX, since v11, needs an explicit activation of pthreads
 case ${target_os} in
-   solaris2.1* )
+   XXXsolaris2.1* )
       AC_MSG_CHECKING([for Solaris 10 / 11 specific configuration for usb drivers])
       AC_SEARCH_LIBS(nanosleep, rt)
       LIBUSB_LIBS="-R/usr/sfw/lib ${LIBUSB_LIBS}"
@@ -355,17 +354,53 @@ NUT_REPORT_FEATURE([build serial drivers], [${nut_with_serial}], [],
 dnl ----------------------------------------------------------------------
 dnl checks related to --with-usb
 
+<<<<<<< HEAD
 dnl ${nut_with_usb}: any value except "yes" or "no" is treated as "auto".
 if test "${nut_with_usb}" = "yes" -a "${nut_have_libusb}" != "yes"; then
    AC_MSG_ERROR([USB drivers requested, but libusb not found.])
 fi
+=======
+nut_usb_lib=""
+>>>>>>> opensource/libusb-1.0+0.1
 
 if test "${nut_with_usb}" != "no"; then
-   nut_with_usb="${nut_have_libusb}"
+	if test "${nut_with_usb}" = "libusb-1.0" -o "${nut_with_usb}" = "libusb-0.1"; then
+		NUT_CHECK_LIBUSB([${nut_with_usb}])
+		dnl Explicitly choosing a library implies 'yes' (i.e. fail if not found), not 'auto'.
+		nut_with_usb=yes
+	else
+		NUT_CHECK_LIBUSB
+	fi
+	dnl Any other value not implying 'yes' is treated as 'auto'.
+	if test "${nut_with_usb}" = "yes" -a "${nut_have_libusb}" != "yes"; then
+		AC_MSG_ERROR(["USB drivers requested, but libusb not found."])
+	fi
+	nut_with_usb="${nut_have_libusb}"
 fi
 
-NUT_REPORT_FEATURE([build USB drivers], [${nut_with_usb}], [],
+AM_CONDITIONAL(WITH_LIBUSB_0_1, test "${nut_usb_lib}" = "(libusb-0.1)")
+AM_CONDITIONAL(WITH_LIBUSB_1_0, test "${nut_usb_lib}" = "(libusb-1.0)")
+NUT_REPORT_FEATURE([build USB drivers], [${nut_with_usb}], [${nut_usb_lib}],
 					[WITH_USB], [Define to enable USB support])
+
+dnl ----------------------------------------------------------------------
+dnl additional USB-related checks
+
+dnl Solaris 10/11 USB handling (need librt and libusb runtime path)
+dnl HPUX, since v11, needs an explicit activation of pthreads
+case ${target_os} in
+   solaris2.1* )
+      echo Checking for Solaris 10 / 11 specific configuration for usb drivers
+      AC_SEARCH_LIBS(nanosleep, rt)
+      LIBUSB_LIBS="-R/usr/sfw/lib ${LIBUSB_LIBS}"
+      dnl FIXME: Sun's libusb doesn't support timeout (so blocks notification)
+      dnl and need to call libusb close upon reconnection
+      AC_DEFINE(SUN_LIBUSB, 1, [Define to 1 for Sun version of the libusb.])
+      SUN_LIBUSB=1
+      ;;
+    hpux11*)
+      CFLAGS="${CFLAGS} -lpthread"
+esac
 
 dnl ----------------------------------------------------------------------
 dnl checks related to --with-neon

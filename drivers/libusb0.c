@@ -1,6 +1,6 @@
 /*!
- * @file libusb.c
- * @brief HID Library - Generic USB communication sub driver (using libusb)
+ * @file libusb0.c
+ * @brief HID Library - Generic USB communication sub driver (using libusb 0.1)
  *
  * @author Copyright (C)
  *  2003 - 2007 Arnaud Quette <aquette.dev@gmail.com>
@@ -31,10 +31,10 @@
 #include "config.h" /* for HAVE_USB_DETACH_KERNEL_DRIVER_NP flag */
 #include "common.h" /* for xmalloc, upsdebugx prototypes */
 #include "usb-common.h"
-#include "libusb.h"
+#include "nut_libusb.h"
 
-#define USB_DRIVER_NAME		"USB communication driver"
-#define USB_DRIVER_VERSION	"0.33"
+#define USB_DRIVER_NAME		"USB communication driver (libusb 0.1)"
+#define USB_DRIVER_VERSION	"0.35"
 
 /* driver description structure */
 upsdrv_info_t comm_upsdrv_info = {
@@ -49,7 +49,7 @@ upsdrv_info_t comm_upsdrv_info = {
 
 static void libusb_close(usb_dev_handle *udev);
 
-/*! Add USB-related driver variables with addvar().
+/*! Add USB-related driver variables with addvar() and dstate_setinfo().
  * This removes some code duplication across the USB drivers.
  */
 void nut_usb_addvars(void)
@@ -64,6 +64,8 @@ void nut_usb_addvars(void)
 
 	addvar(VAR_VALUE, "bus", "Regular expression to match USB bus name");
 	addvar(VAR_VALUE, "usb_set_altinterface", "Force redundant call to usb_set_altinterface() (value=bAlternateSetting; default=0)");
+
+	dstate_setinfo("driver.version.usb", "libusb-0.1 (or compat)");
 }
 
 /* From usbutils: workaround libusb API goofs:  "byte" should never be sign extended;
@@ -177,6 +179,8 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 
 	for (bus = usb_busses; bus; bus = bus->next) {
 		for (dev = bus->devices; dev; dev = dev->next) {
+			/* int	if_claimed = 0; */
+
 			upsdebugx(2, "Checking device (%04X/%04X) (%s/%s)", dev->descriptor.idVendor,
 				dev->descriptor.idProduct, bus->dirname, dev->filename);
 
@@ -204,14 +208,14 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 
 			curDevice->VendorID = dev->descriptor.idVendor;
 			curDevice->ProductID = dev->descriptor.idProduct;
-			curDevice->Bus = strdup(bus->dirname);
+			curDevice->Bus = xstrdup(bus->dirname);
 			curDevice->bcdDevice = dev->descriptor.bcdDevice;
 
 			if (dev->descriptor.iManufacturer) {
 				ret = usb_get_string_simple(udev, dev->descriptor.iManufacturer,
 					string, sizeof(string));
 				if (ret > 0) {
-					curDevice->Vendor = strdup(string);
+					curDevice->Vendor = xstrdup(string);
 				}
 			}
 
@@ -219,7 +223,7 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 				ret = usb_get_string_simple(udev, dev->descriptor.iProduct,
 					string, sizeof(string));
 				if (ret > 0) {
-					curDevice->Product = strdup(string);
+					curDevice->Product = xstrdup(string);
 				}
 			}
 
@@ -227,7 +231,7 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 				ret = usb_get_string_simple(udev, dev->descriptor.iSerialNumber,
 					string, sizeof(string));
 				if (ret > 0) {
-					curDevice->Serial = strdup(string);
+					curDevice->Serial = xstrdup(string);
 				}
 			}
 
@@ -251,7 +255,6 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 					goto next_device;
 				} else if (ret==-1) {
 					fatal_with_errno(EXIT_FAILURE, "matcher");
-					goto next_device;
 				} else if (ret==-2) {
 					upsdebugx(2, "matcher: unspecified error");
 					goto next_device;
@@ -287,6 +290,7 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 				fatalx(EXIT_FAILURE, "Can't claim USB device [%04x:%04x]: %s", curDevice->VendorID, curDevice->ProductID, usb_strerror());
 			}
 #endif
+			/* if_claimed = 1; */
 
 			nut_usb_set_altinterface(udev);
 
@@ -407,6 +411,10 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 			return rdlen;
 
 		next_device:
+			/* usb_release_interface() sometimes blocks and goes
+			into uninterruptible sleep.  So don't do it. */
+			/* if (if_claimed)
+				usb_release_interface(udev, 0); */
 			usb_close(udev);
 		}
 	}
