@@ -556,8 +556,6 @@ static int nut_libusb_get_report(libusb_device_handle *udev, int ReportId, unsig
 		return 0;
 	}
 
-return 0;
-
 	ret = libusb_control_transfer(udev,
 		LIBUSB_ENDPOINT_IN|LIBUSB_REQUEST_TYPE_CLASS|LIBUSB_RECIPIENT_INTERFACE,
 		0x01, /* HID_REPORT_GET */
