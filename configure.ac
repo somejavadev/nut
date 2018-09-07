@@ -365,7 +365,7 @@ dnl additional USB-related checks
 dnl Solaris 10/11 USB handling (need librt and libusb runtime path)
 dnl HPUX, since v11, needs an explicit activation of pthreads
 case ${target_os} in
-   XXXsolaris2.1* )
+   solaris2.1* )
       echo Checking for Solaris 10 / 11 specific configuration for usb drivers
       AC_SEARCH_LIBS(nanosleep, rt)
       LIBUSB_LIBS="-R/usr/sfw/lib ${LIBUSB_LIBS}"
