@@ -596,12 +596,15 @@ static int nut_libusb_get_string(libusb_device_handle *udev, int StringIdx, char
 {
 	int ret;
 
+upsdebugx(3,"libusb1:nut_libusb_get_string(): BP0");
 	if (!udev) {
 		return -1;
 	}
-	ret = libusb_get_string_descriptor_ascii(udev, StringIdx,
-		(unsigned char*)buf, buflen);
+upsdebugx(3,"libusb1:nut_libusb_get_string(): BP1");
+	ret = libusb_get_string_descriptor_ascii(udev, (uint8_t) StringIdx,
+		(unsigned char*)buf, (int)buflen);
 
+upsdebugx(3,"libusb1:nut_libusb_get_string(): BP2");
 	return nut_libusb_strerror(ret, __func__);
 }
 

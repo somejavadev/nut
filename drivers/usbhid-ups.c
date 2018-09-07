@@ -477,6 +477,7 @@ static const char *stringid_conversion_fun(double value)
 {
 	static char buf[20];
 
+upsdebugx(3, "stringid_conversion_fun=%g", value);
 	return HIDGetIndexString(udev, (int)value, buf, sizeof(buf));
 }
 
@@ -853,6 +854,8 @@ void upsdrv_updateinfo(void)
 				HIDDataType(event[i]), event[i]->ReportID,
 				event[i]->Offset, event[i]->Size, value);
 		}
+
+upsdebugx(3, "upsdrv_updateinfo(): BP1");
 
 		/* Skip Input reports, if we don't use the Feature report */
 		found_data = FindObject_with_Path(pDesc, &(event[i]->Path), interrupt_only ? ITEM_INPUT:ITEM_FEATURE);
@@ -1361,6 +1364,8 @@ static bool_t hid_ups_walk(walkmode_t mode)
 			item->hidpath, HIDDataType(item->hiddata), item->hiddata->ReportID,
 			item->hiddata->Offset, item->hiddata->Size, value);
 
+upsdebugx(3, "hid_ups_walk(): BP1");
+
 		if (item->hidflags & HU_TYPE_CMD) {
 			upsdebugx(3, "Adding command '%s' using Path '%s'",
 				item->info_type, item->hidpath);
@@ -1368,26 +1373,32 @@ static bool_t hid_ups_walk(walkmode_t mode)
 			continue;
 		}
 
+upsdebugx(3, "hid_ups_walk(): BP2");
 		/* Process the value we got back (set status bits and
 		 * set the value of other parameters) */
 		if (ups_infoval_set(item, value) != 1)
 			continue;
 
+upsdebugx(3, "hid_ups_walk(): BP3");
 		if (mode == HU_WALKMODE_INIT) {
 			info_lkp_t	*info_lkp;
 
+upsdebugx(3, "hid_ups_walk(): BP4");
 			dstate_setflags(item->info_type, item->info_flags);
+upsdebugx(3, "hid_ups_walk(): BP5");
 
 			/* Set max length for strings */
 			if (item->info_flags & ST_FLAG_STRING) {
 				dstate_setaux(item->info_type, item->info_len);
 			}
 
+upsdebugx(3, "hid_ups_walk(): BP6");
 			/* Set enumerated values, only if the data has ST_FLAG_RW */
 			if (!(item->hidflags & HU_FLAG_ENUM) || !(item->info_flags & ST_FLAG_RW)) {
 				continue;
 			}
 
+upsdebugx(3, "hid_ups_walk(): BP7");
 			/* Loop on all existing values */
 			for (info_lkp = item->hid2info; info_lkp != NULL
 				&& info_lkp->nut_value != NULL; info_lkp++) {
@@ -1588,11 +1599,15 @@ static const char *hu_find_infoval(info_lkp_t *hid2info, const double value)
 	info_lkp_t	*info_lkp;
 
 	/* if a conversion function is defined, use 'value' as argument for it */
+upsdebugx(3, "hu_find_infoval: BP0");
+
 	if (hid2info->fun != NULL) {
+upsdebugx(3, "hu_find_infoval: BP1: func=%p value=%g", hid2info->fun, value);
 		return hid2info->fun(value);
 	}
 
 	/* use 'value' as an index for a lookup in an array */
+upsdebugx(3, "hu_find_infoval: BP2");
 	for (info_lkp = hid2info; info_lkp->nut_value != NULL; info_lkp++) {
 		if (info_lkp->hid_value == (long)value) {
 			upsdebugx(5, "hu_find_infoval: found %s (value: %ld)", info_lkp->nut_value, (long)value);
@@ -1609,14 +1624,17 @@ static int ups_infoval_set(hid_info_t *item, double value)
 {
 	const char	*nutvalue;
 
+upsdebugx(3,"ups_infoval_set(): BP0");
 	/* need lookup'ed translation? */
 	if (item->hid2info != NULL){
 
+upsdebugx(3,"ups_infoval_set(): BP1");
 		if ((nutvalue = hu_find_infoval(item->hid2info, value)) == NULL) {
 			upsdebugx(5, "Lookup [%g] failed for [%s]", value, item->info_type);
 			return -1;
 		}
 
+upsdebugx(3,"ups_infoval_set(): BP1.1");
 		/* deal with boolean items */
 		if (!strncmp(item->info_type, "BOOL", 4)) {
 			process_boolean_info(nutvalue);
@@ -1624,15 +1642,19 @@ static int ups_infoval_set(hid_info_t *item, double value)
 		}
 
 		/* deal with alarm items */
+upsdebugx(3,"ups_infoval_set(): BP1.2");
 		if (!strncmp(item->info_type, "ups.alarm", 9)) {
 			alarm_set(nutvalue);
 			return 0;
 		}
 
+upsdebugx(3,"ups_infoval_set(): BP1.3");
 		dstate_setinfo(item->info_type, "%s", nutvalue);
 	} else {
+upsdebugx(3,"ups_infoval_set(): BP2");
 		dstate_setinfo(item->info_type, item->dfl, value);
 	}
 
+upsdebugx(3,"ups_infoval_set(): BP3");
 	return 1;
 }

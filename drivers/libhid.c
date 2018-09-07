@@ -414,9 +414,14 @@ int HIDGetItemValue(hid_dev_handle_t udev, const char *hidpath, double *Value, u
  */
 char *HIDGetIndexString(hid_dev_handle_t udev, const int Index, char *buf, size_t buflen)
 {
-	if (comm_driver->get_string(udev, Index, buf, buflen) < 1)
+upsdebugx(3, "HIDGetIndexString(): BP0 name='%s' ver='%s'", comm_driver->name, comm_driver->version);
+	if (comm_driver->get_string(udev, Index, buf, buflen) < 1) {
+upsdebugx(3, "HIDGetIndexString(): BP1");
+	
 		buf[0] = '\0';
+	}
 
+upsdebugx(3, "HIDGetIndexString(): BP2");
 	return str_rtrim(buf, '\n');
 }
 
