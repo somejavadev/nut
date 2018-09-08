@@ -72,7 +72,12 @@ $(GENERATED_USB_FILES): $(top_srcdir)/drivers/*-hid.c $(top_srcdir)/drivers/*usb
 # and call both for building nut-scanner
 # Also ensure that data/driver.list is well formatted
 dist-hook:
-	@if python -c 1; then \
+	pwd ; ls -al
+	ls -la tools || true
+	ls -al $(distdir) $(distdir)/nut-scanner || true
+	ls -al $(builddir) $(builddir)/nut-scanner || true
+
+	if python -c 1; then \
 		echo "Regenerating the SNMP helper files in DIST dir."; \
 		TOP_SRCDIR="$(top_srcdir)" ; export TOP_SRCDIR; \
 		TOP_BUILDDIR="$(top_builddir)" ; export TOP_BUILDDIR; \
@@ -84,7 +89,7 @@ dist-hook:
 		echo "----------------------------------------------------------------------"; \
 	fi
 
-	@if perl -e 1; then \
+	if perl -e 1; then \
 		echo "Regenerating the USB helper files in DIST dir."; \
 		TOP_SRCDIR="$(top_srcdir)" ; export TOP_SRCDIR; \
 		TOP_BUILDDIR="$(top_builddir)" ; export TOP_BUILDDIR; \
