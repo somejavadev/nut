@@ -81,7 +81,7 @@ dist-hook:
 		echo "Regenerating the SNMP helper files in DIST dir."; \
 		TOP_SRCDIR="$(top_srcdir)" ; export TOP_SRCDIR; \
 		TOP_BUILDDIR="$(top_builddir)" ; export TOP_BUILDDIR; \
-		cd $(distdir) && ./nut-snmpinfo.py; \
+		$(distdir)/nut-snmpinfo.py; \
 	else \
 		echo "----------------------------------------------------------------------"; \
 		echo "Warning: Python is not available."; \
@@ -93,7 +93,7 @@ dist-hook:
 		echo "Regenerating the USB helper files in DIST dir."; \
 		TOP_SRCDIR="$(top_srcdir)" ; export TOP_SRCDIR; \
 		TOP_BUILDDIR="$(top_builddir)" ; export TOP_BUILDDIR; \
-		cd $(distdir) && ./nut-usbinfo.pl; \
+		$(distdir)/nut-usbinfo.pl; \
 	else \
 		echo "----------------------------------------------------------------------"; \
 		echo "Warning: Perl is not available."; \
