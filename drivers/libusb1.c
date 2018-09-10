@@ -550,13 +550,14 @@ static int nut_libusb_get_report(libusb_device_handle *udev, int ReportId, unsig
 {
 	int	ret;
 
-	upsdebugx(4, "Entering libusb_get_report");
+	upsdebugx(4, "Entering libusb_get_report: id=%d buf=%p sz=%d", ReportId, raw_buf, ReportSize);
 
 	if (!udev) {
 		return 0;
 	}
 
-return 0;
+usleep (1000);
+//return 0;
 
 	ret = libusb_control_transfer(udev,
 		LIBUSB_ENDPOINT_IN|LIBUSB_REQUEST_TYPE_CLASS|LIBUSB_RECIPIENT_INTERFACE,
