@@ -42,7 +42,7 @@ ups_start () {
 	chmod 770 "$NUT_RUN_DIR" \
 	|| exit $SMF_EXIT_ERR_FATAL
 
-	LD_LIBRARY_PATH="${NUT_LIB_DIR}:$LD_LIBRARY_PATH" "${NUT_SBIN_DIR}"/upsmon #> /dev/null 2>&1
+	LD_LIBRARY_PATH="${NUT_LIB_DIR}:$LD_LIBRARY_PATH" "${NUT_SBIN_DIR}"/upsmon # -DDDDDD & #> /dev/null 2>&1
 }
 
 case "$1" in
