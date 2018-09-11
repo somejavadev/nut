@@ -129,7 +129,7 @@ static int pollfreq = DEFAULT_POLLFREQ;
 static int ups_status = 0;
 static bool_t data_has_changed = FALSE; /* for SEMI_STATIC data polling */
 // https://alioth-lists.debian.net/pipermail/nut-upsdev/2014-December/006863.html
-#if 1 //ndef SUN_LIBUSB
+#ifndef SUN_LIBUSB
 bool_t use_interrupt_pipe = TRUE;
 #else
 bool_t use_interrupt_pipe = FALSE;
