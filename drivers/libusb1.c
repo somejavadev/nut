@@ -556,7 +556,7 @@ static int nut_libusb_get_report(libusb_device_handle *udev, int ReportId, unsig
 		return 0;
 	}
 
-usleep (1000);
+//usleep (1000);
 //return 0;
 
 	ret = libusb_control_transfer(udev,
