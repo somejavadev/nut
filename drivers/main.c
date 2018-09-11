@@ -307,6 +307,13 @@ static int main_arg(char *var, char *val)
 		return 1;	/* handled */
 	}
 
+	if (!strcmp(var, "user")) {
+		free(user);
+		user = xstrdup(val);
+
+		return 1;	/* handled */
+	}
+
 	/* only for upsdrvctl - ignored here */
 	if (!strcmp(var, "sdorder"))
 		return 1;	/* handled */
