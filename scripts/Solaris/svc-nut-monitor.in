@@ -18,12 +18,17 @@ NUT_SBIN_DIR="${NUT_DIR}/sbin"
 NUT_LIB_DIR="${NUT_DIR}/lib"
 NUT_RUN_DIR="@PIDPATH@/nut"
 CONFIG="@CONFPATH@/nut.conf"
+CONFIG_UPSMON="@CONFPATH@/upsmon.conf"
 NUTUSER="@RUN_AS_USER@"
 NUTGROUP="@RUN_AS_GROUP@"
 
 if [ -f "$CONFIG" ] ; then
 	. "$CONFIG"
 fi
+
+KILLPOWER="`egrep '^POWERDOWNFLAG' "$CONFIG_UPSMON" | awk '{print $2}'`" \
+&& [ -n "$KILLPOWER" ] \
+|| KILLPOWER="/etc/killpower"
 
 ups_start () {
 	if [ "$MODE" = "none" ];then
