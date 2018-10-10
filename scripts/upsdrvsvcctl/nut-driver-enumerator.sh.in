@@ -460,11 +460,12 @@ upsconf_getMedia() {
 }
 
 upsconf_debug() {
-    _DRV="`upsconf_getDriver "$1"`"
-    _PRT="`upsconf_getPort "$1"`"
+echo "Profile getting debug for $1" >&2
     _MED="`upsconf_getMedia "$1"`"
-    _MD5="`upsconf_getSection_MD5 "$1"`"
-    NAME_MD5="`calc_md5 "$1"`"
+    _DRV="$CURR_DRV"  ; [ -n "$_DRV" ] || _DRV="`time upsconf_getDriver "$1"`"
+    _PRT="$CURR_PORT" ; [ -n "$_PRT" ] || _PRT="`time upsconf_getPort "$1"`"
+    _MD5="`time upsconf_getSection_MD5 "$1"`"
+    NAME_MD5="`time calc_md5 "$1"`"
     echo "INST: ${NAME_MD5}~[$1]: DRV='$_DRV' PORT='$_PRT' MEDIA='$_MED' SECTIONMD5='$_MD5'"
 }
 
