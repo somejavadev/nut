@@ -255,6 +255,47 @@ $_DEV = $_SVC" ; }
     [ "`echo "$1" | wc -l`" = "`echo "$_TMP_DEV_SVC" | wc -l`" ]
 }
 
+# Default prefix for cache variable names
+CACHED_SECTION_CONTENT_DOMAIN="CACHED_SECTION_CONTENT_FULLDATA"
+upsconf_getSection_content_preCache() {
+    # Read all the sections from stdin and store into uniquely named variables
+    # prefixed by $CACHED_SECTION_CONTENT_DOMAIN expansion
+    [ -n "$USE_SECTION_CACHE" ] || return 0
+
+    # Drop old cache
+    for SECTION_CONTENT_VARNAME in `set | egrep "^${CACHED_SECTION_CONTENT_DOMAIN}_ | awk -F= '{print $1}'` ; do
+        eval unset $SECTION_CONTENT_VARNAME
+    done
+
+    CURR_SECTION=""
+    SECTION_CONTENT=""
+
+    while read LINE ; do
+        case "$LINE" in
+            "") ;;
+            \[*\])
+                # Save previous section, including global (null name)
+                SECTION_CONTENT_VARNAME="${CACHED_SECTION_CONTENT_DOMAIN}_`calc_md5 "$CURR_SECTION"`"
+                eval $SECTION_CONTENT_VARNAME="\$SECTION_CONTENT"
+                SECTION_CONTENT="$LINE"
+                CURR_SECTION="`echo "$LINE" | sed 's,^\[\(.*\)\]$,\1,'`"
+                ;;
+            *)
+                if [ -n "$SECTION_CONTENT" ]; then
+                    SECTION_CONTENT="$SECTION_CONTENT
+$LINE"
+                else
+                    SECTION_CONTENT="$LINE"
+                fi
+                ;;
+        esac
+    done
+
+    # Save last section, including global (null name)
+    SECTION_CONTENT_VARNAME="${CACHED_SECTION_CONTENT_DOMAIN}_`calc_md5 "$CURR_SECTION"`"
+    eval $SECTION_CONTENT_VARNAME="\$SECTION_CONTENT"
+}
+
 upsconf_getSection_content() {
     # "$1" = name of ups.conf section to display in whole, from whatever
     # comes on stdin (file or a pre-made normalized variable)
@@ -267,6 +308,12 @@ upsconf_getSection_content() {
     # (as would be better fit for portable shells) to later address them
     # quickly without re-parsing the file or big envvar many times.
     #
+
+    if [ -n "$USE_SECTION_CACHE2" ]; then
+        SECTION_CONTENT_VARNAME="${CACHED_SECTION_CONTENT_DOMAIN}_`calc_md5 "$1"`"
+        eval SECTION_CONTENT="\$$SECTION_CONTENT_VARNAME"
+        [ -n "$SECTION_CONTENT" ] && echo "$SECTION_CONTENT" && return
+    fi
 
     CURR_SECTION=""
     SECTION_CONTENT=""
@@ -303,6 +350,10 @@ $LINE"
         echo "$SECTION_CONTENT"
     fi
 
+    if [ -n "$USE_SECTION_CACHE2" ]; then
+        eval $SECTION_CONTENT_VARNAME="\$SECTION_CONTENT"
+    fi
+
     [ "$RES" = 0 ] || echo "ERROR: Section [$1] was not found in the '$UPSCONF' file" >&2
     return $RES
 }
@@ -310,6 +361,14 @@ $LINE"
 upsconf_getSection() {
     # Use the whole output of normalization parser
     upslist_normalizeFile_once || return    # Propagate errors upwards
+
+    if [ -n "$USE_SECTION_CACHE" ]; then
+        SECTION_CONTENT_VARNAME="CACHED_SECTION_CONTENT_FULLDATA_`calc_md5 "$1"`"
+        eval SECTION_CONTENT="\$$SECTION_CONTENT_VARNAME"
+        [ -n "$SECTION_CONTENT" ] && echo "$SECTION_CONTENT" && return
+    fi
+
+    CACHED_SECTION_CONTENT_DOMAIN="CACHED_SECTION_CONTENT_FULLDATA" \
     upsconf_getSection_content "$@" << EOF
 ${UPSCONF_DATA}
 EOF
@@ -322,6 +381,14 @@ upsconf_getSection_MD5() {
 upsconf_getSection_SDP() {
     # Use the section-driver-port subset
     upslist_normalizeFile_once || return    # Propagate errors upwards
+
+    if [ -n "$USE_SECTION_CACHE" ]; then
+        SECTION_CONTENT_VARNAME="CACHED_SECTION_CONTENT_SDP_`calc_md5 "$1"`"
+        eval SECTION_CONTENT="\$$SECTION_CONTENT_VARNAME"
+        [ -n "$SECTION_CONTENT" ] && echo "$SECTION_CONTENT" && return
+    fi
+
+    CACHED_SECTION_CONTENT_DOMAIN="CACHED_SECTION_CONTENT_SDP" \
     upsconf_getSection_content "$@" << EOF
 ${UPSCONF_DATA_SDP}
 EOF
@@ -603,6 +670,17 @@ EOF`" \
               UPSCONF_DATA=""
               UPSCONF_DATA_SDP=""
             }
+
+    # Prepare parsing data if enabled
+    CACHED_SECTION_CONTENT_DOMAIN="CACHED_SECTION_CONTENT_FULLDATA" \
+    upsconf_getSection_content_preCache << EOF
+${UPSCONF_DATA}
+EOF
+
+    CACHED_SECTION_CONTENT_DOMAIN="CACHED_SECTION_CONTENT_SDP" \
+    upsconf_getSection_content_preCache << EOF
+${UPSCONF_DATA_SDP}
+EOF
 }
 
 upslist_normalizeFile_once() {
@@ -994,11 +1072,16 @@ while [ $# -gt 0 ]; do
             exit $?
             ;;
         upsconf_debug) # Not public, not in usage()
+            upslist_readFile_once || exit
             [ -z "$2" ] && echo "Device name argument required" >&2 && exit 1
+            # Enable the cache for subsequent lookups into same one section
+            USE_SECTION_CACHE=y ; export USE_SECTION_CACHE
+            upsconf_getSection_SDP "$2" > /dev/null
             upsconf_debug "$2"
             exit $?
             ;;
         upslist_debug) # Not public, not in usage()
+            USE_SECTION_CACHE=y ; export USE_SECTION_CACHE
             upslist_readFile_once || exit
             upslist_debug
             exit $?
