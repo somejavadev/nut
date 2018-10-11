@@ -16,4 +16,4 @@ else
 fi
 
 ls -la
-sh -x ./nut-driver-enumerator-test.sh
+DEBUG=trace ./nut-driver-enumerator-test.sh
