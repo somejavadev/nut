@@ -64,8 +64,9 @@ env:
   global:
     - CI_TIME=true
     - CI_TRACE=false
-  matrix:
-    - BUILD_TYPE=default
+### Commented away while testing NDE selftest
+#  matrix:
+#    - BUILD_TYPE=default
 
 # Builds with customized setups
 # Note that doc-related builds take the longest, and Travis CI cloud
@@ -109,69 +110,70 @@ matrix:
       apt:
         packages:
         - ash
-  - env: BUILD_TYPE=default-withdoc
-    os: linux
-    addons:
-      apt:
-        packages: &deps_gendocs
-        - asciidoc
-        - xsltproc
-        - dblatex
-        - docbook-xsl
-        - docbook-xsl-ns
-        - source-highlight
-        - libxml2-utils
-  - env: BUILD_TYPE=default-spellcheck
-    os: linux
-    addons:
-      apt:
-        packages: &deps_aspell
-        - aspell
-        - aspell-en
-  - env: BUILD_TYPE=default-tgt:distcheck-valgrind
-    os: linux
-    sudo: false
-    services:
-        - docker
-    addons:
-      apt:
-        packages:
-        - *deps_driverlibs
-        - valgrind
-# Other quicker builds in standard env follow:
-  - env: BUILD_TYPE=default-nodoc
-    os: linux
-    addons:
-      apt:
-        packages:
-        - *deps_driverlibs
-  - env: BUILD_TYPE=default-alldrv
-    os: linux
-    sudo: false
-    services:
-        - docker
-    addons:
-      apt:
-        packages:
-        - *deps_driverlibs
-  - env: BUILD_TYPE=default-tgt:distcheck-light
-    os: linux
-    sudo: false
-    services:
-        - docker
-    addons:
-      apt:
-        packages:
-        - *deps_driverlibs
-  - env:
-    - BUILD_TYPE=default-tgt:distcheck-light
-    - NO_PKG_CONFIG=true
-    os: linux
-    sudo: true
-    addons:
-      apt:
-        packages:
-        - *deps_driverlibs
+### Commented away while testing NDE selftest
+#  - env: BUILD_TYPE=default-withdoc
+#    os: linux
+#    addons:
+#      apt:
+#        packages: &deps_gendocs
+#        - asciidoc
+#        - xsltproc
+#        - dblatex
+#        - docbook-xsl
+#        - docbook-xsl-ns
+#        - source-highlight
+#        - libxml2-utils
+#  - env: BUILD_TYPE=default-spellcheck
+#    os: linux
+#    addons:
+#      apt:
+#        packages: &deps_aspell
+#        - aspell
+#        - aspell-en
+#  - env: BUILD_TYPE=default-tgt:distcheck-valgrind
+#    os: linux
+#    sudo: false
+#    services:
+#        - docker
+#    addons:
+#      apt:
+#        packages:
+#        - *deps_driverlibs
+#        - valgrind
+### Other quicker builds in standard env follow:
+#  - env: BUILD_TYPE=default-nodoc
+#    os: linux
+#    addons:
+#      apt:
+#        packages:
+#        - *deps_driverlibs
+#  - env: BUILD_TYPE=default-alldrv
+#    os: linux
+#    sudo: false
+#    services:
+#        - docker
+#    addons:
+#      apt:
+#        packages:
+#        - *deps_driverlibs
+#  - env: BUILD_TYPE=default-tgt:distcheck-light
+#    os: linux
+#    sudo: false
+#    services:
+#        - docker
+#    addons:
+#      apt:
+#        packages:
+#        - *deps_driverlibs
+#  - env:
+#    - BUILD_TYPE=default-tgt:distcheck-light
+#    - NO_PKG_CONFIG=true
+#    os: linux
+#    sudo: true
+#    addons:
+#      apt:
+#        packages:
+#        - *deps_driverlibs
 
 before_install:
 - if [ $TRAVIS_OS_NAME == "osx" ] ; then brew update; brew install binutils asciidoc docbook-xsl ; XML_CATALOG_FILES=/usr/local/etc/xml/catalog ; export XML_CATALOG_FILES ; fi
