@@ -4,6 +4,9 @@
 # using chosen SHELL_PROGS (passed from caller envvars)
 
 cd "${REPO_DIR}/tests" || exit
+BUILDDIR="${REPO_DIR}"
+SRCDIR="${REPO_DIR}"
+export BUILDDIR SRCDIR
 
 printf "Will test nut-driver-enumerator interpreted by: "
 if [ -n "${SHELL_PROGS}" ] ; then
