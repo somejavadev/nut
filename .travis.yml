@@ -21,6 +21,16 @@ sudo: false
 services:
 - docker
 
+# Define one job in the matrix, to avoid a failing job
+# with "no environment variables set"; but others are
+# listed below to prioritize the longer jobs to start first.
+env:
+  global:
+    - CI_TIME=true
+    - CI_TRACE=false
+  matrix:
+    - BUILD_TYPE=default
+
 # Common required packages for all common scenarios
 # Note that YAML lists may be named with & and referenced with * characters;
 # but without such links, every list is complete and unique (meaning that
@@ -56,16 +66,6 @@ addons:
     - libxpm-dev
     - libxml2-utils
     - libmodbus-dev
-
-# Define one job in the matrix, to avoid a failing job
-# with "no environment variables set"; but others are
-# listed below to prioritize the longer jobs to start first.
-env:
-  global:
-    - CI_TIME=true
-    - CI_TRACE=false
-  matrix:
-    - BUILD_TYPE=default
 
 # Builds with customized setups
 # Note that doc-related builds take the longest, and Travis CI cloud
