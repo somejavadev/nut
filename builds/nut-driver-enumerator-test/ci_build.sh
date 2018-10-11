@@ -12,4 +12,5 @@ else
     echo "default system '/bin/sh'"
 fi
 
-./nut-driver-enumerator-test.sh
+ls -la
+sh -x ./nut-driver-enumerator-test.sh
