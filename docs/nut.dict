@@ -1,4 +1,4 @@
-personal_ws-1.1 en 2432 utf-8
+personal_ws-1.1 en 2475 utf-8
 AAS
 ACFAIL
 ACFREQ
@@ -210,6 +210,8 @@ DELRANGE
 DES
 DESTDIR
 DISCHRG
+DMF
+DMFs
 DN
 DOCTYPE
 DOMAINs
@@ -496,6 +498,8 @@ Laventhol
 Legrand
 Lepple
 Levente
+LibLTDL
+LibNEON
 LineA
 LineB
 LineSens
@@ -507,6 +511,7 @@ LowRntm
 LowRuntime
 Loyer
 Ltr
+Lua
 Lucent
 Lygre
 Lynge
@@ -616,6 +621,7 @@ NOTIFYMSG
 NQA
 NTP
 NUT's
+NUTSRC
 NVA
 NX
 Nadav
@@ -865,6 +871,7 @@ Rucelf
 RxD
 RxHs
 SAI
+SCHEMADIR
 SCM
 SCO
 SCR
@@ -993,6 +1000,8 @@ TCIOFLUSH
 TCSANOW
 TEMPC
 TEMPF
+TESTEDFILE
+TESTEDINDEX
 TIMELEFT
 TIOCM
 TIOCMBIC
@@ -1090,6 +1099,7 @@ Viewpower
 Viewsonic
 Viktor
 Vout
+Vyskocil
 Václav
 WALKMODE
 WELI
@@ -1187,6 +1197,7 @@ apcupsd
 aphel
 ar
 argc
+argparse
 args
 argv
 asapm
@@ -1365,6 +1376,7 @@ coreutils
 cout
 coverity
 cp
+cpp
 cpqpower
 cpsups
 cr
@@ -1414,10 +1426,14 @@ desde
 dev
 devd
 devel
+deviceamperes
+devicelua
+deviceluaOutlet
 devscan
 dfl
 dipsw
 dir
+dirpath
 disp
 distcheck
 distro
@@ -1425,6 +1441,13 @@ dl
 dll
 dlopen
 dmesg
+dmf
+dmfdir
+dmffile
+dmfify
+dmfnutscan
+dmfpath
+dmfsnmp
 dnl
 dockapp
 docs
@@ -1530,6 +1553,7 @@ fs
 fsd
 fuji
 fullload
+functionset
 gamatronic
 gcc
 gd
@@ -1661,6 +1685,7 @@ journalctl
 jpg
 jpgraph
 json
+jsonify
 kVA
 kadets
 kaminski
@@ -1690,6 +1715,7 @@ libhidups
 libi
 libltdl
 libmodbus
+libneon
 libnss
 libnut
 libnutclient
@@ -1713,6 +1739,7 @@ linux
 listdef
 littleguy
 lk
+lkp
 lm
 ln
 loadPercentage
@@ -1736,6 +1763,8 @@ lowruntime
 lowvoltsout
 lr
 lsusb
+lua
+luaOutlet
 lu
 lvo
 lxml
@@ -1813,6 +1842,7 @@ multimeter
 multimon
 mustek
 mv
+myOrg
 myauthenticationpassphrase
 mybox
 mydev
@@ -1901,6 +1931,7 @@ offsite
 offt
 offtimedays
 oftd
+oid
 oids
 ok
 ol
@@ -1926,6 +1957,7 @@ oq
 otherprotocols
 pF
 paramkeywords
+parsability
 parsable
 parseconf
 passname
@@ -1986,6 +2018,7 @@ powerware
 pprint
 ppro
 pre
+prepend
 prepended
 preprocess
 preprocessing
@@ -2006,6 +2039,7 @@ pwro
 px
 pxgx
 py
+pycparser
 pydoc
 pynut
 qa
@@ -2038,6 +2072,7 @@ reentrancy
 refactoring
 referencenominal
 regex
+reindex
 reposurgeon
 repotec
 req
@@ -2076,6 +2111,7 @@ safenet
 sbin
 sbindir
 scd
+schemas
 screenshot
 screenshots
 scriptname
@@ -2241,6 +2277,7 @@ timername
 tiocm
 tios
 tmp
+tonumber
 toolchain
 topbot
 tport
@@ -2370,10 +2407,12 @@ vbatt
 vendorid
 verifySourceSig
 versa
+versioned
 victron
 victronups
 vid
 vin
+virtualenv
 virtualization
 vo
 vod
@@ -2381,6 +2420,7 @@ voltronic
 von
 wDescriptorLength
 wakeup
+wastePower
 webserver
 wf
 whitespace
@@ -2412,9 +2452,12 @@ xh
 xhtml
 xmalloc
 xml
+xmlify
 xmllint
+xmlns
 xr
 xrealloc
+xsd
 xsltproc
 xstrdup
 xu

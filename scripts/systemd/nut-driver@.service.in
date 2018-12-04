@@ -28,6 +28,8 @@ PartOf=nut-driver.target
 ExecStart=/bin/sh -c "@SBINDIR@/upsdrvctl start `@NUT_LIBEXECDIR@/nut-driver-enumerator.sh --get-device-for-service %i`"
 ExecStop=/bin/sh -c "@SBINDIR@/upsdrvctl stop `@NUT_LIBEXECDIR@/nut-driver-enumerator.sh --get-device-for-service %i`"
 Type=forking
+Restart=on-failure
+RestartSec=5min
 # Note: If you customize the "maxstartdelay" in ups.conf or in your
 # NUT compilation defaults, so it exceeds the default systemd unit
 # startup timeout (typically 90 sec), then make sure to set a slightly
