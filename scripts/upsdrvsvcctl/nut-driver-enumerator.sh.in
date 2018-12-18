@@ -1218,11 +1218,41 @@ $0 --show-device-config-value DEV KEY [KEY...]
         one per line in the same order (including empty lines for missing
         values); any missing value yields a non-zero exit code.
 EOF
+
+# TODO: refactor no-arg and daemonized runs  into common loop, set ACTION
+# and process that all uniformly.
+#COMMON OPTIONS:
+#  --timeout-cmd <prog>	service management calls will be time-limited
+#  --timeout-args <arg>	by calling the specified program with its args.
+#                    	By default, if coreutils timeout is found, it
+#                    	would be used to limit service calls by 90 sec.
+
 }
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --help|-h|-help) usage; exit 0 ;;
+        --timeout-length|--timeout-len|--timeout-args)
+            TIMEOUT_ARGS="$2"
+            shift
+            ;;
+        --timeout-cmd)
+            if [ -n "$2" ] ; then
+                if [ -x "$2" ] || which "$2" 2>/dev/null >/dev/null ; then
+                    TIMEOUT_CMD="$2"
+                else
+                    echo "ERROR: Received a '$2' argument for $1, and can not find such program; clearing the option so the basic functionality can proceed" >&2
+                    TIMEOUT_CMD=""
+                    TIMEOUT_ARGS=""
+                fi
+            else
+                echo "INFO: Received an empty argument for $1, clearing the option" >&2
+                TIMEOUT_CMD=""
+                TIMEOUT_ARGS=""
+            fi
+            shift
+            ;;
+
         --get-service-framework) echo "${SERVICE_FRAMEWORK}" ; exit 0 ;;
         --reconfigure)
             upslist_readFile_once || exit $?
