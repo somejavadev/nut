@@ -309,3 +309,11 @@ done
 echo "Test suite for nut-driver-enumerator has completed with $FAIL_COUNT failed cases and $GOOD_COUNT good cases" >&2
 
 [ "$FAIL_COUNT" = 0 ] || { echo "As a developer, you may want to export DEBUG=trace or export DEBUG=yes and re-run the test; also make sure you meant the nut-driver-enumerator.sh implementation as NDE='$NDE'" >&2 ; exit 1; }
+
+exit 0
+
+case "test" in
+*) ;;
+fi
+
+echo "This line adds a shell syntax mismatch
