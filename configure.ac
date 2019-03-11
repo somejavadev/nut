@@ -148,8 +148,8 @@ dnl We need to relative-symlink some files. Or hardlink. Or copy...
 LN_S_R="cp -pR"
 if test "$as_ln_s" = "ln -s" ; then
     LN_S_R="ln"
-    DIR1="$(mktemp -d "dir1.XXXXX")" && \
-    DIR2="$(mktemp -d "dir2.XXXXX")" && \
+    DIR1="$(mktemp -d "dir1.XXXXXXX")" && \
+    DIR2="$(mktemp -d "dir2.XXXXXXX")" && \
     touch "${DIR1}/a" && \
     $as_ln_s -r "${DIR1}/a" "${DIR2}/b" && \
     ls -la "${DIR2}/b" | grep '\.\./' > /dev/null && \
@@ -366,18 +366,20 @@ dnl Solaris 10/11 USB handling (need librt and libusb runtime path)
 dnl HPUX, since v11, needs an explicit activation of pthreads
 case ${target_os} in
    solaris2.1* )
-      echo Checking for Solaris 10 / 11 specific configuration for usb drivers
+      AC_MSG_CHECKING([for Solaris 10 / 11 specific configuration for usb drivers])
       AC_SEARCH_LIBS(nanosleep, rt)
       LIBUSB_LIBS="-R/usr/sfw/lib ${LIBUSB_LIBS}"
       dnl FIXME: Sun's libusb doesn't support timeout (so blocks notification)
       dnl and need to call libusb close upon reconnection
       AC_DEFINE(SUN_LIBUSB, 1, [Define to 1 for Sun version of the libusb.])
       SUN_LIBUSB=1
+      AC_MSG_RESULT([${LIBUSB_LIBS}])
       ;;
     hpux11*)
       CFLAGS="${CFLAGS} -lpthread"
       ;;
 esac
+
 
 dnl ----------------------------------------------------------------------
 dnl checks related to --with-neon
@@ -843,12 +845,12 @@ dnl not fail if we have no tools to generate it (so add to SKIP list).
 			else
 				DOC_SKIPBUILD_LIST="${DOC_SKIPBUILD_LIST} ${nut_doc_build_target_base}"
 				if test "${nut_doc_build_target_flag}" = "auto" ; then
-dnl Test that groff files exist (building from dist'ed tarball, not git repo)
+dnl Test that groff files exist (building from distributed tarball, not git repo)
 					if test -s "${abs_srcdir}"/docs/man/snmp-ups.8 ; then
-						AC_MSG_WARN([Unable to build ${nut_doc_build_target_base} documentation, but can install pre-built dist'ed copies])
+						AC_MSG_WARN([Unable to build ${nut_doc_build_target_base} documentation, but can install pre-built distributed copies])
 						DOC_INSTALL_DISTED_MANS="yes"
 					else
-						AC_MSG_WARN([Unable to build ${nut_doc_build_target_base} documentation, and unable to install pre-built dist'ed copies because they are absent])
+						AC_MSG_WARN([Unable to build ${nut_doc_build_target_base} documentation, and unable to install pre-built distributed copies because they are absent])
 					fi
 				fi  # Other variants include "no", "skip"...
 			fi
@@ -1341,41 +1343,44 @@ dnl # Could use `AX_CXX_COMPILE_STDCXX_11([noext], [optional])` if it were
 dnl # available everywhere. Or AX_CHECK_COMPILE_FLAG if it was ubiquitous:
 dnl ###AX_CHECK_COMPILE_FLAG([-std=c++11],
 dnl ###    [CXXFLAGS="$CXXFLAGS -std=c++11"
-dnl ###     HAVE_CXX11=1],
-dnl ###    [HAVE_CXX11=0])
+dnl ###     have_cxx11=1],
+dnl ###    [have_cxx11=0])
 
 AC_MSG_CHECKING(for C++11 support in current compiler)
 my_CXXFLAGS="$CXXFLAGS"
 AC_LANG_PUSH([C++])
 
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+CPLUSPLUS_DECL='
 #include <stdio.h>
 #if __cplusplus < 201103L
   #error This library needs at least a C++11 compliant compiler
 #endif
-]], [[printf("%ld\n", __cplusplus);]])
-],
+'
+CPLUSPLUS_MAIN='printf("%ld\n", __cplusplus);'
+
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[${CPLUSPLUS_DECL}]], [[${CPLUSPLUS_MAIN}]])],
     [AC_MSG_RESULT([yes, out of the box])
-     HAVE_CXX11=1],
+     have_cxx11=1],
     [CXXFLAGS="$CXXFLAGS -std=c++11"
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <stdio.h>
-#if __cplusplus < 201103L
-  #error This library needs at least a C++11 compliant compiler
-#endif
-        ]], [[printf("%ld\n", __cplusplus);]])
-        ],
-        [AC_MSG_RESULT([yes, GCC-style])
-         HAVE_CXX11=1],
+     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[${CPLUSPLUS_DECL}]], [[${CPLUSPLUS_MAIN}]])],
+        [AC_MSG_RESULT([yes, GCC-style (as C++11)])
+         have_cxx11=1],
+        [CXXFLAGS="$CXXFLAGS -std=c++0x"
+         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[${CPLUSPLUS_DECL}]], [[${CPLUSPLUS_MAIN}]])],
+            [AC_MSG_RESULT([yes, GCC-style (as C++0X)])
+             have_cxx11=1],
             [AC_MSG_RESULT([no])
              CXXFLAGS="$my_CXXFLAGS"
-             HAVE_CXX11=0])])
+             have_cxx11=0])])])
+AM_CONDITIONAL(HAVE_CXX11, test "${have_cxx11}" = "yes")
 AC_LANG_POP([C++])
+unset CPLUSPLUS_MAIN
+unset CPLUSPLUS_DECL
 
 have_cppunit="no"
 CPPUNIT_NUT_CXXFLAGS=""
 AS_IF([test x"$have_PKG_CONFIG" = xyes],
-    [AS_IF([test "${HAVE_CXX11}" = 1],
+    [AS_IF([test "${have_cxx11}" = 1],
         [PKG_CHECK_MODULES(CPPUNIT, cppunit, have_cppunit=yes, have_cppunit=no)
          AS_IF([test "${have_cppunit}" != "yes"],
             [AC_MSG_WARN([libcppunit not found - those C++ tests will not be built.])
@@ -1418,6 +1423,16 @@ else
 	AC_MSG_RESULT(no)
 fi
 AM_CONDITIONAL(WITH_AUGLENS, test -n "${auglensdir}")
+
+AC_PATH_PROGS([AUGPARSE], [augparse], [none])
+AM_CONDITIONAL([HAVE_AUGPARSE], [test "x${AUGPARSE}" != "xnone"])
+AC_MSG_CHECKING([whether to enable Augeas configuration-management lenses tests])
+if test "x${AUGPARSE}" != xnone ; then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+
 
 AC_MSG_CHECKING(whether to install hotplug rules)
 AC_ARG_WITH(hotplug-dir,
