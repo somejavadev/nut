@@ -148,6 +148,20 @@ if [ -z "${SERVICE_FRAMEWORK-}" ] ; then
         SERVICE_FRAMEWORK="systemd"
 fi
 
+# Optionally use Coreutils timeout to limit the
+# (potentially hanging) calls to systemd tools...
+# Should not hurt with SMF too, if it ever misbehaves.
+if [ -z "${TIMEOUT_CMD+x}" ]; then
+    # Envvar not set at all (set but empty is okay, caller wants that then)
+    TIMEOUT_CMD=""
+    TIMEOUT_ARGS=""
+    if which timeout 2>/dev/null >/dev/null ; then
+        # Systemd default timeout for unit start/stop
+        TIMEOUT_CMD="timeout"
+        TIMEOUT_ARGS="90s"
+    fi
+fi
+
 # Cache needed bits of ups.conf to speed up later parsing. Note that these
 # data are needed for most operations, and populated by upslist_readFile()
 UPSCONF_DATA=""
@@ -162,6 +176,7 @@ UPSLIST_SVCS=""
 # Framework-specific implementations are generally hooked here:
 hook_registerInstance=""
 hook_unregisterInstance=""
+hook_refreshSupervizor=""
 hook_listInstances=""
 hook_listInstances_raw=""
 hook_validInstanceName=""
@@ -176,6 +191,7 @@ case "${SERVICE_FRAMEWORK-}" in
     smf)
         hook_registerInstance="smf_registerInstance"
         hook_unregisterInstance="smf_unregisterInstance"
+        hook_refreshSupervizor="smf_refreshSupervizor"
         hook_listInstances="smf_listInstances"
         hook_listInstances_raw="smf_listInstances_raw"
         hook_validInstanceName="smf_validInstanceName"
@@ -189,6 +205,7 @@ case "${SERVICE_FRAMEWORK-}" in
     systemd)
         hook_registerInstance="systemd_registerInstance"
         hook_unregisterInstance="systemd_unregisterInstance"
+        hook_refreshSupervizor="systemd_refreshSupervizor"
         hook_listInstances="systemd_listInstances"
         hook_listInstances_raw="systemd_listInstances_raw"
         hook_validInstanceName="systemd_validInstanceName"
@@ -202,6 +219,7 @@ case "${SERVICE_FRAMEWORK-}" in
     selftest)
         hook_registerInstance="selftest_NOOP"
         hook_unregisterInstance="selftest_NOOP"
+        hook_refreshSupervizor="selftest_NOOP"
         hook_listInstances="selftest_NOOP"
         hook_listInstances_raw="selftest_NOOP"
         hook_validInstanceName="selftest_NOOP"
@@ -508,9 +526,22 @@ upsconf_debug() {
 }
 
 calc_md5() {
+    # Tries several ways to produce an MD5 of the "$1" argument
     _MD5="`echo "$1" | md5sum 2>/dev/null | awk '{print $1}'`" && [ -n "$_MD5" ] || \
     { _MD5="`echo "$1" | openssl dgst -md5 2>/dev/null | awk '{print $NF}'`" && [ -n "$_MD5" ]; } || \
     return 1
+
+    echo "$_MD5"
+}
+
+calc_md5_file() {
+    # Tries several ways to produce an MD5 of the file named by "$1" argument
+    [ -s "$1" ] || return 2
+
+    _MD5="`md5sum 2>/dev/null < "$1" | awk '{print $1}'`" && [ -n "$_MD5" ] || \
+    { _MD5="`openssl dgst -md5 2>/dev/null < "$1" | awk '{print $NF}'`" && [ -n "$_MD5" ]; } || \
+    return 1
+
     echo "$_MD5"
 }
 
@@ -583,6 +614,9 @@ smf_unregisterInstance() {
     echo "Removing instance: 'nut-driver:$1' ..." >&2
     /usr/sbin/svcadm disable -ts 'nut-driver:'"$1" || false
     /usr/sbin/svccfg -s nut-driver delete "$1"
+}
+smf_refreshSupervizor() {
+    :
 }
 smf_listInstances_raw() {
     # Newer versions have pattern matching; older SMF might not have this luxury
@@ -698,16 +732,22 @@ EOF
     systemd_setSavedMD5 "$SVCINST" "`upsconf_getSection_MD5 "$DEVICE"`"
 
     if [ "$AUTO_START" = yes ] ; then
-        /bin/systemctl start --no-block 'nut-driver@'"$SVCINST".service || return
+        $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl start --no-block 'nut-driver@'"$SVCINST".service || return
         echo "Started instance: 'nut-driver@$SVCINST' for NUT configuration section '$DEVICE'" >&2
     fi
 }
 systemd_unregisterInstance() {
     echo "Removing instance: 'nut-driver@$1' ..." >&2
-    /bin/systemctl stop 'nut-driver@'"$1".service || false
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || false
+
     /bin/systemctl disable 'nut-driver@'"$1".service
     rm -rf "${SYSTEMD_CONFPATH}/nut-driver@$1.service.d"
     /bin/systemctl reset-failed 'nut-driver@'"$1".service
+}
+systemd_refreshSupervizor() {
+    /bin/systemctl daemon-reload
 }
 systemd_listInstances_raw() {
     /bin/systemctl show 'nut-driver@*' -p Id | egrep '=nut-driver' | sed 's,^Id=,,'
@@ -733,7 +773,6 @@ systemd_setSavedMD5() {
 Environment='$PROP=$2'
 EOF
     [ $? = 0 ] && echo "OK" || { echo "FAILED to stash the checksum">&2 ; return 1 ; }
-    /bin/systemctl daemon-reload
 }
 systemd_restart_upsd() {
     # Do not restart/reload if not already running
@@ -746,15 +785,9 @@ systemd_restart_upsd() {
     # Note: reload is a better way to go about this, so the
     # data service is not interrupted by re-initialization
     # of the daemon. But systemd/systemctl sometimes stalls...
-    # Coreutils timeout
-    TIMEOUT=""
-    if which timeout 2>/dev/null >/dev/null ; then
-        # Systemd default timeout for unit start/stop
-        TIMEOUT="timeout 90s "
-    fi
 
-    $TIMEOUT /bin/systemctl reload-or-restart "nut-server" || \
-    $TIMEOUT /bin/systemctl restart "nut-server"
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl reload-or-restart "nut-server" || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl restart "nut-server"
 }
 
 systemd_restart_drv() {
@@ -765,14 +798,9 @@ systemd_restart_drv() {
     esac
 
     echo "Restarting NUT driver instance '$1' to make sure it knows new configuration..."
-    TIMEOUT=""
-    if which timeout 2>/dev/null >/dev/null ; then
-        # Systemd default timeout for unit start/stop
-        TIMEOUT="timeout 90s "
-    fi
 
     # Full restart, e.g. in case we changed the user= in configs
-    $TIMEOUT /bin/systemctl restart "nut-driver@$1"
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl restart "nut-driver@$1"
 }
 
 upslist_normalizeFile_filter() {
@@ -919,8 +947,31 @@ upslist_restartSvcs() {
     done
 }
 
+# FIXME : process via kill -l?
+# Different shells use a SIG prefix or not to signal names
+# so standard numbers are in fact more portable :\
+TERMINATION_SIGNALS="2 3 15"
+RECONFIGURATION_SIGNALS="1"
+
+TERMINATE_ASAP=false
+trap_handle_interruption_exit() {
+    # Handle SIGINT, SIGQUIT, SIGTERM with a message
+    echo "`date -u` : Received an interruption signal, terminating the script now" >&2
+    exit 0
+}
+
+trap_handle_interruption() {
+    # Handle SIGINT, SIGQUIT, SIGTERM gracefully - tell the main
+    # iteration to complete and just then abort
+    echo "`date -u` : Received an interruption signal, will terminate the script after ending the main routine. Repeat the signal if urgent!" >&2
+    TERMINATE_ASAP=true
+    trap 'trap_handle_interruption_exit' $TERMINATION_SIGNALS
+}
+
 nut_driver_enumerator_main() {
     ################# MAIN PROGRAM by default
+    TERMINATE_ASAP=false
+    trap 'trap_handle_interruption' $TERMINATION_SIGNALS
 
     # Note: do not use the read..._once() here, to ensure that the
     # looped daemon sees the whole picture, which can be new every time
@@ -976,6 +1027,7 @@ nut_driver_enumerator_main() {
     if [ -n "$UPSLIST_FILE" ]; then
         # Add services for sections that are in config file but not yet wrapped
         upslist_addSvcs
+        $hook_refreshSupervizor
         upslist_readSvcs "after checking for new config sections to define service instances"
     fi
 
@@ -997,29 +1049,101 @@ nut_driver_enumerator_main() {
 
     # Return 42 if there was a change applied succesfully
     # (but e.g. some services should restart - upsd, maybe upsmon)
-    if upslist_equals "$UPSLIST_FILE" "$UPSLIST_SVCS" ; then
+    UPSLIST_EQ_RES=0
+    upslist_equals "$UPSLIST_FILE" "$UPSLIST_SVCS" || UPSLIST_EQ_RES=$?
+
+    # File processing and service startups take a while;
+    # make sure upsconf did not change while we worked...
+    # NOTE: Check this at the last moment to minimize
+    # the chance of still not noticing the change made
+    # at just the wrong moment.
+    UPSCONF_CHECKSUM_END="`calc_md5_file "$UPSCONF"`" || true
+    if [ "$UPSCONF_CHECKSUM_END" != "$UPSCONF_CHECKSUM_START" ] ; then
+        # NOTE: even if daemonized, the sleep between iterations
+        # can be configured into an uncomfortably long lag, so
+        # we should re-sync the system config in any case.
+        echo "`date -u` : '$UPSCONF' changed while $0 $* was processing its older contents; re-running the script to pick up the late-coming changes"
+        # Make sure the cycle does not repeat itself due to diffs
+        # from an ages-old state of the file from when we started.
+        UPSCONF_CHECKSUM_START="$UPSCONF_CHECKSUM_END"
+        ( nut_driver_enumerator_main ) ; return $?
+        # The "main" routine at the end of recursions will
+        # do REPORT_RESTART_42 logic or the error exit-code
+    fi
+
+    if [ "$UPSLIST_EQ_RES" = 0 ] ; then
         echo "`date -u` : OK: No more changes to reconcile between ${SERVICE_FRAMEWORK} service instances and device configurations in '$UPSCONF'"
         [ "${REPORT_RESTART_42-}" = no ] && return 0 || return 42
     fi
     return 13
 }
 
-daemonize() (
-    trap '-' 1
+RECONFIGURE_ASAP=false
+trap_handle_hup_main() {
+    echo "`date -u` : Received a HUP during processing, scheduling reconfiguration to repeat ASAP (after the current iteration is done)" >&2
+    # Note: in the worst case the reconfig would run twice;
+    # we do not update UPSCONF_CHECKSUM_START in this case
+    # to avoid corrupting decisions of the currently running
+    # processing.
+    RECONFIGURE_ASAP=true
+}
+
+trap_handle_hup_sleep() {
+    echo "`date -u` : Received a HUP in my sleep, reprocessing configs right now!" >&2
+    # Avoid re-parsing main twice, though don't recalculate
+    # checksums needlessly on every loop cycle, either...
+    UPSCONF_CHECKSUM_START="`calc_md5_file "$UPSCONF"`" || true
+    RECONFIGURE_ASAP=true
+    if [ -n "$1" ] ; then
+        # Kill the sleeper PID
+        kill "$1"
+    fi
+}
+
+daemonize() {
+    # Note: do not further sub-shell this routine, so systemd
+    # is not confused whom to signal.
+    echo "`date -u` : Daemonizing $0 with config re-evaluation frequency $DAEMON_SLEEP" >&2
+
+    # Support (SIG)HUP == signal code 1 to quickly reconfigure,
+    # e.g. to request it while the sleep is happening or while
+    # "main" is processing an earlier change of the file.
+    RECONFIGURE_ASAP=false
+    trap 'trap_handle_hup_main' $RECONFIGURATION_SIGNALS
+
     # Note: this loop would die on errors with config file or
     # inability to ensure that it matches the list of services.
     # If caller did not `export REPORT_RESTART_42=no` then the
     # loop would exit with code 42, and probably trigger restart
     # of the service which wraps this daemon do topple others that
     # depend on it.
+    # Note: do not quickly skip the "main" based on full-file
+    # checksum refresh, to ensure that whatever is configured
+    # gets applied (e.g. if user disabled some services or they
+    # died, or some config was not applied due to coding error).
     while nut_driver_enumerator_main ; do
-        sleep $DAEMON_SLEEP &
-        trap "kill $! ; echo 'Sleep interrupted, processing configs now!'>&2" 1
-        wait $!
-        trap '-' 1
+        trap 'trap_handle_interruption_exit' $TERMINATION_SIGNALS
+        if $TERMINATE_ASAP ; then
+            echo "`date -u` : Trapped a SIGTERM/SIGINT/SIGQUIT during last run of nut_driver_enumerator_main, terminating gracefully now" >&2
+            exit 0
+        fi
+
+        if $RECONFIGURE_ASAP ; then
+            echo "`date -u` : Trapped a SIGHUP during last run of nut_driver_enumerator_main, repeating reconfiguration quickly" >&2
+        else
+            sleep $DAEMON_SLEEP &
+            trap "trap_handle_hup_sleep $!" $RECONFIGURATION_SIGNALS
+            wait $!
+        fi
+        RECONFIGURE_ASAP=false
+        trap 'trap_handle_hup_main' $RECONFIGURATION_SIGNALS
     done
     exit $?
-)
+}
+
+# Save the checksum of ups.conf as early as possible,
+# to test in the end that it is still the same file.
+UPSCONF_CHECKSUM_START="`calc_md5_file "$UPSCONF"`" || true
 
 # By default, update wrapping of devices into services
 if [ $# = 0 ]; then
@@ -1031,8 +1155,14 @@ if [ $# = 1 ] ; then
     # Note: Not all shells have 'case ... ;&' support
     case "$1" in
         --daemon=*) DAEMON_SLEEP="`echo "$1" | sed 's,^--daemon=,,'`" ;;
+        --daemon-after=*) DAEMON_SLEEP="`echo "$1" | sed 's,^--daemon-after=,,'`" ;;
     esac
     case "$1" in
+        --daemon-after|--daemon-after=*)
+            REPORT_RESTART_42=no nut_driver_enumerator_main || exit $?
+            daemonize &
+            exit $?
+            ;;
         --daemon|--daemon=*)
             daemonize &
             exit $?
@@ -1047,6 +1177,10 @@ $0 (no args)
         Update wrapping of devices into services
 $0 --daemon(=freq)
         Update wrapping of devices into services in an infinite loop
+        Default freq is 60 sec
+$0 --daemon-after(=freq)
+        Update wrapping of devices into services in an infinite loop
+        First do one run of the loop though
         Default freq is 60 sec
 $0 --reconfigure
         Stop and un-register all service instances and recreate them
@@ -1110,6 +1244,10 @@ while [ $# -gt 0 ]; do
             # Save new checksum of global config
             $hook_setSavedMD5 "" "`upsconf_getSection_MD5 ""`"
 
+            # Service units were manipulated, including saving of checksums;
+            # refresh the service management daemon if needed
+            $hook_refreshSupervizor
+
             if [ -n "$UPSLIST_SVCS" ] ; then
                 echo "=== The currently defined service instances are:"
                 echo "$UPSLIST_SVCS"
@@ -1127,10 +1265,26 @@ while [ $# -gt 0 ]; do
 
             # Return 42 if there was a change applied succesfully
             # (but e.g. some services should restart - upsd, maybe upsmon)
-            if upslist_equals "$UPSLIST_FILE" "$UPSLIST_SVCS" ; then
+            UPSLIST_EQ_RES=0
+            upslist_equals "$UPSLIST_FILE" "$UPSLIST_SVCS" || UPSLIST_EQ_RES=$?
+
+            # File processing and service startups take a while;
+            # make sure upsconf did not change while we worked...
+            # NOTE: Check this at the last moment to minimize
+            # the chance of still not noticing the change made
+            # at just the wrong moment.
+            UPSCONF_CHECKSUM_END="`calc_md5_file "$UPSCONF"`" || true
+            if [ "$UPSCONF_CHECKSUM_END" != "$UPSCONF_CHECKSUM_START" ] ; then
+                echo "`date -u` : '$UPSCONF' changed while $0 $* was processing its older contents; re-running the script to pick up the late-coming changes"
+                $0 ; exit $?
+                # The "main" routine will do REPORT_RESTART_42 logic too
+            fi
+
+            if [ "$UPSLIST_EQ_RES" = 0 ] ; then
                 echo "`date -u` : OK: No more changes to reconcile between ${SERVICE_FRAMEWORK} service instances and device configurations in '$UPSCONF'"
                 [ "${REPORT_RESTART_42-}" = no ] && exit 0 || exit 42
             fi
+
             exit 13
             ;;
         --list-devices)

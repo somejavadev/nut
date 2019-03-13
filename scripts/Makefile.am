@@ -26,3 +26,8 @@ EXTRA_DIST = README \
     Windows/Makefile
 
 SUBDIRS = augeas devd hotplug python systemd udev Solaris upsdrvsvcctl
+if WITH_SNMP
+if WITH_NEON
+  SUBDIRS += DMF
+endif
+endif

@@ -499,6 +499,20 @@ endif
 
 HTML_SNMP_MANS = snmp-ups.html
 
+# (--with-snmp_dmf{_lua})
+SRC_SNMP_DMF_PAGES = snmp-ups-dmf.txt
+if WITH_MANS
+MAN_SNMP_DMF_PAGES = snmp-ups-dmf.8
+endif
+
+if WITH_SNMP
+if WITH_DMFMIB
+  man8_MANS += $(MAN_SNMP_DMF_PAGES)
+endif
+endif
+
+HTML_SNMP_DMF_MANS = snmp-ups-dmf.html
+
 # (--with-usb)
 SRC_USB_LIBUSB_PAGES = \
 	bcmxcp_usb.txt \
@@ -638,6 +652,7 @@ MAN_MANS += \
 	$(MAN3_DEV_PAGES) \
 	$(MAN_SERIAL_PAGES) \
 	$(MAN_SNMP_PAGES) \
+	$(MAN_SNMP_DMF_PAGES) \
 	$(MAN_USB_LIBUSB_PAGES) \
 	$(MAN_SERIAL_USB_PAGES) \
 	$(MAN_NETXML_PAGES) \
@@ -658,6 +673,7 @@ SRC_ALL_PAGES = \
 	$(SRC_DEV_PAGES) \
 	$(SRC_SERIAL_PAGES) \
 	$(SRC_SNMP_PAGES) \
+	$(SRC_SNMP_DMF_PAGES) \
 	$(SRC_USB_LIBUSB_PAGES) \
 	$(SRC_SERIAL_USB_PAGES) \
 	$(SRC_NETXML_PAGES) \
@@ -698,6 +714,7 @@ HTML_MANS = \
 	$(HTML_DEV_MANS) \
 	$(HTML_SERIAL_MANS) \
 	$(HTML_SNMP_MANS) \
+	$(HTML_SNMP_DMF_MANS) \
 	$(HTML_USB_LIBUSB_MANS) \
 	$(HTML_SERIAL_USB_MANS) \
 	$(HTML_NETXML_MANS) \

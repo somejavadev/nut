@@ -14,7 +14,9 @@ SUBDIRS = . nut-scanner
 EXTRA_DIST = nut-usbinfo.pl nut-recorder.sh nut-ddl-dump.sh \
   gitlog2changelog.py nut-snmpinfo.py driver-list-format.sh
 
-GENERATED_SNMP_FILES = nut-scanner/nutscan-snmp.h
+# DMF recipe modification:
+#GENERATED_SNMP_FILES = nut-scanner/nutscan-snmp.h
+GENERATED_SNMP_FILES = nut-scanner/nutscan-snmp.c
 
 GENERATED_USB_FILES = nut-scanner/nutscan-usb.h
 

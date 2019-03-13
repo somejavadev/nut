@@ -20,9 +20,11 @@ endif
 bin_PROGRAMS = upsc upslog upsrw upscmd
 dist_bin_SCRIPTS = upssched-cmd
 sbin_PROGRAMS = upsmon upssched
+
 lib_LTLIBRARIES = libupsclient.la libnutclient.la
 if WITH_DEV
  include_HEADERS = upsclient.h ../include/parseconf.h nutclient.h
+ include_HEADERS += ../include/dmfsnmp.h
 endif
 if WITH_CGI
  cgiexec_PROGRAMS = upsstats.cgi upsimage.cgi upsset.cgi
@@ -51,11 +53,14 @@ if WITH_SSL
   libupsclient_la_LIBADD += $(LIBSSL_LIBS)
 endif
 
-# libupsclient version information
+# Below we set API versions of public libraries
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
+# Note that changes here may have to be reflected in packaging (the shared
+# object .so names would differ)
+
+# libupsclient version information
 libupsclient_la_LDFLAGS = -version-info 4:0:0
 
 # libnutclient version information
 libnutclient_la_SOURCES = nutclient.h nutclient.cpp
 libnutclient_la_LDFLAGS = -version-info 1:0:0
-

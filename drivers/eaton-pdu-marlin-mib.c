@@ -29,12 +29,14 @@
  */
 
 #include "eaton-pdu-marlin-mib.h"
-#include "dstate.h"
+#if WITH_SNMP_LKP_FUN
+#include "eaton-pdu-marlin-helpers.h"
+#endif
 
 /* Eaton PDU-MIB - Marlin MIB
  * ************************** */
 
-#define EATON_MARLIN_MIB_VERSION	"0.46"
+#define EATON_MARLIN_MIB_VERSION	"0.50"
 #define EATON_MARLIN_SYSOID			".1.3.6.1.4.1.534.6.6.7"
 #define EATON_MARLIN_OID_MODEL_NAME	".1.3.6.1.4.1.534.6.6.7.1.2.1.2.0"
 
@@ -108,7 +110,7 @@ static info_lkp_t marlin_threshold_frequency_status_info[] = {
 
 static info_lkp_t marlin_ambient_drycontacts_info[] = {
 	{ -1, "unknown" },
-	{ 0, "open" },
+	{ 0, "opened" },
 	{ 1, "closed" },
 	{ 0, NULL }
 };
@@ -173,36 +175,41 @@ static info_lkp_t marlin_input_type_info[] = {
 	{ 0, NULL }
 };
 
-static char marlin_scratch_buf[20];
-
-/* Compute the phase to which an outlet group is connected
- * WRT the number of phase(s) and the outlet group number.
- * Note that the group type (marlin_outlet_group_type_info) is
- *  not considered since this applies to any kind of group */
-static const char *marlin_outlet_group_phase_fun(int outlet_group_nb)
-{
-	const char* str_phases_nb = dstate_getinfo("input.phases");
-	int phases_nb = 1;
-	if (str_phases_nb) {
-		phases_nb = atoi(str_phases_nb);
-		if (phases_nb == 1) {
-			return "L1";
-		}
-		else { /* 3ph assumed, 2ph PDU don't exist! */
-			if (outlet_group_nb > 3)
-				snprintf(marlin_scratch_buf, 3, "L%i", (outlet_group_nb -3));
-			else
-				snprintf(marlin_scratch_buf, 3, "L%i", outlet_group_nb);
-
-			return marlin_scratch_buf;
-		}
-	}
-	return NULL;
-}
 static info_lkp_t marlin_outlet_group_phase_info[] = {
-	{ 1, "dummy", marlin_outlet_group_phase_fun },
+	{ 0, "unknown" }, /* unknown     */
+	{ 1, "1" },       /* singlePhase */
+	{ 2, "1-N" },     /* phase1toN   */
+	{ 3, "2-N" },     /* phase2toN   */
+	{ 4, "3-N" },     /* phase3toN   */
+	{ 5, "1-2" },     /* phase1to2   */
+	{ 6, "2-3" },     /* phase2to3   */
+	{ 7, "3-1" },     /* phase3to1   */
 	{ 0, NULL }
 };
+
+#if WITH_SNMP_LKP_FUN
+/* Note: marlin_device_count_fun() is defined in eaton-pdu-marlin-helpers.c
+ * Future work for DMF might provide a same-named routine via LUA-C gateway.
+ */
+
+#if WITH_SNMP_LKP_FUN_DUMMY
+long marlin_device_count_fun(const char *daisy_dev_list)
+		{ return 1; }
+#endif // WITH_SNMP_LKP_FUN_DUMMY
+
+static info_lkp_t marlin_device_count_info[] = {
+	{ 1, "dummy", NULL, NULL, marlin_device_count_fun, NULL },
+	{ 0, NULL, NULL, NULL, NULL, NULL }
+};
+
+#else // if not WITH_SNMP_LKP_FUN:
+
+/* FIXME: For now, DMF codebase falls back to old implementation with static
+ * lookup/mapping tables for this, which can easily go into the DMF XML file.
+ */
+
+#endif // WITH_SNMP_LKP_FUN
+
 
 /* Snmp2NUT lookup table for Eaton Marlin MIB */
 static snmp_info_t eaton_marlin_mib[] = {
@@ -224,12 +231,33 @@ static snmp_info_t eaton_marlin_mib[] = {
 	/* For daisychain, there is only 1 physical interface! */
 	{ "device.macaddr", ST_FLAG_STRING, SU_INFOSIZE, ".1.3.6.1.2.1.2.2.1.6.2",
 		"", SU_FLAG_STATIC | SU_FLAG_OK, NULL },
-	/* Daisychained devices support
-	 * Notes: this definition is used to:
+
+	/* Daisychained devices support */
+	/* FIXME : Should this be a static value, or can we expect the amount of
+	 * daisy-chained devices to change without restart of the driver by user?
+	 * If this is a critical matter, should a detected change of amount of
+	 * daisy-chained devices, outlet counts, etc. cause restart/reinit of
+	 * this running driver instance?
+	 */
+#if WITH_SNMP_LKP_FUN
+	/* Number of daisychained units is processed according to present units
+	 * in the chain with new G3 firmware (02.00.0051, since autumn 2017):
+	 * Take string "unitsPresent" (ex: "0,3,4,5"), and count the amount
+	 * of "," separators+1 using an inline function */
+	/* FIXME: inline func */
+	{ "device.count", 0, 1, ".1.3.6.1.4.1.534.6.6.7.1.1.0",
+		"0", SU_FLAG_STATIC | SU_FLAG_UNIQUE,
+		&marlin_device_count_info[0] /* devices_count */ },
+#endif
+	/* Notes: this older/fallback definition is used to:
 	 * - estimate the number of devices, based on the below OID iteration capabilities
 	 * - determine the base index of the SNMP OID (ie 0 or 1) */
 	{ "device.count", 0, 1, ".1.3.6.1.4.1.534.6.6.7.1.2.1.2.%i",
-		"1", SU_FLAG_STATIC, NULL },
+		"1", SU_FLAG_STATIC
+#if WITH_SNMP_LKP_FUN
+		 | SU_FLAG_UNIQUE
+#endif
+	, NULL /* devices_count */ },
 
 	/* UPS collection */
 	{ "ups.mfr", ST_FLAG_STRING, SU_INFOSIZE, NULL, "EATON",
@@ -261,6 +289,13 @@ static snmp_info_t eaton_marlin_mib[] = {
 	 */
 
 	/* Input collection */
+	/* Note: a larger ePDU can have several inputs. The "%i" iterators
+	 * in key names are currently available for daisychain devs, outlets,
+	 * and groups - but not for inputs. These would likely evolve later
+	 * to "input.%i.something" with default (non-%i) same as .1 instance.
+	 * At this time only a single-input (or first of several inputs) is
+	 * supported by this mapping.
+	 */
 	/* Historically, some of these data were previously published as
 	 * outlet.{realpower,...}
 	 * However, it's more suitable and logic to have these on input.{...}
@@ -269,7 +304,11 @@ static snmp_info_t eaton_marlin_mib[] = {
 	/* inputCount.0; Value (Integer): 1
 	{ "input.count", 0, 1, ".1.3.6.1.4.1.534.6.6.7.1.2.1.20.0",
 		NULL, SU_FLAG_STATIC, NULL }, */
-	/* Note: for daisychain mode, we must handle phase(s) per device, not as a whole */
+	/* Note: for daisychain mode, we must handle phase(s) per device,
+	 * not as a whole. In case of daisychain, support of the UNIQUE
+	 * field is not yet implemented (FIXME) so the last resolved OID
+	 * value wins. If a more-preferable OID is not implemented by device,
+	 * this is ok - the previous available value remains in place. */
 	/* inputType.%i.1 = INTEGER: singlePhase (1) */
 	{ "input.phases", 0, 1, ".1.3.6.1.4.1.534.6.6.7.3.1.1.2.%i.1",
 		NULL, SU_FLAG_STATIC, &marlin_input_type_info[0] },
@@ -516,6 +555,36 @@ static snmp_info_t eaton_marlin_mib[] = {
 	{ "input.L3.power", 0, 1.0, ".1.3.6.1.4.1.534.6.6.7.3.4.1.3.%i.1.3",
 		NULL, SU_FLAG_NEGINVALID | SU_FLAG_OK, NULL },
 
+	/* Input feed: a feed (A or B) is tied to an input, and this
+	 * sub-collection describes the properties of an actual cable.
+	 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream ; check type (number? string?) and flags */
+	/* { "input.feed.%i.id", 0, 1, "???.%i.%i", NULL, SU_FLAG_NEGINVALID, NULL, NULL }, */
+	/* Feed name(s) of the ePDU power input(s), can be set by user (FIXME: rename to .desc?)
+	 * inputFeedName.0.1 = Value (OctetString): Feed A
+	 */
+	/* FIXME: SU_FLAG_SEMI_STATIC or SU_FLAG_SETTING => refreshed from time to time or upon call to setvar */
+/*	{ "input.%i.feed.desc", ST_FLAG_RW | ST_FLAG_STRING, SU_INFOSIZE,
+ *		".1.3.6.1.4.1.534.6.6.7.3.1.1.10.%i.%i",
+ *		NULL, SU_FLAG_SEMI_STATIC | SU_FLAG_OK | SU_TYPE_DAISY_1, NULL, NULL },
+ */
+	{ "input.feed.desc", ST_FLAG_RW | ST_FLAG_STRING, SU_INFOSIZE,
+		".1.3.6.1.4.1.534.6.6.7.3.1.1.10.%i.1",
+		NULL, SU_FLAG_SEMI_STATIC | SU_FLAG_OK | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+	/* Feed color (integer RGB)
+	 * inputFeedColor.0.1 = Gauge32: 0   (black)
+	 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream */
+/*	{ "input.%i.feed.color", 0, 1, ".1.3.6.1.4.1.534.6.6.7.3.1.1.9.%i.%i",
+ *		NULL, SU_FLAG_STATIC | SU_FLAG_OK | SU_TYPE_DAISY_1, NULL, NULL },
+ */
+	{ "input.feed.color", 0, 1, ".1.3.6.1.4.1.534.6.6.7.3.1.1.9.%i.1",
+		NULL, SU_FLAG_SEMI_STATIC | SU_FLAG_OK | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+	/* inputPowerCapacity.0.1 = INTEGER: 2300 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream */
+	{ "input.realpower.nominal", 0, 1.0, ".1.3.6.1.4.1.534.6.6.7.3.5.1.9.%i.1",
+		NULL, SU_FLAG_NEGINVALID | SU_FLAG_OK, NULL /*, NULL */ },
+
 	/* Ambient collection */
 	{ "ambient.present", ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.7.1.1.3.%i.1",
@@ -605,21 +674,46 @@ static snmp_info_t eaton_marlin_mib[] = {
 	/* outlet template definition
 	 * Indexes start from 1, ie outlet.1 => <OID>.1 */
 	/* Note: the first definition is used to determine the base index (ie 0 or 1) */
-	/* outletName: Outlet friendly name, which can be modified by the user */
+	/* Outlet friendly name, which can be modified by the user
+	 * outletName: = OctetString: "Outlet A16"
+	 */
+	/* FIXME: SU_FLAG_SEMI_STATIC or SU_FLAG_SETTING => refreshed from time to time or upon call to setvar */
 	{ "outlet.%i.desc", ST_FLAG_RW | ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.6.1.1.3.%i.%i",
-		NULL, SU_FLAG_STATIC | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
+		NULL, SU_FLAG_SEMI_STATIC | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1,
+		NULL },
 	{ "outlet.%i.status", ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.6.6.1.2.%i.%i",
 		NULL, SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1, &marlin_outlet_status_info[0] },
 	/* Numeric identifier of the outlet, tied to the whole unit */
 	{ "outlet.%i.id", 0, 1, NULL, "%i",
-		SU_FLAG_STATIC | SU_FLAG_ABSENT | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
-	/* outletID: Outlet physical name, related to its number in the group
-	 * ex: first outlet of the second group (B) is B1 */
+		SU_FLAG_STATIC | SU_FLAG_ABSENT | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1,
+		NULL },
+
+	/* NOTE: For daisychain devices ATM the last listed value presented by
+	 * the SNMP device is kept by the driver - no SU_FLAG_UNIQUE here yet.
+	 * Verified that a non-implemented OID does not publish empty values. */
+	/* Fallback in firmwares issued before Sep 2017 is to use the
+	 * outletID: Outlet physical name, related to its number in the group
+	 * ex: first outlet of the second group (B) is B1, or can default to
+	 * the outlet number (represented as string) and is a read-only string
+	 * outletID.0.8 = Value (OctetString): "8"
+	 */
 	{ "outlet.%i.name", ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.6.1.1.2.%i.%i",
-		NULL, SU_FLAG_STATIC | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
+		NULL, SU_FLAG_STATIC | SU_FLAG_UNIQUE | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1,
+		NULL },
+	/* Preferred: Outlet physical name OID in new G3 firmware (02.00.0051)
+	 * is named outletDesignator (other MIBs outletPhysicalName)
+	 * and is a read-only string provided by firmware
+	 * outletDesignator.0.1 = Value (OctetString): "A1"
+	 * outletPhysicalName.0.16 = Value (OctetString): "A16"
+	 */
+	{ "outlet.%i.name", ST_FLAG_STRING, SU_INFOSIZE,
+		".1.3.6.1.4.1.534.6.6.7.6.1.1.6.%i.%i",
+		NULL, SU_FLAG_STATIC | SU_FLAG_UNIQUE | SU_FLAG_OK | SU_OUTLET | SU_TYPE_DAISY_1,
+		NULL },
+
 	/* FIXME: the last part of the OID gives the group number (i.e. %i.1 means "group 1")
 	 * Need to address that, without multiple declaration (%i.%i, SU_OUTLET | SU_OUTLET_GROUP)? */
 	{ "outlet.%i.groupid", ST_FLAG_STRING, SU_INFOSIZE,
@@ -707,18 +801,44 @@ static snmp_info_t eaton_marlin_mib[] = {
 	{ "outlet.group.%i.id", ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.5.1.1.2.%i.%i",
 		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1, NULL },
-	/* groupName.0.1 = OctetString: Factory Group 1 */
+	/* User-friendly (writeable) description of the outlet group:
+	 * groupName.0.1 = OctetString: Factory Group 1
+	 * groupName.0.2 = OctetString: Branch Circuit B
+	 */
 	/* FIXME: SU_FLAG_SEMI_STATIC or SU_FLAG_SETTING => refreshed from time to time or upon call to setvar */
-	{ "outlet.group.%i.name", ST_FLAG_RW | ST_FLAG_STRING, SU_INFOSIZE,
+	{ "outlet.group.%i.desc", ST_FLAG_RW | ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.5.1.1.3.%i.%i",
-		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1, NULL },
+		NULL, SU_FLAG_SEMI_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
+		NULL },
+	/* Outlet-group physical name, a read-only string,
+	 * is named groupDesignator (other MIBs groupPhysicalName)
+	 * groupPhysicalName.0.1 = Value (OctetString): A
+	 * groupDesignator.0.2 = Value (OctetString): B
+	 */
+	{ "outlet.group.%i.name", ST_FLAG_STRING, SU_INFOSIZE,
+		".1.3.6.1.4.1.534.6.6.7.5.1.1.8.%i.%i",
+		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
+		NULL },
+	/* Outlet-group color: groupColor (other MIBs groupBkgColor)
+	 * groupColor.0.1 = Value (Gauge32): 16051527    (0xF4ED47)
+	 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream */
+	{ "outlet.group.%i.color", ST_FLAG_STRING, SU_INFOSIZE,
+		".1.3.6.1.4.1.534.6.6.7.5.1.1.7.%i.%i",
+		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
+		NULL },
 	/* groupType.0.1 = Integer: outletSection  (4) */
 	{ "outlet.group.%i.type", ST_FLAG_STRING, SU_INFOSIZE,
 		".1.3.6.1.4.1.534.6.6.7.5.1.1.4.%i.%i",
 		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
 		&marlin_outlet_group_type_info[0] },
+	/* Phase to which an outlet-group is connected:
+	 * We use the following OID, which gives the voltage measurement type
+	 * groupVoltageMeasType.0.1; Value (Integer): singlePhase  (1)
+	 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream ; check type (number? string?) and flags (daisy?) */
 	{ "outlet.group.%i.phase", 0, SU_INFOSIZE,
-		".1.3.6.1.4.1.534.6.6.7.5.1.1.2.%i.%i",
+		".1.3.6.1.4.1.534.6.6.7.5.3.1.2.%i.%i",
 		NULL, SU_FLAG_STATIC | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
 		&marlin_outlet_group_phase_info[0] },
 	/* groupControlStatus.0.1 = Integer: on  (1) */
@@ -799,7 +919,16 @@ static snmp_info_t eaton_marlin_mib[] = {
 	/* groupVA.0.1 = Integer: 3132 */
 	{ "outlet.group.%i.power", 0, 1.0,
 		".1.3.6.1.4.1.534.6.6.7.5.5.1.2.%i.%i",
-		NULL, SU_FLAG_NEGINVALID | SU_OUTLET_GROUP | SU_TYPE_DAISY_1, NULL },
+		NULL, SU_FLAG_NEGINVALID | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
+		NULL },
+	/* Input to which an outlet-group is connected
+	 * groupInputIndex.0.1 = Integer: 1
+	 */
+	/* FIXME: RFC on key name is needed when backporting to NUT upstream */
+	{ "outlet.group.%i.input", 0, 1,
+		".1.3.6.1.4.1.534.6.6.7.5.1.1.9.%i.%i",
+		NULL, SU_FLAG_NEGINVALID | SU_OUTLET_GROUP | SU_TYPE_DAISY_1,
+		NULL },
 
 	/* instant commands. */
 	/* Notes:
@@ -825,6 +954,30 @@ static snmp_info_t eaton_marlin_mib[] = {
 		"0", SU_TYPE_CMD | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
 	{ "outlet.%i.load.cycle", 0, 1, ".1.3.6.1.4.1.534.6.6.7.6.6.1.5.%i.%i",
 		"0", SU_TYPE_CMD | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
+
+	/* Per-outlet shutdown / startup delay (configuration point, not the timers)
+	 * outletControlShutoffDelay.0.3 = INTEGER: 120
+	 * outletControlSequenceDelay.0.8 = INTEGER: 8
+	 * (by default each output socket startup is delayed by its number in seconds)
+	 */
+	{ "outlet.%i.delay.shutdown", ST_FLAG_RW, 1,
+		".1.3.6.1.4.1.534.6.6.7.6.6.1.10.%i.%i",
+		NULL, SU_FLAG_NEGINVALID | SU_OUTLET | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+	{ "outlet.%i.delay.start", ST_FLAG_RW, 1,
+		".1.3.6.1.4.1.534.6.6.7.6.6.1.7.%i.%i",
+		NULL, SU_FLAG_NEGINVALID | SU_OUTLET | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+
+	/* Per-outlet shutdown / startup timers
+	 * outletControlOffCmd.0.1 = INTEGER: -1
+	 * outletControlOnCmd.0.1 = INTEGER: -1
+	 */
+	{ "outlet.%i.timer.shutdown", 0, 1,
+		".1.3.6.1.4.1.534.6.6.7.6.6.1.3.%i.%i",
+		NULL, SU_OUTLET | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+	{ "outlet.%i.timer.start", 0, 1,
+		".1.3.6.1.4.1.534.6.6.7.6.6.1.4.%i.%i",
+		NULL, SU_OUTLET | SU_TYPE_DAISY_1, NULL /*, NULL */ },
+
 	/* Delayed version, parameter is mandatory (so dfl is NULL)! */
 	{ "outlet.%i.load.off.delay", 0, 1, ".1.3.6.1.4.1.534.6.6.7.6.6.1.3.%i.%i",
 		NULL, SU_TYPE_CMD | SU_OUTLET | SU_TYPE_DAISY_1, NULL },
