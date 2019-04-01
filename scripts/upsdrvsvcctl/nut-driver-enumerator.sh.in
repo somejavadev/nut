@@ -149,6 +149,20 @@ if [ -z "${SERVICE_FRAMEWORK-}" ] ; then
         SERVICE_FRAMEWORK="systemd"
 fi
 
+# Optionally use Coreutils timeout to limit the
+# (potentially hanging) calls to systemd tools...
+# Should not hurt with SMF too, if it ever misbehaves.
+if [ -z "${TIMEOUT_CMD+x}" ]; then
+    # Envvar not set at all (set but empty is okay, caller wants that then)
+    TIMEOUT_CMD=""
+    TIMEOUT_ARGS=""
+    if which timeout 2>/dev/null >/dev/null ; then
+        # Systemd default timeout for unit start/stop
+        TIMEOUT_CMD="timeout"
+        TIMEOUT_ARGS="90s"
+    fi
+fi
+
 # Cache needed bits of ups.conf to speed up later parsing. Note that these
 # data are needed for most operations, and populated by upslist_readFile()
 UPSCONF_DATA=""
@@ -840,13 +854,16 @@ EOF
     systemd_setSavedDeviceName "$SVCINST" "$DEVICE"
 
     if [ "$AUTO_START" = yes ] ; then
-        /bin/systemctl start --no-block 'nut-driver@'"$SVCINST".service || return
+        $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl start --no-block 'nut-driver@'"$SVCINST".service || return
         echo "Started instance: 'nut-driver@$SVCINST' for NUT configuration section '$DEVICE'" >&2
     fi
 }
 systemd_unregisterInstance() {
     echo "Removing instance: 'nut-driver@$1' ..." >&2
-    /bin/systemctl stop 'nut-driver@'"$1".service || false
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl stop 'nut-driver@'"$1".service || false
+
     /bin/systemctl disable 'nut-driver@'"$1".service
     rm -rf "${SYSTEMD_CONFPATH}/nut-driver@$1.service.d"
     /bin/systemctl reset-failed 'nut-driver@'"$1".service
@@ -925,15 +942,9 @@ systemd_restart_upsd() {
     # Note: reload is a better way to go about this, so the
     # data service is not interrupted by re-initialization
     # of the daemon. But systemd/systemctl sometimes stalls...
-    # Coreutils timeout
-    TIMEOUT=""
-    if which timeout 2>/dev/null >/dev/null ; then
-        # Systemd default timeout for unit start/stop
-        TIMEOUT="timeout 90s "
-    fi
 
-    $TIMEOUT /bin/systemctl reload-or-restart "nut-server" || \
-    $TIMEOUT /bin/systemctl restart "nut-server"
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl reload-or-restart "nut-server" || \
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl restart "nut-server"
 }
 
 systemd_restart_drv() {
@@ -944,14 +955,9 @@ systemd_restart_drv() {
     esac
 
     echo "Restarting NUT driver instance '$1' to make sure it knows new configuration..."
-    TIMEOUT=""
-    if which timeout 2>/dev/null >/dev/null ; then
-        # Systemd default timeout for unit start/stop
-        TIMEOUT="timeout 90s "
-    fi
 
     # Full restart, e.g. in case we changed the user= in configs
-    $TIMEOUT /bin/systemctl restart "nut-driver@$1"
+    $TIMEOUT_CMD $TIMEOUT_ARGS /bin/systemctl restart "nut-driver@$1"
 }
 
 upslist_normalizeFile_filter() {
@@ -1098,8 +1104,31 @@ upslist_restartSvcs() {
     done
 }
 
+# FIXME : process via kill -l?
+# Different shells use a SIG prefix or not to signal names
+# so standard numbers are in fact more portable :\
+TERMINATION_SIGNALS="2 3 15"
+RECONFIGURATION_SIGNALS="1"
+
+TERMINATE_ASAP=false
+trap_handle_interruption_exit() {
+    # Handle SIGINT, SIGQUIT, SIGTERM with a message
+    echo "`date -u` : Received an interruption signal, terminating the script now" >&2
+    exit 0
+}
+
+trap_handle_interruption() {
+    # Handle SIGINT, SIGQUIT, SIGTERM gracefully - tell the main
+    # iteration to complete and just then abort
+    echo "`date -u` : Received an interruption signal, will terminate the script after ending the main routine. Repeat the signal if urgent!" >&2
+    TERMINATE_ASAP=true
+    trap 'trap_handle_interruption_exit' $TERMINATION_SIGNALS
+}
+
 nut_driver_enumerator_main() {
     ################# MAIN PROGRAM by default
+    TERMINATE_ASAP=false
+    trap 'trap_handle_interruption' $TERMINATION_SIGNALS
 
     # Note: do not use the read..._once() here, to ensure that the
     # looped daemon sees the whole picture, which can be new every time
@@ -1439,12 +1468,38 @@ update_upslist_savednames_find_missing() {
     return ${_MISSING_RES}
 }
 
-daemonize() (
+RECONFIGURE_ASAP=false
+trap_handle_hup_main() {
+    echo "`date -u` : Received a HUP during processing, scheduling reconfiguration to repeat ASAP (after the current iteration is done)" >&2
+    # Note: in the worst case the reconfig would run twice;
+    # we do not update UPSCONF_CHECKSUM_START in this case
+    # to avoid corrupting decisions of the currently running
+    # processing.
+    RECONFIGURE_ASAP=true
+}
+
+trap_handle_hup_sleep() {
+    echo "`date -u` : Received a HUP in my sleep, reprocessing configs right now!" >&2
+    # Avoid re-parsing main twice, though don't recalculate
+    # checksums needlessly on every loop cycle, either...
+    UPSCONF_CHECKSUM_START="`calc_md5_file "$UPSCONF"`" || true
+    RECONFIGURE_ASAP=true
+    if [ -n "$1" ] ; then
+        # Kill the sleeper PID
+        kill "$1"
+    fi
+}
+
+daemonize() {
+    # Note: do not further sub-shell this routine, so systemd
+    # is not confused whom to signal.
+    echo "`date -u` : Daemonizing $0 with config re-evaluation frequency $DAEMON_SLEEP" >&2
+
     # Support (SIG)HUP == signal code 1 to quickly reconfigure,
     # e.g. to request it while the sleep is happening or while
     # "main" is processing an earlier change of the file.
     RECONFIGURE_ASAP=false
-    trap 'RECONFIGURE_ASAP=true' 1
+    trap 'trap_handle_hup_main' $RECONFIGURATION_SIGNALS
 
     update_upslist_savednames_find_missing
 
@@ -1459,18 +1514,24 @@ daemonize() (
     # gets applied (e.g. if user disabled some services or they
     # died, or some config was not applied due to coding error).
     while nut_driver_enumerator_main ; do
+        trap 'trap_handle_interruption_exit' $TERMINATION_SIGNALS
+        if $TERMINATE_ASAP ; then
+            echo "`date -u` : Trapped a SIGTERM/SIGINT/SIGQUIT during last run of nut_driver_enumerator_main, terminating gracefully now" >&2
+            exit 0
+        fi
+
         if $RECONFIGURE_ASAP ; then
             echo "`date -u` : Trapped a SIGHUP during last run of nut_driver_enumerator_main, repeating reconfiguration quickly" >&2
         else
             sleep $DAEMON_SLEEP &
-            trap "kill $! ; echo 'Sleep interrupted, processing configs now!'>&2" 1
+            trap "trap_handle_hup_sleep $!" $RECONFIGURATION_SIGNALS
             wait $!
         fi
         RECONFIGURE_ASAP=false
-        trap 'RECONFIGURE_ASAP=true' 1
+        trap 'trap_handle_hup_main' $RECONFIGURATION_SIGNALS
     done
     exit $?
-)
+}
 
 # Save the checksum of ups.conf as early as possible,
 # to test in the end that it is still the same file.
@@ -1487,8 +1548,14 @@ if [ $# = 1 ] ; then
     # Note: Not all shells have 'case ... ;&' support
     case "$1" in
         --daemon=*) DAEMON_SLEEP="`echo "$1" | sed 's,^--daemon=,,'`" ;;
+        --daemon-after=*) DAEMON_SLEEP="`echo "$1" | sed 's,^--daemon-after=,,'`" ;;
     esac
     case "$1" in
+        --daemon-after|--daemon-after=*)
+            REPORT_RESTART_42=no nut_driver_enumerator_main || exit $?
+            daemonize &
+            exit $?
+            ;;
         --daemon|--daemon=*)
             daemonize &
             exit $?
@@ -1504,6 +1571,11 @@ $0 (no args)
 $0 --daemon(=freq)
         Update wrapping of devices into services in an infinite loop
         Default freq is 60 sec
+$0 --daemon-after(=freq)
+        Update wrapping of devices into services in an infinite loop;
+        first do one run of the loop though, then daemonize (this way
+        service unit is deemed started only when NUT config and driver
+        instances are in sync). Default freq is 60 sec.
 $0 --reconfigure
         Stop and un-register all service instances and recreate them
         (e.g. if new dependency template was defined in a new
