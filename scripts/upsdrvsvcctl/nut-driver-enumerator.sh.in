@@ -497,8 +497,11 @@ upsconf_getSection_content() {
                 # Fall through to add the line to contents of existing section
                 ;;
             \[*\])
+                # We have just displayed the requested section,
+                # and here starts a new one -- so we are done
                 [ "$CURR_SECTION" = "$1" ] && break
-                # Use a value that can not be a section name here:
+                # Use a value that can not be a section name here
+                # just to "ignore" this section content in our loop:
                 CURR_SECTION="[]"
                 continue
                 ;;
@@ -650,6 +653,9 @@ upsconf_debug() {
     echo "INST: ${NAME_MD5}~[$1]: DRV='${_DRV}' PORT='${_PRT}' MEDIA='${_MED}' SECTIONMD5='${_MD5}'"
 }
 
+# PERF : check first which tools exist (md5sum, base64, openssl...),
+# and then set up calling an existing one directly, especially for
+# *_stdin() routines below
 calc_md5() {
     # Tries several ways to produce an MD5 of the "$1" argument
     _MD5="`echo "$1" | md5sum 2>/dev/null | awk '{print $1}'`" && [ -n "${_MD5}" ] || \
