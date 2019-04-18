@@ -1457,7 +1457,7 @@ get_service_for_device() {
     return 1
 }
 
-update_upslist_savednames_find_missing() {
+update_upslist_savednames_found_missing() {
     # Runs once in production modes that inspect and reconcile
     # configs, to handle upgraded NUT deployments
     SVCINSTS_NO_DEVICE="`upslist_savednames_find_missing`" || \
@@ -1520,7 +1520,7 @@ daemonize() {
     RECONFIGURE_ASAP=false
     trap 'trap_handle_hup_main' $RECONFIGURATION_SIGNALS
 
-    update_upslist_savednames_find_missing
+    update_upslist_savednames_found_missing
 
     # Note: this loop would die on errors with config file or
     # inability to ensure that it matches the list of services.
@@ -1558,7 +1558,7 @@ UPSCONF_CHECKSUM_START="`calc_md5_file "$UPSCONF"`" || true
 
 # By default, update wrapping of devices into services
 if [ $# = 0 ]; then
-    update_upslist_savednames_find_missing
+    update_upslist_savednames_found_missing
     nut_driver_enumerator_main ; exit $?
 fi
 
@@ -1727,8 +1727,8 @@ while [ $# -gt 0 ]; do
             upslist_savednames_find_mismatch
             exit $?
             ;;
-        update_upslist_savednames_find_missing) # Not public, not in usage()
-            update_upslist_savednames_find_missing
+        update_upslist_savednames_found_missing) # Not public, not in usage()
+            update_upslist_savednames_found_missing
             exit $?
             ;;
         hook_findSavedDeviceName) shift ; $hook_findSavedDeviceName "$@" ; exit $? ;;
