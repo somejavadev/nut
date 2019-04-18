@@ -358,15 +358,28 @@ upslist_savednames_find_missing() {
     # Report those that do not have a value there (any value) so we can
     # amend those quickly after an upgrade. Otherwise we trust these.
 
-    # Get full instance names from system and from props
-    SVCINSTS="`$hook_listInstances_raw`" && [ "${#SVCINSTS}" != 0 ] || return 1
-    # If no props were found, (over)write them all
-    SVCINST_PROPS="`$hook_findSavedDeviceName`" && [ "${#SVCINST_PROPS}" != 0 ] \
-    || { echo $SVCINSTS ; return 2; }
+    # Get full instance names from system
+    SVCINSTS="`$hook_listInstances_raw | sort`" && [ "${#SVCINSTS}" != 0 ] || return 1
+    # Get a mapping of full instance names to device names
+    # (for those service instances that do have them saved)
+    SVCINSTS_PROPS="`$hook_findSavedDeviceName`" && [ "${#SVCINSTS_PROPS}" != 0 ] \
+    || { # If no props were found, (over)write them all
+        echo $SVCINSTS ; return 2; }
 
-    # Find services which do not have saved names in props
+    # Find services in system which do not have saved names in props:
+    # entry missing altogether, or entry with empty device-name column.
+
+    # First pick just the service names that do have the device column
+    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F'\t' '($2 != ""){print $1}' | sort`"
+    if [ "${SVCINSTS}" = "${SVCINSTS_PROPS_COMPLETE}" ] ; then
+        # All services are already well configured
+        return 0
+    fi
+
+    # Now find the difference of all the system instances vs those that
+    # have the props set
     for SVCINST in $SVCINSTS ; do
-        echo "$SVCINST_PROPS" | egrep "^${SVCINST_PROPS}\t"'$' >/dev/null || echo "$SVCINST"
+        echo "$SVCINSTS_PROPS_COMPLETE" | grep -x "${SVCINST}" >/dev/null || echo "$SVCINST"
     done
 }
 
@@ -383,18 +396,34 @@ upslist_savednames_find_mismatch() {
     # upslist_savednames_find_missing() should have handled those).
 
     # Get full instance names from system and from props
-    SVCINSTS="`$hook_listInstances_raw`" && [ "${#SVCINSTS}" != 0 ] || return 1
-    SVCINST_PROPS="`$hook_findSavedDeviceName`" && [ "${#SVCINST_PROPS}" != 0 ] || return 2
+    SVCINSTS="`$hook_listInstances_raw | sort`" && [ "${#SVCINSTS}" != 0 ] || return 1
+    SVCINSTS_PROPS="`$hook_findSavedDeviceName`" && [ "${#SVCINSTS_PROPS}" != 0 ] || return 2
 
-    # Find services whose props exist but services do not
-    echo "$SVCINST_PROPS" | while read SVCINST_PROP DEVNAME_PROP ; do
-        echo "$SVCINSTS" | egrep "^${SVCINST_PROP}"'$' >/dev/null || echo "$SVCINST_PROP"
+    # Perform consistency checks for service instances which already
+    # have the DEVICE property
+    echo "$SVCINSTS_PROPS" | while read SVCINST_PROP DEVNAME_PROP ; do
+        # Find services whose props exist but services do not (may be a
+        # file data-staleness problem with systemd, but not likely with
+        # SMF as it is all in one database):
+        echo "$SVCINSTS" | grep -x "${SVCINST_PROP}" >/dev/null || { echo "$SVCINST_PROP" ; continue ; }
+
+        # TODO: Verify the DEVNAME_PROP against SVCINST_PROP (check
+        # that the name is verbatim or MD5 match), and that it exists
+        # in UPSLIST_CONF
     done
 
-    # Find services which do not have saved names in props
+    # Find services which do not have saved names in props, so they
+    # should be remade by caller
+    # First, pick just the service names that do have the device column
+    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F'\t' '($2 != ""){print $1}' | sort`"
+    # Now find the difference of all the system instances vs those that
+    # have the props set
     for SVCINST in $SVCINSTS ; do
-        echo "$SVCINST_PROPS" | egrep "^${SVCINST_PROP}\t"'$' >/dev/null || echo "$SVCINST"
+        echo "$SVCINSTS_PROPS_COMPLETE" | grep -x "${SVCINST}" >/dev/null || echo "$SVCINST"
     done
+
+    # Note: we do not check here for services whose names do not match
+    # any device or vice versa, this is the main loop's job
 }
 
 upsconf_getSection_content() {
