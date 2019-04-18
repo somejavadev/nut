@@ -1420,9 +1420,7 @@ get_service_for_device() {
         || { echo "No service instances detected" >&2 ; return 1; }
     UPSLIST_SVCS_RAW="`$hook_listInstances_raw`" && [ "${#UPSLIST_SVCS_RAW}" != 0 ] \
         || { echo "No service units detected" >&2 ; return 1; }
-    vINST="`$hook_validInstanceName "$DEV"`"
     vUNITD="`$hook_validFullUnitName "$DEV"`"
-    vUNITI="`$hook_validFullUnitName "$vINST"`"
 
     # First pass over simple verbatim names
     for INST in $UPSLIST_SVCS ; do
@@ -1436,6 +1434,8 @@ get_service_for_device() {
         fi
     done
     # Second pass over other options
+    vINST="`$hook_validInstanceName "$DEV"`"
+    vUNITI="`$hook_validFullUnitName "$vINST"`"
     for INST in $UPSLIST_SVCS ; do
         if [ "$INST" = "$vINST" ] ; then
             for UNIT in $UPSLIST_SVCS_RAW ; do
