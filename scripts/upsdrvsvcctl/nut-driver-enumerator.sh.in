@@ -1065,8 +1065,7 @@ upslist_readFile_once() {
 upslist_readSvcs() {
     UPSLIST_SVCS="`$hook_listInstances`" || UPSLIST_SVCS=""
     if [ "${#UPSLIST_SVCS}" = 0 ] && [ "$1" != "-" ] ; then
-        EXPLAIN=""
-        [ -z "$1" ] || EXPLAIN=" - $1"
+        [ -z "$1" ] && EXPLAIN="" || EXPLAIN=" - $1"
         echo "Error reading the list of ${SERVICE_FRAMEWORK-} service instances for UPS drivers, or none are defined${EXPLAIN}" >&2
         # Ok to continue - we may end up defining new instances
     fi
