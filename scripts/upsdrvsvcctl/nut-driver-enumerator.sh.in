@@ -920,18 +920,18 @@ systemd_getSavedMD5() {
     [ -n "$1" ] || PROP="SECTION_CHECKSUM_GLOBAL"
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-checksum.conf"
     [ -s "${PROPFILE}" ] \
-    && grep "Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," \
+    && egrep "^[ \t]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," \
     || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
 }
 systemd_findSavedDeviceName() {
     # Returns long service instance name which has DEVICE=="$1"
     # For empty "$1" returns a list of all recorded "SVC<TAB>DEVICE"
     if [ -z "$1" ]; then
-        grep -H "Environment='DEVICE=" \
+        egrep -H "^[ \t]*Environment='DEVICE=" \
             /etc/systemd/system/nut-driver@*.service.d/nut-driver-enumerator-generated-devicename.conf \
         | sed 's|^/etc/systemd/system/\(nut-driver@[^/]*\.service\)\.d/.*DEVICE='"[\"']*\([^\"']*\)[\"']*"'$|\1\t\2|'
     else
-        egrep -H "Environment='DEVICE=($1|\"$1\")'" \
+        egrep -H "^[ \t]*Environment='DEVICE=($1|\"$1\")'" \
             /etc/systemd/system/nut-driver@*.service.d/nut-driver-enumerator-generated-devicename.conf \
         | sed 's|^/etc/systemd/system/\(nut-driver@[^/]*\.service\)\.d/.*$|\1|'
     fi
@@ -944,7 +944,7 @@ systemd_getSavedDeviceName() {
     PROP="DEVICE"
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-devicename.conf"
     [ -s "${PROPFILE}" ] \
-    && grep "Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," -e 's,^"\(.*\)"$,\1,' \
+    && egrep "^[ \t]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," -e 's,^"\(.*\)"$,\1,' \
     || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
 }
 systemd_setSavedDeviceName() {
