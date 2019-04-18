@@ -355,8 +355,8 @@ upslist_checksums_unchanged() {
             if [ "${_DEV}" = "${_SVC}" ] \
             || [ "`$hook_validInstanceName "${_DEV}"`" = "${_SVC}" ] \
             ; then
-                CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^${_DEV}\t"`"
-                CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}\t"`"
+                CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^${_DEV}${TABCHAR}"`"
+                CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}${TABCHAR}"`"
                 [ -n "${CFGSUM_FILE}" ] \
                 && [ "${CFGSUM_FILE}" = "${CFGSUM_SAVE}" ] \
                 || { echo "${_SVC}" ; _RES=1; }
@@ -388,7 +388,7 @@ upslist_savednames_find_missing() {
     # entry missing altogether, or entry with empty device-name column.
 
     # First pick just the service names that do have the device column
-    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F'\t' '($2 != ""){print $1}' | sort`"
+    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F"${TABCHAR}" '($2 != ""){print $1}' | sort`"
     if [ "${SVCINSTS}" = "${SVCINSTS_PROPS_COMPLETE}" ] ; then
         # All services are already well configured
         return 0
@@ -451,7 +451,7 @@ upslist_savednames_find_mismatch() {
     # Find services which do not have saved names in props, so they
     # should be remade by caller
     # First, pick just the service names that do have the device column
-    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F'\t' '($2 != ""){print $1}' | sort`"
+    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F"${TABCHAR}" '($2 != ""){print $1}' | sort`"
     # Now find the difference of all the system instances vs those that
     # have the props set
     for SVCINST in $SVCINSTS ; do
@@ -951,18 +951,18 @@ systemd_getSavedMD5() {
     [ -n "$1" ] || PROP="SECTION_CHECKSUM_GLOBAL"
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-checksum.conf"
     [ -s "${PROPFILE}" ] \
-    && egrep "^[ \t]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," \
+    && egrep "^[ ${TABCHAR}]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," \
     || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
 }
 systemd_findSavedDeviceName() {
     # Returns long service instance name which has DEVICE=="$1"
     # For empty "$1" returns a list of all recorded "SVC<TAB>DEVICE"
     if [ -z "$1" ]; then
-        egrep -H "^[ \t]*Environment='DEVICE=" \
+        egrep -H "^[ ${TABCHAR}]*Environment='DEVICE=" \
             /etc/systemd/system/nut-driver@*.service.d/nut-driver-enumerator-generated-devicename.conf \
         | sed 's|^/etc/systemd/system/\(nut-driver@[^/]*\.service\)\.d/.*DEVICE='"[\"']*\([^\"']*\)[\"']*"'$|\1\t\2|'
     else
-        egrep -H "^[ \t]*Environment='DEVICE=($1|\"$1\")'" \
+        egrep -H "^[ ${TABCHAR}]*Environment='DEVICE=($1|\"$1\")'" \
             /etc/systemd/system/nut-driver@*.service.d/nut-driver-enumerator-generated-devicename.conf \
         | sed 's|^/etc/systemd/system/\(nut-driver@[^/]*\.service\)\.d/.*$|\1|'
     fi
@@ -975,7 +975,7 @@ systemd_getSavedDeviceName() {
     PROP="DEVICE"
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-devicename.conf"
     [ -s "${PROPFILE}" ] \
-    && egrep "^[ \t]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," -e 's,^"\(.*\)"$,\1,' \
+    && egrep "^[ ${TABCHAR}]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," -e 's,^"\(.*\)"$,\1,' \
     || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
 }
 systemd_setSavedDeviceName() {
