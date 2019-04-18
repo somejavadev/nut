@@ -1307,6 +1307,9 @@ nut_driver_enumerator_full_reconfigure() {
 }
 
 list_services_for_devices() {
+    # This routine actually processes the NUT configuration and the
+    # service instances defined in the current operating environment
+    # to compare the two lists and return the mapping of one to other
     FINAL_RES=0
     upslist_readFile_once && [ "${#UPSLIST_FILE}" != 0 ] \
         || { echo "No devices detected in '$UPSCONF'" >&2 ; return 1 ; }
@@ -1315,10 +1318,8 @@ list_services_for_devices() {
     UPSLIST_SVCS_RAW="`$hook_listInstances_raw`" && [ "${#UPSLIST_SVCS_RAW}" != 0 ] \
         || { echo "No service units detected" >&2 ; return 1; }
     for DEV in $UPSLIST_FILE ; do
-        vINST="`$hook_validInstanceName "$DEV"`"
-        vUNITD="`$hook_validFullUnitName "$DEV"`"
-        vUNITI="`$hook_validFullUnitName "$vINST"`"
         # First pass over simple verbatim names
+        vUNITD="`$hook_validFullUnitName "$DEV"`"
         for INST in $UPSLIST_SVCS ; do
             if [ "$INST" = "$DEV" ] ; then
                 for UNIT in $UPSLIST_SVCS_RAW ; do
@@ -1329,6 +1330,9 @@ list_services_for_devices() {
                 done
             fi
         done
+        # Second pass over names that are not "service==device"
+        vINST="`$hook_validInstanceName "$DEV"`"
+        vUNITI="`$hook_validFullUnitName "$vINST"`"
         for INST in $UPSLIST_SVCS ; do
             if [ "$INST" = "$vINST" ] ; then
                 for UNIT in $UPSLIST_SVCS_RAW ; do
