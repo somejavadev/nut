@@ -400,21 +400,39 @@ upslist_savednames_find_mismatch() {
     # is updating from versions that did not track this info yet (but
     # upslist_savednames_find_missing() should have handled those).
 
-    # Get full instance names from system and from props
+    # Get full instance names from system
     SVCINSTS="`$hook_listInstances_raw | sort`" && [ "${#SVCINSTS}" != 0 ] || return 1
+
+    # If there is no NUT config (or got an error reading it), tell the
+    # caller to reconfigure everything
+    upslist_readFile_once && [ "${#UPSLIST_FILE}" != 0 ] \
+        || { echo "No devices detected in '$UPSCONF'" >&2 ; echo "$SVCINSTS"; return 0 ; }
+
+    # Get a mapping of full instance names to device names
+    # (for those service instances that do have them saved)
     SVCINSTS_PROPS="`$hook_findSavedDeviceName`" && [ "${#SVCINSTS_PROPS}" != 0 ] || return 2
 
     # Perform consistency checks for service instances which already
     # have the DEVICE property
     echo "$SVCINSTS_PROPS" | while read SVCINST_PROP DEVNAME_PROP ; do
+        [ -n "${DEVNAME_PROP}" ] || { echo "$SVCINST_PROP" ; continue ; }
+
         # Find services whose props exist but services do not (may be a
         # file data-staleness problem with systemd, but not likely with
         # SMF as it is all in one database):
         echo "$SVCINSTS" | grep -x "${SVCINST_PROP}" >/dev/null || { echo "$SVCINST_PROP" ; continue ; }
 
-        # TODO: Verify the DEVNAME_PROP against SVCINST_PROP (check
-        # that the name is verbatim or MD5 match), and that it exists
-        # in UPSLIST_CONF
+        # Verify the DEVNAME_PROP against SVCINST_PROP (check that
+        # the name is verbatim or MD5 match):
+        vUNITD="`$hook_validFullUnitName "$DEVNAME_PROP"`"
+        if [ "${vUNITD}" != "${SVCINST_PROP}" ] ; then
+            vINST="`$hook_validInstanceName "$DEVNAME_PROP"`"
+            vUNITI="`$hook_validFullUnitName "$vINST"`"
+            [ "${vUNITI}" = "${SVCINST_PROP}" ] || { echo "$SVCINST_PROP" ; continue ; }
+        fi
+
+        # Verify that DEVNAME_PROP exists in UPSLIST_FILE:
+        echo "$UPSLIST_FILE" | grep -x "${DEVNAME_PROP}" >/dev/null || { echo "$SVCINST_PROP" ; continue ; }
     done
 
     # Find services which do not have saved names in props, so they
