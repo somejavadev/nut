@@ -402,8 +402,8 @@ upsconf_getSection_content() {
     # comes on stdin (file or a pre-made normalized variable)
     # empty "$1" means the global config (before any sections)
     #
-    # NOTE (TODO?): This routine finds the one NUT device section, prints it
-    # and returns when the section is over. It currently does not cover (in
+    # PERF: This routine finds the one NUT device section, prints it and
+    # returns when the section is over. It currently does not cover (in
     # a way allowing to do it efficiently) selection of several sections,
     # or storing each section content in some array or dynamic variables
     # (as would be better fit for portable shells) to later address them
@@ -1321,6 +1321,8 @@ list_services_for_devices() {
         # First pass over simple verbatim names
         vUNITD="`$hook_validFullUnitName "$DEV"`"
         for INST in $UPSLIST_SVCS ; do
+            # PERF: Find a way to reduce the iteration scope (to not repeat
+            # passing items matched and processed already), here and below
             if [ "$INST" = "$DEV" ] ; then
                 for UNIT in $UPSLIST_SVCS_RAW ; do
                     if [ "$UNIT" = "$vUNITD" ] ; then
