@@ -1072,6 +1072,11 @@ upslist_readSvcs() {
     fi
 }
 
+upslist_readSvcs_once() {
+    [ "${#UPSLIST_SVCS}" = 0 ] || return 0
+    upslist_readSvcs
+}
+
 upslist_debug() {
     for UPSF in "" $UPSLIST_FILE ; do
         upsconf_debug "$UPSF"
@@ -1191,9 +1196,12 @@ nut_driver_enumerator_main() {
         upslist_addSvcs
         $hook_refreshSupervizor
         upslist_readSvcs "after checking for new config sections to define service instances"
+    else
+        # Require upslist_readSvcs_once() below to re-read current services
+        UPSLIST_SVCS=""
     fi
 
-    upslist_readSvcs
+    upslist_readSvcs_once
     if [ "${#UPSLIST_SVCS}" != 0 ] ; then
         echo "=== The currently defined service instances are:"
         echo "$UPSLIST_SVCS"
