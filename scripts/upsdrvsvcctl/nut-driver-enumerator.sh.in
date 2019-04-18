@@ -298,18 +298,15 @@ upslist_equals() {
     # Trivial case 2: different amount of entries
     [ "`echo "$1" | wc -l`" = "`echo "$2" | wc -l`" ] || return $?
 
-    _TMP_DEV_SVC=""
-    for _DEV in $1 ; do
+    # Make a list of services that correspond in two lists
+    _TMP_DEV_SVC="$( for _DEV in $1 ; do
         DEVINST="`$hook_validInstanceName "${_DEV}"`"
         for _SVC in $2 ; do
             [ "${_DEV}" = "${_SVC}" ] \
             || [ "$DEVINST" = "${_SVC}" ] \
-            && { [ "${#_TMP_DEV_SVC}" = 0 ] \
-                 && _TMP_DEV_SVC="${_DEV} = ${_SVC}" \
-                 || _TMP_DEV_SVC="${_TMP_DEV_SVC}
-${_DEV} = ${_SVC}" ; }
+            && echo "${_DEV} = ${_SVC}"
         done
-    done
+    done )"
 
     # Input was not empty; did anything in output fit?
     [ "${#_TMP_DEV_SVC}" = 0 ] && return 1
