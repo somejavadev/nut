@@ -354,9 +354,14 @@ ${_SVC}" ; }
 }
 
 upslist_savednames_find_missing() {
-    # Verify that all existing service units have a saved DEVICE name
-    # Report those that do not have a value there (any value) so we can
-    # amend those quickly after an upgrade. Otherwise we trust these.
+    # Verify that all existing service units have some saved DEVICE name;
+    # this routine does not check if that saved value makes any sense.
+    # Report those instances that do not have any value there so we can
+    # amend them quickly after an upgrade. Otherwise we trust these to
+    # have been generated properly and not mangled by users or storage.
+    # Note the mismatch can also happen for systemd if a service is not
+    # "enabled", so when just its files exist.
+    # See upslist_savednames_find_mismatch() below for more pedantic check.
 
     # Get full instance names from system
     SVCINSTS="`$hook_listInstances_raw | sort`" && [ "${#SVCINSTS}" != 0 ] || return 1
