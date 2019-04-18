@@ -326,6 +326,22 @@ upssvcconf_checksum_unchanged() {
     [ "`upsconf_getSection_MD5 "$1"`" = "`$hook_getSavedMD5 "$2"`" ]
 }
 
+upslist_checksums_file() {
+    # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
+    # using data from NUT configuration
+    for _DEV in $1 ; do
+        printf '%s\t%s\n' "${_DEV}" "`upsconf_getSection_MD5 "${_DEV}"`"
+    done
+}
+
+upslist_checksums_saved() {
+    # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
+    # using saved service instance properties
+    for _DEV in $1 ; do
+        printf '%s\t%s\n' "${_DEV}" "`$hook_getSavedMD5 "${_DEV}"`"
+    done
+}
+
 upslist_checksums_unchanged() {
     # For each device and its corresponding unit, compare checksums of the
     # configuration section from the file and the stashed configuration in
@@ -333,24 +349,25 @@ upslist_checksums_unchanged() {
     # should get reconfigured.
     [ "${#1}" = 0 -o "${#2}" = 0 ] && return 1
 
-    _TMP_SVC=""
+    CFGSUMS_FILE="`upslist_checksums_file "$1"`"
+    CFGSUMS_SAVE="`upslist_checksums_saved "$2"`"
+
+    _RES=0
     for _DEV in $1 ; do
         DEVINST="`$hook_validInstanceName "${_DEV}"`"
         for _SVC in $2 ; do
             if [ "${_DEV}" = "${_SVC}" ] \
             || [ "$DEVINST" = "${_SVC}" ] \
             ; then
-                upssvcconf_checksum_unchanged "${_DEV}" "${_SVC}" || \
-                { [ "${#_TMP_SVC}" = 0 ] \
-                  && _TMP_SVC="${_SVC}" \
-                  || _TMP_SVC="${_TMP_SVC}
-${_SVC}" ; }
+                CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^${_DEV}\t"`"
+                CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}\t"`"
+                [ -n "${CFGSUM_FILE}" ] \
+                && [ "${CFGSUM_FILE}" = "${CFGSUM_SAVE}" ] \
+                || { echo "${_SVC}" ; _RES=1; }
             fi
         done
     done
-    [ "${#_TMP_SVC}" = 0 ] && return 0
-    echo "${_TMP_SVC}"
-    return 1
+    return ${_RES}
 }
 
 upslist_savednames_find_missing() {
