@@ -351,10 +351,9 @@ upslist_checksums_unchanged() {
 
     _RES=0
     for _DEV in $1 ; do
-        DEVINST="`$hook_validInstanceName "${_DEV}"`"
         for _SVC in $2 ; do
             if [ "${_DEV}" = "${_SVC}" ] \
-            || [ "$DEVINST" = "${_SVC}" ] \
+            || [ "`$hook_validInstanceName "${_DEV}"`" = "${_SVC}" ] \
             ; then
                 CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^${_DEV}\t"`"
                 CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}\t"`"
