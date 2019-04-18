@@ -319,6 +319,7 @@ upssvcconf_checksum_unchanged() {
     # $1 = dev, $2 = svc
     # compare checksums of the configuration section from the file and the
     # stashed configuration in a service instance (if any).
+    # Empty values mean checking the global section.
     # FIXME : optimize by caching, we likely have quite a few requests
     [ "`upsconf_getSection_MD5 "$1"`" = "`$hook_getSavedMD5 "$2"`" ]
 }
@@ -1218,7 +1219,7 @@ nut_driver_enumerator_main() {
 
     # Test if global config has changed since last run
     RESTART_ALL=no
-    upssvcconf_checksum_unchanged "" || { echo "`date -u` : Detected changes in global section of '$UPSCONF', will restart all drivers"; RESTART_ALL=yes; }
+    upssvcconf_checksum_unchanged "" "" || { echo "`date -u` : Detected changes in global section of '$UPSCONF', will restart all drivers"; RESTART_ALL=yes; }
 
     # Quickly exit if there's nothing to do; note the lists are pre-sorted
     # Otherwise a non-zero exit will be done below
