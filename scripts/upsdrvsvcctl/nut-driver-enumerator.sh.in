@@ -815,7 +815,7 @@ EOF`" && [ -n "${_B64}" ]; } || \
 }
 
 calc_base64_stdin() {
-    # Tries several ways to produce an MD5 of the stdin input
+    # Tries several ways to produce a BASE64 of the stdin input
     calc_base64 "`cat`"
 }
 
@@ -831,6 +831,11 @@ EOF`" && [ -n "${_OUT}" ]; } || \
     return 1
 
     echo "${_OUT}"
+}
+
+calc_debase64_stdin() {
+    # Tries several ways to produce a cleartext from BASE64 of the stdin input
+    calc_debase64 "`cat`"
 }
 
 smf_validFullUnitName() {
