@@ -1618,7 +1618,7 @@ get_device_for_service() {
     case "$SVC" in
         MD5_*) ;; # fall through to the bulk of code
         *)  upslist_readFile_once || return $?
-            echo "$UPSLIST_FILE" | egrep "^$SVC\$"
+            echo "${UPSLIST_FILE}" | egrep "^${SVC}\$"
             return $?
             ;;
     esac
