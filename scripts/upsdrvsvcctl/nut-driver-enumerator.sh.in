@@ -159,8 +159,8 @@ NDE_DEVEL_DEBUG="false"
     NUT_DRIVER_ENUMERATOR_CONF="${NUT_CONFPATH}/nut-driver-enumerator.conf"
 
 [ -s "${NUT_DRIVER_ENUMERATOR_CONF}" ] && \
-    echo "Sourcing config file: ${NUT_DRIVER_ENUMERATOR_CONF}" && \
-    . "${NUT_DRIVER_ENUMERATOR_CONF}"
+    echo "Sourcing config file: ${NUT_DRIVER_ENUMERATOR_CONF}" >&2 && \
+    . "${NUT_DRIVER_ENUMERATOR_CONF}" >&2
 
 [ -z "${UPSCONF-}" ] && \
     UPSCONF="${NUT_CONFPATH}/ups.conf"
