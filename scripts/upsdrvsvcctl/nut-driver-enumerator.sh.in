@@ -585,9 +585,10 @@ EOF
 upsconf_getSection_content_once() {
     # Return content for device section "$1"
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
-    # and pre-calculates the whole config file's worth of section checksums
+    # and pre-calculates the whole config file's worth of section base64
+    # encodings to grep them quickly and decode afterwards
     upsconf_getAllSections_BASE64_once || return # gives UPSCONF_HASH_BASE64
-    egrep "^\[${1}\]${TABCHAR}" | calc_debase64_stdin << EOF
+    egrep "^\[${1}\]" | awk -F"${TABCHAR}" '{print $NF}' | calc_debase64_stdin << EOF
 ${UPSCONF_HASH_BASE64}
 EOF
 }
