@@ -352,7 +352,7 @@ upssvcconf_checksum_unchanged() {
 }
 
 upslist_checksums_file() {
-    # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
+    # List a table of [DEVNAME]<TAB>CHECKSUM for devices listed in $*
     # arguments, using the data from NUT configuration
     upsconf_getAllSections_MD5_once # gives UPSCONF_HASH_MD5
     for _DEV in $1 ; do
@@ -361,12 +361,12 @@ upslist_checksums_file() {
 }
 
 upslist_checksums_file_once() {
-    # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
+    # List a table of [DEVNAME]<TAB>CHECKSUM for devices listed in $*
     # arguments, using data from NUT configuration
     # PERF : Separate a use-case for known full list to return it ASAP?
     upsconf_getAllSections_MD5_once # gives UPSCONF_HASH_MD5
     for _DEV in $1 ; do
-        egrep "^${_DEV}${TABCHAR}" << EOF
+        egrep "^\[${_DEV}\]${TABCHAR}" << EOF
 ${UPSCONF_HASH_MD5}
 EOF
     done
