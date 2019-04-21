@@ -78,6 +78,31 @@
 #   start-up lacking a driver, there should be some timer to re-enable
 #   failed not-disabled drivers (would be useful in any case though).
 
+# PERF TODO (2019-04), logging due to planned time off from the improvement PoC:
+# Recent commits added new routines to speed up mass-processing use-cases (e.g.
+# config-service setup reconciliation) based on upsconf_getAllSections_Hash().
+# Currently it is geared towards calculating a map of section names to some
+# one (stdin-passed) processing product of the normalized section content.
+# This is used in the PoC to separately map it to a base64 form of the content
+# useful for faster lookups, or to an MD5 of this content for change detection.
+# The "processing routines" like calc_md5_stdin() are suboptimal due to use of
+# `cat` to make a string variable (the idea being to not pass large text over
+# routine CLI args where possible due to potential sensitivity of data and to
+# minimize shell envvar creation and processing) and ultimately the text is
+# still converted into envvar for trying into different hashing options that
+# may be present on a system (e.g. openssl CLI vs dedicated tools like md5sum).
+# * consider a less generic routine for making one table in one pass over the
+#   NUT config file of [DEVICE]<TAB>MD5<TAB>BASE64 entries, fix value-getters
+#   accordingly
+# * detect the hashing solution for md5 and base64 (functional, maybe faster
+#   of several available?) upon startup, and only call it allowing for simpler
+#   code paths including stdin support without complicated fallbacks seen now
+# * simplify code to avoid `cat` and pass config snippets (relatively small)
+#   as text envvars easy to forward into several hashers in a row
+# * plug these new routines into production code for actual benefit
+# * in daemonized loop mode, make sure to re-parse the existing NUT ups.conf
+#   file (if it changed) into the cache so changes are detected in fact
+
 # Directory where NUT configs are located, e.g. /etc/nut or /etc/ups
 # Set at package configuration, compiled into daemons and drivers
 prefix="@prefix@"
