@@ -25,8 +25,10 @@ Type=forking
 # an option to send the "KillSignal" followed by a SIGHUP so we can
 # use it, if the line below is uncommented (hopefully this should not
 # be a frequent use-case, completion of the processing loop is not
-# expected to take prohibitively long):
-SendSIGHUP=yes
+# expected to take prohibitively long); individual deployments can
+# tweak this via drop-in systemd unit configuration files named like
+# /etc/systemd/system/nut-driver-enumerator-daemon.service.d/hup.conf
+#SendSIGHUP=yes
 Restart=always
 Environment=REPORT_RESTART_42=no
 ExecStart=@NUT_LIBEXECDIR@/nut-driver-enumerator.sh --daemon-after
