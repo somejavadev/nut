@@ -1151,7 +1151,7 @@ systemd_getSavedMD5() {
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-checksum.conf"
     [ -s "${PROPFILE}" ] \
     && egrep "^[ ${TABCHAR}]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," \
-    || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
+    || { echo "Did not find '${PROPFILE}' with a $PROP" >&2 ; return 1; }
 }
 systemd_findSavedDeviceName() {
     # Returns long service instance name which has DEVICE=="$1"
@@ -1175,7 +1175,7 @@ systemd_getSavedDeviceName() {
     PROPFILE="${SYSTEMD_CONFPATH}/nut-driver@$1.service.d/nut-driver-enumerator-generated-devicename.conf"
     [ -s "${PROPFILE}" ] \
     && egrep "^[ ${TABCHAR}]*Environment='$PROP=" "${PROPFILE}" | sed -e "s,^Environment='$PROP=,," -e "s,'\$,," -e 's,^"\(.*\)"$,\1,' \
-    || { echo "Did not find '${PROPFILE}' with a $PROP" ; return 1; }
+    || { echo "Did not find '${PROPFILE}' with a $PROP" >&2 ; return 1; }
 }
 systemd_setSavedDeviceName() {
     # Save device (config section) name $2 into service instance $1
