@@ -18,6 +18,15 @@ User=root
 # it is expected that this process has to fork the daemon before systemd
 # starts follow-up units; it should not be a problem for those
 Type=forking
+# Normally nut-driver-enumerator waits to complete a processing loop
+# before exiting after a single SIGTERM, SIGINT or SIGQUIT; it exits
+# faster (maybe with inconsistent setup to clean up on next execution)
+# if it receives a second signal like that, or a SIGHUP. Systemd has
+# an option to send the "KillSignal" followed by a SIGHUP so we can
+# use it, if the line below is uncommented (hopefully this should not
+# be a frequent use-case, completion of the processing loop is not
+# expected to take prohibitively long):
+SendSIGHUP=yes
 Restart=always
 Environment=REPORT_RESTART_42=no
 ExecStart=@NUT_LIBEXECDIR@/nut-driver-enumerator.sh --daemon-after
