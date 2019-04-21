@@ -128,6 +128,8 @@ DEPSVC_NET_LOCAL_SMF="svc:/network/loopback:default"
 DEPREQ_NET_LOCAL_SMF="optional_all"
 SVCNAME_SMF="svc:/system/power/nut-driver"
 
+# Config may set this to true
+NDE_DEVEL_DEBUG="false"
 [ -z "${NUT_DRIVER_ENUMERATOR_CONF-}" ] && \
     NUT_DRIVER_ENUMERATOR_CONF="${NUT_CONFPATH}/nut-driver-enumerator.conf"
 
@@ -1942,6 +1944,7 @@ while [ $# -gt 0 ]; do
             shift
             echo "DEVEL-DEBUG: Will execute routine (maybe with args): $*"
             [ "$#" = 0 ] && { echo "ERROR: Nothing to execute" >&2 ; exit 1 ; }
+            [ "${NDE_DEVEL_DEBUG}" = true ] || { echo "ERROR: NDE_DEVEL_DEBUG is not allowed" >&2 ; exit 2; }
             # Actually a small script can be passed this way, it is intended
             ( eval "$@" ) ; exit $?
             ;;
