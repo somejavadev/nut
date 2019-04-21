@@ -577,7 +577,7 @@ upsconf_getSection_MD5_once() {
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
     upsconf_getAllSections_MD5_once || return # gives UPSCONF_HASH_MD5
-    egrep "^\[${1}\]" | awk -F"${TABCHAR}" '{print $NF}' << EOF
+    egrep "^\[${1}\]" << EOF | awk -F"${TABCHAR}" '{print $NF}'
 ${UPSCONF_HASH_MD5}
 EOF
 }
@@ -588,7 +588,7 @@ upsconf_getSection_content_once() {
     # and pre-calculates the whole config file's worth of section base64
     # encodings to grep them quickly and decode afterwards
     upsconf_getAllSections_BASE64_once || return # gives UPSCONF_HASH_BASE64
-    egrep "^\[${1}\]" | awk -F"${TABCHAR}" '{print $NF}' | calc_debase64_stdin << EOF
+    egrep "^\[${1}\]" << EOF | awk -F"${TABCHAR}" '{print $NF}' | calc_debase64_stdin
 ${UPSCONF_HASH_BASE64}
 EOF
 }
