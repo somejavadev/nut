@@ -327,7 +327,7 @@ upssvcconf_checksum_unchanged() {
 upslist_checksums_file() {
     # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
     # using data from NUT configuration
-    upsconf_getAllSections_MD5_once # => UPSCONF_HASH_MD5
+    upsconf_getAllSections_MD5_once # gives UPSCONF_HASH_MD5
     for _DEV in $1 ; do
         printf '%s\t%s\n' "${_DEV}" "`upsconf_getSection_MD5 "${_DEV}"`"
     done
@@ -337,7 +337,7 @@ upslist_checksums_file_once() {
     # List a table of DEVNAME<TAB>CHECKSUM for devices listed in $*
     # using data from NUT configuration
     # PERF : Separate a use-case for known full list to return it ASAP?
-    upsconf_getAllSections_MD5_once # => UPSCONF_HASH_MD5
+    upsconf_getAllSections_MD5_once # gives UPSCONF_HASH_MD5
     for _DEV in $1 ; do
         egrep "^${_DEV}${TABCHAR}" << EOF
 ${UPSCONF_HASH_MD5}
@@ -576,7 +576,7 @@ upsconf_getSection_MD5_once() {
     # Return checksum for device section "$1"
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
-    upsconf_getAllSections_MD5_once || return # => UPSCONF_HASH_MD5
+    upsconf_getAllSections_MD5_once || return # gives UPSCONF_HASH_MD5
     egrep "^${1}${TABCHAR}" << EOF
 ${UPSCONF_HASH_MD5}
 EOF
@@ -586,7 +586,7 @@ upsconf_getSection_content_once() {
     # Return content for device section "$1"
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
-    upsconf_getAllSections_BASE64_once || return # => UPSCONF_HASH_BASE64
+    upsconf_getAllSections_BASE64_once || return # gives UPSCONF_HASH_BASE64
     egrep "^${1}${TABCHAR}" << EOF | calc_debase64_stdin
 ${UPSCONF_HASH_BASE^$}
 EOF
