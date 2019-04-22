@@ -474,7 +474,9 @@ upslist_savednames_find_missing() {
     # entry missing altogether, or entry with empty device-name column.
 
     # First pick just the service names that do have the device column
-    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F"${TABCHAR}" '($2 != ""){print $1}' | sort`"
+    SVCINSTS_PROPS_COMPLETE="`awk -F"${TABCHAR}" '($2 != ""){print $1}' << EOF | sort
+$SVCINSTS_PROPS
+EOF`"
     if [ "${SVCINSTS}" = "${SVCINSTS_PROPS_COMPLETE}" ] ; then
         # All services are already well configured
         return 0
@@ -519,7 +521,9 @@ upslist_savednames_find_mismatch() {
         # Find services whose props exist but services do not (may be a
         # file data-staleness problem with systemd, but not likely with
         # SMF as it is all in one database):
-        echo "$SVCINSTS" | grep -x "${SVCINST_PROP}" >/dev/null || { echo "$SVCINST_PROP" ; continue ; }
+        grep -x "${SVCINST_PROP}" >/dev/null << EOF || { echo "$SVCINST_PROP" ; continue ; }
+$SVCINSTS
+EOF
 
         # Verify the DEVNAME_PROP against SVCINST_PROP (check that
         # the name is verbatim or MD5 match):
@@ -531,17 +535,23 @@ upslist_savednames_find_mismatch() {
         fi
 
         # Verify that DEVNAME_PROP exists in UPSLIST_FILE:
-        echo "$UPSLIST_FILE" | grep -x "${DEVNAME_PROP}" >/dev/null || { echo "$SVCINST_PROP" ; continue ; }
+        grep -x "${DEVNAME_PROP}" >/dev/null << EOF || { echo "$SVCINST_PROP" ; continue ; }
+$UPSLIST_FILE
+EOF
     done
 
     # Find services which do not have saved names in props, so they
     # should be remade by caller
     # First, pick just the service names that do have the device column
-    SVCINSTS_PROPS_COMPLETE="`echo "$SVCINSTS_PROPS" | awk -F"${TABCHAR}" '($2 != ""){print $1}' | sort`"
+    SVCINSTS_PROPS_COMPLETE="`awk -F"${TABCHAR}" '($2 != ""){print $1}' << EOF | sort
+$SVCINSTS_PROPS
+EOF`"
     # Now find the difference of all the system instances vs those that
     # have the props set
     for SVCINST in $SVCINSTS ; do
-        echo "$SVCINSTS_PROPS_COMPLETE" | grep -x "${SVCINST}" >/dev/null || echo "$SVCINST"
+        grep -x "${SVCINST}" >/dev/null << EOF || echo "$SVCINST"
+$SVCINSTS_PROPS_COMPLETE
+EOF
     done
 
     # Note: we do not check here for services whose names do not match
