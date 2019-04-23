@@ -581,6 +581,16 @@ ${UPSCONF_HASH_MD5}
 EOF
 }
 
+upsconf_getSection_content_once() {
+    # Return content for device section "$1"
+    # WARNING: This is intended for mass-usage scenario, so it pre-reads
+    # and pre-calculates the whole config file's worth of section checksums
+    upsconf_getAllSections_BASE64_once || return # => UPSCONF_HASH_BASE64
+    egrep "^${1}${TABCHAR}" << EOF | calc_debase64_stdin
+${UPSCONF_HASH_BASE^$}
+EOF
+}
+
 upsconf_getAllSections_BASE64() {
     # Parse the whole config in one take, producing a list
     # of all DEVICE<TAB>BASE64 lines
