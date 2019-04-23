@@ -1937,6 +1937,12 @@ while [ $# -gt 0 ]; do
             upsconf_getValue "$DEV" "$@"
             exit $?
             ;;
+        devel-debug) # Not public, not in usage()
+            shift
+            echo "DEVEL-DEBUG: Will execute routine (maybe with args): $*"
+            [ "$#" = 0 ] && { echo "ERROR: Nothing to execute" >&2 ; exit 1 ; }
+            ( "$@" ) ; exit $?
+            ;;
         upsconf_debug) # Not public, not in usage()
             [ -z "$2" ] && echo "Device name argument required" >&2 && exit 1
             upsconf_debug "$2"
