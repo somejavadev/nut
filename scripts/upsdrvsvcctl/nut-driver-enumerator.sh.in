@@ -306,6 +306,27 @@ common_isRegistered() {
     return 1
 }
 
+# List of [DEVICE]<TAB>MD5_<hash-of-DEVICE> entries
+CACHED_INSTANCE_NAMES=""
+cached_validInstanceName() {
+    # Return MD5_<hash> of $1 string; empty $1 means global section
+    if [ "${#CACHED_INSTANCE_NAMES}" != 0 ]; then
+        # Find in cache first, echo the hit if any
+        awk -F"${TABCHAR}" 'BEGIN { hit=0; }
+( $1 == "['"$1"]'") {print $2; ++hit; exit 0 ; }
+END { if (hit == 0 ) { exit 1 } ; }' << EOF
+${CACHED_INSTANCE_NAMES}
+EOF
+        [ $? = 0 ] && return
+    fi
+    # Calculate, cache and report the value
+    _VAL="MD5_`calc_md5 "$1"`" && [ "${#_VAL}" != 0 ] || return 1
+    echo "${_VAL}"
+    CACHED_INSTANCE_NAMES="$CACHED_INSTANCE_NAMES
+[$1]	${_VAL}"
+    return 0
+}
+
 upslist_equals() {
     # Compare pre-sorted list of DEVICES ($1) and SVCINSTs ($2) including
     # the possible mangling for service names. Return 0 if lists describe
@@ -876,7 +897,8 @@ smf_validFullUnitName() {
     esac
 }
 smf_validInstanceName() {
-    echo "MD5_`calc_md5 "$1"`"
+    cached_validInstanceName "$1"
+#    echo "MD5_`calc_md5 "$1"`"
 }
 smf_validInstanceSuffixName() {
     case "$1" in
@@ -1071,7 +1093,8 @@ systemd_validFullUnitName() {
     esac
 }
 systemd_validInstanceName() {
-    echo "MD5_`calc_md5 "$1"`"
+    cached_validInstanceName "$1"
+#    echo "MD5_`calc_md5 "$1"`"
 }
 systemd_validInstanceSuffixName() {
     echo "$1" | sed -e 's,^.*@,,' -e 's,\.service$,,'
