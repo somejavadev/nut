@@ -367,7 +367,8 @@ upslist_equals() {
         for _SVC in $2 ; do
             [ "${_DEV}" = "${_SVC}" ] \
             || [ "$DEVINST" = "${_SVC}" ] \
-            && echo "${_DEV} = ${_SVC}"
+            && echo "${_DEV} = ${_SVC}" \
+            && break
         done
     done )"
 
@@ -443,6 +444,7 @@ upslist_checksums_unchanged() {
                 CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^\[${_DEV}\]${TABCHAR}"`"
                 [ "${#CFGSUM_FILE}" != 0 ] \
                 && [ "${CFGSUM_FILE}" = "${CFGSUM_SAVE}" ] \
+                && break \
                 || { echo "${_SVC}" ; _RES=1; }
             fi
         done
