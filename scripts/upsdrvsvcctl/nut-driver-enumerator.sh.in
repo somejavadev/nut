@@ -404,7 +404,7 @@ upslist_checksums_unchanged() {
             || [ "`$hook_validInstanceName "${_DEV}"`" = "${_SVC}" ] \
             ; then
                 CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^\[${_DEV}\]${TABCHAR}"`"
-                CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}${TABCHAR}"`"
+                CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^\[${_DEV}\]${TABCHAR}"`"
                 [ "${#CFGSUM_FILE}" != 0 ] \
                 && [ "${CFGSUM_FILE}" = "${CFGSUM_SAVE}" ] \
                 || { echo "${_SVC}" ; _RES=1; }
