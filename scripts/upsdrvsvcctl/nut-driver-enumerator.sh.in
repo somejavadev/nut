@@ -777,10 +777,10 @@ calc_md5() {
     # Tries several ways to produce an MD5 of the "$1" argument
     _MD5="`md5sum 2>/dev/null << EOF | awk '{print $1}'
 $1
-EOF`" && [ -n "${_MD5}" ] || \
+EOF`" && [ "${#_MD5}" != 0 ] || \
     { _MD5="`openssl dgst -md5 2>/dev/null << EOF | awk '{print $NF}'
 $1
-EOF`" && [ -n "${_MD5}" ]; } || \
+EOF`" && [ "${#_MD5}" != 0 ]; } || \
     return 1
 
     echo "${_MD5}"
@@ -805,10 +805,10 @@ calc_md5_file() {
 calc_base64() {
     _B64="`base64 2>/dev/null << EOF
 $1
-EOF`" && [ -n "${_B64}" ] || \
+EOF`" && [ "${#_B64}" != 0 ] || \
     { _B64="`openssl enc -base64 -e 2>/dev/null << EOF
 $1
-EOF`" && [ -n "${_B64}" ]; } || \
+EOF`" && [ "${#_B64}" != 0 ]; } || \
     return 1
 
     echo "${_B64}"
@@ -824,10 +824,10 @@ calc_debase64() {
 
     _OUT="`base64 -d 2>/dev/null << EOF
 $1
-EOF`" && [ -n "${_OUT}" ] || \
+EOF`" && [ "${#_OUT}" != 0 ] || \
     { _OUT="`openssl enc -base64 -d 2>/dev/null << EOF
 $1
-EOF`" && [ -n "${_OUT}" ]; } || \
+EOF`" && [ "${#_OUT}" != 0 ]; } || \
     return 1
 
     echo "${_OUT}"
