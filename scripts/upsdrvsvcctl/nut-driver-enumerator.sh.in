@@ -1942,7 +1942,8 @@ while [ $# -gt 0 ]; do
             shift
             echo "DEVEL-DEBUG: Will execute routine (maybe with args): $*"
             [ "$#" = 0 ] && { echo "ERROR: Nothing to execute" >&2 ; exit 1 ; }
-            ( "$@" ) ; exit $?
+            # Actually a small script can be passed this way, it is intended
+            ( eval "$@" ) ; exit $?
             ;;
         upsconf_debug) # Not public, not in usage()
             [ -z "$2" ] && echo "Device name argument required" >&2 && exit 1
