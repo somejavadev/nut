@@ -522,7 +522,7 @@ upsconf_getSection_content() {
     CURR_SECTION=""
     SECTION_CONTENT=""
     # If a (non-global) section is requested, by default we failed to find it:
-    [ "${#1}" = 0 ] && RES=1 || RES=0
+    [ "${#1}" = 0 ] && RES=0 || RES=1
     while read LINE ; do
         case "$LINE" in
             \["$1"\])
