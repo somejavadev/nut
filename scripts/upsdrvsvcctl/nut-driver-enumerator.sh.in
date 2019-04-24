@@ -374,7 +374,7 @@ upslist_checksums_unchanged() {
             ; then
                 CFGSUM_FILE="`echo "$CFGSUMS_FILE" | egrep "^${_DEV}${TABCHAR}"`"
                 CFGSUM_SAVE="`echo "$CFGSUMS_SAVE" | egrep "^${_DEV}${TABCHAR}"`"
-                [ -n "${CFGSUM_FILE}" ] \
+                [ "${#CFGSUM_FILE}" != 0 ] \
                 && [ "${CFGSUM_FILE}" = "${CFGSUM_SAVE}" ] \
                 || { echo "${_SVC}" ; _RES=1; }
             fi
@@ -494,8 +494,8 @@ upsconf_getSection_content() {
 
     CURR_SECTION=""
     SECTION_CONTENT=""
-    RES=1
-    [ -n "$1" ] || RES=0
+    # If a (non-global) section is requested, by default we failed to find it:
+    [ "${#1}" = 0 ] && RES=1 || RES=0
     while read LINE ; do
         case "$LINE" in
             \["$1"\])
@@ -515,7 +515,8 @@ upsconf_getSection_content() {
                 ;;
             \[*\])
                 # We have just displayed the requested section,
-                # and here starts a new one -- so we are done
+                # and here starts a new one -- so we are done.
+                # Empty $1 also fits (global config section).
                 [ "$CURR_SECTION" = "$1" ] && break
                 # Use a value that can not be a section name here
                 # just to "ignore" this section content in our loop:
@@ -526,11 +527,11 @@ upsconf_getSection_content() {
             *)  ;; # Fall through to add the line to contents of existing section
         esac
         if [ "$CURR_SECTION" = "$1" ]; then
-            if [ -n "$SECTION_CONTENT" ]; then
+            if [ "${#SECTION_CONTENT}" = 0 ]; then
+                SECTION_CONTENT="$LINE"
+            else
                 SECTION_CONTENT="$SECTION_CONTENT
 $LINE"
-            else
-                SECTION_CONTENT="$LINE"
             fi
         fi
     done
@@ -625,7 +626,7 @@ upsconf_getAllSections_Hash() {
                 ;;
             \[*\])
                 if [ "${#SECTION_CONTENT}" != 0 ]; then
-                    # We have some content, report it
+                    # We have some content, report it, using the hashfunc from args
                     printf '%s\t%s\n' "$CURR_SECTION" "`"$@" << EOF
 $SECTION_CONTENT
 EOF`"
@@ -637,17 +638,17 @@ EOF`"
             "") continue ;;
             *)  ;; # Fall through to add the line to contents of existing section
         esac
-        if [ -n "$SECTION_CONTENT" ]; then
+        if [ "${#SECTION_CONTENT}" = 0 ]; then
+            SECTION_CONTENT="$LINE"
+        else
             SECTION_CONTENT="$SECTION_CONTENT
 $LINE"
-        else
-            SECTION_CONTENT="$LINE"
         fi
     done << EOF
 ${UPSCONF_DATA}
 EOF
 
-    if [ -n "$SECTION_CONTENT" ]; then
+    if [ "${#SECTION_CONTENT}" != 0 ]; then
         echo "$SECTION_CONTENT"
     fi
 
