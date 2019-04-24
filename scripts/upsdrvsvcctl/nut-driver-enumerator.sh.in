@@ -1753,6 +1753,11 @@ update_upslist_savednames_found_missing() {
 
 RECONFIGURE_ASAP=false
 trap_handle_hup_main() {
+    if [ "$TERMINATE_ASAP" = true ]; then
+        echo "`date -u` : Received a HUP following an interruption signal, terminating the script now" >&2
+        exit 0
+    fi
+
     echo "`date -u` : Received a HUP during processing, scheduling reconfiguration to repeat ASAP (after the current iteration is done)" >&2
     # Note: in the worst case the reconfig would run twice;
     # we do not update UPSCONF_CHECKSUM_START in this case
