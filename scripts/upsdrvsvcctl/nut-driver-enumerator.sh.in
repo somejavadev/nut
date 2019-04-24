@@ -558,7 +558,7 @@ upsconf_getSection_MD5() {
 
 upsconf_getAllSections_MD5() {
     # Parse the whole config in one take, producing a list
-    # of all DEVICE<TAB>CHECKSUM lines
+    # of all [DEVICE]<TAB>CHECKSUM lines
     upsconf_getAllSections_Hash calc_md5_stdin
 }
 
@@ -577,7 +577,7 @@ upsconf_getSection_MD5_once() {
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
     upsconf_getAllSections_MD5_once || return # gives UPSCONF_HASH_MD5
-    egrep "^${1}${TABCHAR}" << EOF
+    egrep "^\[${1}\]${TABCHAR}" << EOF
 ${UPSCONF_HASH_MD5}
 EOF
 }
@@ -587,14 +587,14 @@ upsconf_getSection_content_once() {
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
     upsconf_getAllSections_BASE64_once || return # gives UPSCONF_HASH_BASE64
-    egrep "^${1}${TABCHAR}" << EOF | calc_debase64_stdin
+    egrep "^\[${1}\]${TABCHAR}" | calc_debase64_stdin << EOF
 ${UPSCONF_HASH_BASE64}
 EOF
 }
 
 upsconf_getAllSections_BASE64() {
     # Parse the whole config in one take, producing a list
-    # of all DEVICE<TAB>BASE64 lines
+    # of all [DEVICE]<TAB>BASE64 lines
     upsconf_getAllSections_Hash calc_base64_stdin
 }
 
@@ -610,7 +610,7 @@ upsconf_getAllSections_BASE64_once() {
 
 upsconf_getAllSections_Hash() {
     # Parse the normalized config once, producing a list of all
-    # DEVICE<TAB>SOME_HASH lines, with the hash function defined
+    # [DEVICE]<TAB>SOME_HASH lines, with the hash function defined
     # by "$@" arguments, taking on stdin the contents of a section
     # (including its [devicename] as a start - for non-globals)
     [ "$#" != 0 ] || return
@@ -627,6 +627,7 @@ upsconf_getAllSections_Hash() {
             \[*\])
                 if [ "${#SECTION_CONTENT}" != 0 ]; then
                     # We have some content, report it, using the hashfunc from args
+                    [ "${#CURR_SECTION}" = 0 ] && CURR_SECTION="[]" # global cfg
                     printf '%s\t%s\n' "$CURR_SECTION" "`"$@" << EOF
 $SECTION_CONTENT
 EOF`"
