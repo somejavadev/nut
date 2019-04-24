@@ -577,7 +577,7 @@ upsconf_getSection_MD5_once() {
     # WARNING: This is intended for mass-usage scenario, so it pre-reads
     # and pre-calculates the whole config file's worth of section checksums
     upsconf_getAllSections_MD5_once || return # gives UPSCONF_HASH_MD5
-    egrep "^\[${1}\]${TABCHAR}" << EOF
+    egrep "^\[${1}\]" | awk -F"${TABCHAR}" '{print $NF}' << EOF
 ${UPSCONF_HASH_MD5}
 EOF
 }
