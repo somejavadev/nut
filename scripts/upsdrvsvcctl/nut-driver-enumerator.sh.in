@@ -647,13 +647,6 @@ $LINE"
     done << EOF
 ${UPSCONF_DATA}
 EOF
-
-    if [ "${#SECTION_CONTENT}" != 0 ]; then
-        echo "$SECTION_CONTENT"
-    fi
-
-    [ "$RES" = 0 ] || echo "ERROR: Section [$1] was not found in the '$UPSCONF' file" >&2
-    return $RES
 }
 
 upsconf_getSection_SDP() {
