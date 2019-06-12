@@ -288,9 +288,46 @@ globalflag" \
         --show-config-value '' nosuchflag
 }
 
+filter_shell_syntax_complaints() {
+    # For testcase_shell_syntax()... there are a few issues reported by
+    # some shells we chose to not care about because fixes to such issues
+    # preclude portability to other shells.
+    egrep -v '(warning.*[`].* obsolete, use \$\(.*|warning.* quote may be missing)'
+}
+
+testcase_shell_syntax() {
+    # Check shell interpreter syntax; modeled after run_testcase() above
+    printf "Testing : SHELL='%s'\tCASE='%s'\t" "$USE_SHELL" "ShellSyntax"
+    OUT="`$USE_SHELL -n $NDE 2>&1`" ; RESCODE=$?
+    printf "Got : RESCODE='%s'\t" "$RESCODE"
+
+    RES=0
+    if [ "$RESCODE" = "0" ]; then
+        printf "STATUS_CODE='MATCHED'\t"
+        GOOD_COUNT="`expr $GOOD_COUNT + 1`"
+    else
+        printf "STATUS_CODE='MISMATCH' expect_code=%s received_code=%s\t" "$EXPECT_CODE" "$RESCODE" >&2
+        FAIL_COUNT="`expr $FAIL_COUNT + 1`"
+        RES="`expr $RES + 1`"
+    fi
+
+    COMPLAINTS="`echo "$OUT" | filter_shell_syntax_complaints`"
+    if [ -z "$COMPLAINTS" ]; then
+        printf "STATUS_TEXT='MATCHED'\n"
+        GOOD_COUNT="`expr $GOOD_COUNT + 1`"
+    else
+        RES="`expr $RES + 1`"
+        FAIL_COUNT="`expr $FAIL_COUNT + 1`"
+        printf "STATUS_TEXT='MISMATCH'\n"
+        printf '\t--- expected ---\n%s\n\t--- received ---\n%s\n\t--- MISMATCH ABOVE\n\n' "No unusual warnings" "$COMPLAINTS" >&2
+    fi
+
+    return $RES
+}
 
 # Combine the cases above into a stack
 testsuite() {
+    testcase_shell_syntax
     testcase_bogus_args
     testcase_list_all_devices
     testcase_show_all_configs
