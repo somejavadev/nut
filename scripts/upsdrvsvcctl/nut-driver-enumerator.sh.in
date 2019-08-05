@@ -327,13 +327,14 @@ EOF
     # Calculate, cache and report the value
     _VAL="MD5_`calc_md5 "$1"`" && [ "${#_VAL}" != 0 ] || return 1
     echo "${_VAL}"
+    # Note: tab character used below (do not lose in copy-pastes)
     CACHED_INSTANCE_NAMES="$CACHED_INSTANCE_NAMES
 [$1]	${_VAL}"
     return 0
 }
 
 update_validInstanceNames() {
-    # create or update the mappings for MD5 names in the cache
+    # create or update (append) the mappings for MD5 names in the cache
     # use this after e.g. reading in a list of devices from NUT config
     # TODO : preselect DEV's that are not in list (if not empty) yet
     # and make these a uniq'ed list
@@ -345,6 +346,7 @@ EOF
     VAL="MD5_`calc_md5 "${DEV}"`" && [ "${#VAL}" != 0 ] || continue
     echo "[${DEV}]	${VAL}"
 done)"
+    # Note: tab character used above (do not lose in copy-pastes)
 }
 
 upslist_equals() {
