@@ -1966,6 +1966,7 @@ while [ $# -gt 0 ]; do
         --help|-h|-help) usage; exit 0 ;;
         --get-service-framework) echo "${SERVICE_FRAMEWORK}" ; exit 0 ;;
         --reconfigure)
+            shift
             nut_driver_enumerator_full_reconfigure "$@"
             exit $?
             ;;
