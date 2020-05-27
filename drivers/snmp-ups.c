@@ -113,6 +113,7 @@ static mib2nut_info_t *mib2nut[] = {
 	&cyberpower,		/* This struct comes from : cyberpower-mib.c */
 	&delta_ups,			/* This struct comes from : delta_ups-mib.c */
 	&eaton_ats16,		/* This struct comes from : eaton-ats16-mib.c */
+	&eaton_ats16_g2,	/* This struct comes from : eaton-ats16-mib.c */
 	&eaton_ats30,		/* This struct comes from : eaton-ats30-mib.c */
 	&eaton_marlin,		/* This struct comes from : eaton-mib.c */
 	&emerson_avocent_pdu,	/* This struct comes from : emerson-avocent-pdu-mib.c */
@@ -167,7 +168,7 @@ const char *mibvers;
 #else
 # define DRIVER_NAME	"Generic SNMP UPS driver"
 #endif /* WITH_DMFMIB */
-#define DRIVER_VERSION		"1.13"
+#define DRIVER_VERSION		"1.14"
 
 /* driver description structure */
 upsdrv_info_t	upsdrv_info = {
@@ -3173,29 +3174,43 @@ int su_setOID(int mode, const char *varname, const char *val)
 	}
 
 	/* set value into the device, using the provided one, or the default one otherwise */
+	if (mode==SU_MODE_INSTCMD) {
+		/* Sanity check: commands should either have a value or a default */
+		if ( (val == NULL) && (su_info_p->dfl == NULL) ) {
+			upsdebugx(1, "%s: cannot execute command '%s': a provided or default value is needed!", __func__, varname);
+			return STAT_SET_INVALID;
+		}
+	}
+
 	if (su_info_p->info_flags & ST_FLAG_STRING) {
 		status = nut_snmp_set_str(su_info_p->OID, val ? val : su_info_p->dfl);
-	} else {
+	}
+	else {
 		if (mode==SU_MODE_INSTCMD) {
-			/* Sanity check: commands should either have a value or a default */
-			if ( (val == NULL) && (su_info_p->dfl == NULL) ) {
-				upsdebugx(1, "%s: cannot execute command '%s': a provided or default value is needed!", __func__, varname);
+			if ( !str_to_long(val ? val : su_info_p->dfl, &value, 10) ) {
+				upsdebugx(1, "%s: cannot execute command '%s': value is not a number!", __func__, varname);
 				return STAT_SET_INVALID;
 			}
-			/* FIXME: switch to a generic nut_snmp_set(oid, char *value)
-			 * to simplify handling and avoid atoi(NULL) */
-			status = nut_snmp_set_int(su_info_p->OID, val ? atoi(val) : atoi(su_info_p->dfl));
 		}
 		else {
 			/* non string data may imply a value lookup */
 			if (su_info_p->oid2info) {
-				value = su_find_valinfo(su_info_p->oid2info, val);
+				value = su_find_valinfo(su_info_p->oid2info, val ? val : su_info_p->dfl);
 			}
 			else {
 				/* Convert value and apply multiplier */
-				value = atof(val) / su_info_p->info_len;
+				if ( !str_to_long(val, &value, 10) ) {
+					upsdebugx(1, "%s: cannot set '%s': value is not a number!", __func__, varname);
+					return STAT_SET_INVALID;
+				}
+				value = (long)((double)value / su_info_p->info_len);
 			}
-			/* Actually apply the new value */
+		}
+		/* Actually apply the new value */
+		if (su_info_p->flags & SU_TYPE_TIME) {
+			status = nut_snmp_set_time(su_info_p->OID, value);
+		}
+		else {
 			status = nut_snmp_set_int(su_info_p->OID, value);
 		}
 	}
