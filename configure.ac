@@ -195,6 +195,19 @@ case ${target_os} in
       dnl on 64 bit HP-UX unless we define _REENTRANT
       CFLAGS="${CFLAGS} -D_REENTRANT"
       ;;
+    osx* | darwin* )
+      dnl The flags below should also work with llvm clang;
+      dnl but is its compatibility discovered in GCC macro?..
+      if ( test "${GCC}" = "yes" )
+      then
+        dnl Seems to be needed to get __sigbits defined (from signal.h)
+        CFLAGS="${CFLAGS} -fgnu89-inline"
+      else
+        dnl Seems to be needed to not get __sigbits mentioned and required
+        dnl for linking (from signal.h)
+        CFLAGS="${CFLAGS} -D_ANSI_SOURCE"
+      fi
+      ;;
 esac
 
 dnl optind handling:
