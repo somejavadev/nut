@@ -733,7 +733,8 @@ _matrix_fixbugs:
 # These days, "jobs" and "matrix" are same thing... at least, ours is an explicit list.
 jobs:
   include:
-  - *_matrix_master
+#  - *_matrix_master
+  - *_matrix_osx_cstd_nowarn
 
 ###################################################################################
 # Note: "env" lines below must exactly describe a matrix option defined above
