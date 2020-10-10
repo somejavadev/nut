@@ -711,8 +711,12 @@ _matrix_master:
   include: &_matrix_master
   - *_matrix_required
   - *_matrix_allowfail_linux
-  - *_matrix_osx
-  - *_matrix_windows
+# Enable these when builds are actually made possible (more R&D needed)
+# They take quite a big hit on Travis infra to start and run, so better
+# not to try in vain until this becomes practically useful...
+#  - *_matrix_osx_cstd_nowarn
+#  - *_matrix_osx
+#  - *_matrix_windows
 
 _matrix_fixbugs:
   include: &_matrix_fixbugs
