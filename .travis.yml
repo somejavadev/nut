@@ -796,7 +796,7 @@ jobs:
 before_install:
 - |-
   if [ $TRAVIS_OS_NAME == "osx" ] ; then
-    brew update
+    echo "NOT CALLING 'brew update' as it takes too long and cleans up preisntalled env"
     brew install binutils ccache gd
     if [ $BUILD_TYPE = default-withdoc ] ; then
         brew install asciidoc docbook-xsl
