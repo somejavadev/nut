@@ -564,26 +564,6 @@ _matrix_linux_cstd_warn:
 # Inspired by https://github.com/taocpp/operators/blob/master/.travis.yml
 _matrix_osx_cstd_nowarn:
   include: &_matrix_osx_cstd_nowarn
-  - env: NUT_MATRIX_TAG="c99-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu99 -fgnu89-inline" CXXFLAGS="-std=gnu++99" CC=clang CXX=clang++
-    os: osx
-    osx_image: xcode10.2
-    compiler: clang
-    cache:
-      directories:
-      - /usr/local/Cellar
-      - $HOME/Library/Caches/Homebrew
-      - $HOME/.ccache
-
-  - env: NUT_MATRIX_TAG="c99-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu99 -fno-gnu89-inline" CXXFLAGS="-std=gnu++99" CC=clang CXX=clang++
-    os: osx
-    osx_image: xcode10.2
-    compiler: clang
-    cache:
-      directories:
-      - /usr/local/Cellar
-      - $HOME/Library/Caches/Homebrew
-      - $HOME/.ccache
-
   - env: NUT_MATRIX_TAG="c17-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu17 -D_ANSI_SOURCE" CXXFLAGS="-std=gnu++17" CC=clang CXX=clang++
     os: osx
     osx_image: xcode10.2
@@ -595,6 +575,26 @@ _matrix_osx_cstd_nowarn:
       - $HOME/.ccache
 
   - env: NUT_MATRIX_TAG="c17-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu17" CXXFLAGS="-std=gnu++17" CC=clang CXX=clang++
+    os: osx
+    osx_image: xcode10.2
+    compiler: clang
+    cache:
+      directories:
+      - /usr/local/Cellar
+      - $HOME/Library/Caches/Homebrew
+      - $HOME/.ccache
+
+  - env: NUT_MATRIX_TAG="c99-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu99 -fgnu89-inline" CXXFLAGS="-std=gnu++99" CC=clang CXX=clang++
+    os: osx
+    osx_image: xcode10.2
+    compiler: clang
+    cache:
+      directories:
+      - /usr/local/Cellar
+      - $HOME/Library/Caches/Homebrew
+      - $HOME/.ccache
+
+  - env: NUT_MATRIX_TAG="c99-clang-xcode10.2-nowarn" BUILD_TYPE=default-all-errors CFLAGS="-std=gnu99 -fno-gnu89-inline" CXXFLAGS="-std=gnu++99" CC=clang CXX=clang++
     os: osx
     osx_image: xcode10.2
     compiler: clang
