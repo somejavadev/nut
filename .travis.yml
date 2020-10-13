@@ -70,6 +70,26 @@ env:
       # we can call master branch builds sometimes to update the workers cache
       # of packages by manual or timer-driven runs with explicit setting like
       # HOMEBREW_NO_AUTO_UPDATE=0
+    # Below, a number of conditions follow to help pick what we build in this
+    # run if it is either on the common upstream repo (not fork) and default
+    # CI_CASES_UPSTREAM=auto, or a fork (branches of contributor forks can by
+    # default build anything in their Travis CI account's quota, to make work
+    # on bugfixes easier). See https://docs.travis-ci.com/user/conditions-v1
+    # for syntax of conditionals used in test cases defined further below.
+    - CI_CASES_UPSTREAM=auto
+      # auto = decide by fork/branch (select for upstream/master, all for forks)
+      # all = build everything defined (and included into jobs matrix)
+      # select = follow envvars below
+    - CI_CASE_REQUIRED=true
+      # Does this build want whatever the matrix defines as required for PR merge?
+    - CI_CASE_WARNINGS_FATAL=false
+      # Do we build pedantic cases where any warnings are fatal?
+    - CI_CASE_STD_C=false
+      # Do we build cases for -std=c* ?
+    - CI_CASE_OSX=false
+      # Do we build cases for MacOS X?
+    - CI_CASE_WINDOWS=false
+      # Do we build cases for Windows?
 
 # Builds with customized setups
 # Note that doc-related builds take the longest, and Travis CI cloud
@@ -85,6 +105,9 @@ env:
 _matrix_required_linux_pass1_quick:
   include: &_matrix_required_linux_pass1_quick
   - env: BUILD_TYPE=default-nodoc
+    if: |
+        ( fork == false && branch == master && env(CI_CASES_UPSTREAM) == auto && env(CI_CASE_REQUIRED) == true ) || \
+        ( fork == true && env(CI_CASE_REQUIRED) == true )
     os: linux
     addons:
       apt:
