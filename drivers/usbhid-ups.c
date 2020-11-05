@@ -769,6 +769,7 @@ void upsdrv_updateinfo(void)
 		{
 		case -EBUSY:		/* Device or resource busy */
 			upslog_with_errno(LOG_CRIT, "Got disconnected by another driver");
+			/* FALLTHRU */
 		case -EPERM:		/* Operation not permitted */
 		case -ENODEV:		/* No such device */
 		case -EACCES:		/* Permission denied */
@@ -1278,6 +1279,7 @@ static bool_t hid_ups_walk(walkmode_t mode)
 		{
 		case -EBUSY:		/* Device or resource busy */
 			upslog_with_errno(LOG_CRIT, "Got disconnected by another driver");
+			/* FALLTHRU */
 		case -EPERM:		/* Operation not permitted */
 		case -ENODEV:		/* No such device */
 		case -EACCES:		/* Permission denied */
