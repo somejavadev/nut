@@ -90,35 +90,35 @@ static const char *liebert_config_voltage_fun(double value);
 static const char *liebert_line_voltage_fun(double value);
 
 static info_lkp_t liebert_online_info[] = {
-	{ 0, NULL, liebert_online_fun }
+	{ 0, NULL, liebert_online_fun, NULL }
 };
 
 static info_lkp_t liebert_discharging_info[] = {
-        { 0, NULL, liebert_discharging_fun }
+        { 0, NULL, liebert_discharging_fun, NULL }
 };
 
 static info_lkp_t liebert_charging_info[] = {
-        { 0, NULL, liebert_charging_fun }
+        { 0, NULL, liebert_charging_fun, NULL }
 };
 
 static info_lkp_t liebert_lowbatt_info[] = {
-        { 0, NULL, liebert_lowbatt_fun }
+        { 0, NULL, liebert_lowbatt_fun, NULL }
 };
 
 static info_lkp_t liebert_replacebatt_info[] = {
-        { 0, NULL, liebert_replacebatt_fun }
+        { 0, NULL, liebert_replacebatt_fun, NULL }
 };
 
 static info_lkp_t liebert_shutdownimm_info[] = {
-        { 0, NULL, liebert_shutdownimm_fun }
+        { 0, NULL, liebert_shutdownimm_fun, NULL }
 };
 
 static info_lkp_t liebert_config_voltage_info[] = {
-	{ 0, NULL, liebert_config_voltage_fun },
+	{ 0, NULL, liebert_config_voltage_fun, NULL },
 };
 
 static info_lkp_t liebert_line_voltage_info[] = {
-	{ 0, NULL, liebert_line_voltage_fun },
+	{ 0, NULL, liebert_line_voltage_fun, NULL },
 };
 
 static double liebert_config_voltage_mult = 1.0;
@@ -211,7 +211,7 @@ static const char *belkin_firmware_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_firmware_conversion[] = {
-	{ 0, NULL, belkin_firmware_conversion_fun }
+	{ 0, NULL, belkin_firmware_conversion_fun, NULL }
 };
 
 static const char *belkin_upstype_conversion_fun(double value)
@@ -234,7 +234,7 @@ static const char *belkin_upstype_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_upstype_conversion[] = {
-	{ 0, NULL, belkin_upstype_conversion_fun }
+	{ 0, NULL, belkin_upstype_conversion_fun, NULL }
 };
 
 static const char *belkin_sensitivity_conversion_fun(double value)
@@ -251,17 +251,17 @@ static const char *belkin_sensitivity_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_sensitivity_conversion[] = {
-	{ 0, NULL, belkin_sensitivity_conversion_fun }
+	{ 0, NULL, belkin_sensitivity_conversion_fun, NULL }
 };
 
 static info_lkp_t belkin_test_info[] = {
-	{ 0, "No test initiated", NULL },
-	{ 1, "Done and passed", NULL },
-	{ 2, "Done and warning", NULL },
-	{ 3, "Done and error", NULL },
-	{ 4, "Aborted", NULL },
-	{ 5, "In progress", NULL },
-	{ 0, NULL, NULL }
+	{ 0, "No test initiated", NULL, NULL },
+	{ 1, "Done and passed", NULL, NULL },
+	{ 2, "Done and warning", NULL, NULL },
+	{ 3, "Done and error", NULL, NULL },
+	{ 4, "Aborted", NULL, NULL },
+	{ 5, "In progress", NULL, NULL },
+	{ 0, NULL, NULL, NULL }
 };
 
 static const char *belkin_overload_conversion_fun(double value)
@@ -274,7 +274,7 @@ static const char *belkin_overload_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_overload_conversion[] = {
-	{ 0, NULL, belkin_overload_conversion_fun }
+	{ 0, NULL, belkin_overload_conversion_fun, NULL }
 };
 
 static const char *belkin_overheat_conversion_fun(double value)
@@ -287,7 +287,7 @@ static const char *belkin_overheat_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_overheat_conversion[] = {
-	{ 0, NULL, belkin_overheat_conversion_fun }
+	{ 0, NULL, belkin_overheat_conversion_fun, NULL }
 };
 
 static const char *belkin_commfault_conversion_fun(double value)
@@ -300,7 +300,7 @@ static const char *belkin_commfault_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_commfault_conversion[] = {
-	{ 0, NULL, belkin_commfault_conversion_fun }
+	{ 0, NULL, belkin_commfault_conversion_fun, NULL }
 };
 
 static const char *belkin_awaitingpower_conversion_fun(double value)
@@ -313,7 +313,7 @@ static const char *belkin_awaitingpower_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_awaitingpower_conversion[] = {
-	{ 0, NULL, belkin_awaitingpower_conversion_fun }
+	{ 0, NULL, belkin_awaitingpower_conversion_fun, NULL }
 };
 
 static const char *belkin_online_conversion_fun(double value)
@@ -326,7 +326,7 @@ static const char *belkin_online_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_online_conversion[] = {
-	{ 0, NULL, belkin_online_conversion_fun }
+	{ 0, NULL, belkin_online_conversion_fun, NULL }
 };
 
 static const char *belkin_lowbatt_conversion_fun(double value)
@@ -339,7 +339,7 @@ static const char *belkin_lowbatt_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_lowbatt_conversion[] = {
-	{ 0, NULL, belkin_lowbatt_conversion_fun }
+	{ 0, NULL, belkin_lowbatt_conversion_fun, NULL }
 };
 
 static const char *belkin_depleted_conversion_fun(double value)
@@ -352,7 +352,7 @@ static const char *belkin_depleted_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_depleted_conversion[] = {
-	{ 0, NULL, belkin_depleted_conversion_fun }
+	{ 0, NULL, belkin_depleted_conversion_fun, NULL }
 };
 
 static const char *belkin_replacebatt_conversion_fun(double value)
@@ -365,7 +365,7 @@ static const char *belkin_replacebatt_conversion_fun(double value)
 }
 
 static info_lkp_t belkin_replacebatt_conversion[] = {
-	{ 0, NULL, belkin_replacebatt_conversion_fun }
+	{ 0, NULL, belkin_replacebatt_conversion_fun, NULL }
 };
 
 /* --------------------------------------------------------------- */
