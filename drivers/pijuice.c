@@ -257,7 +257,7 @@ upsdrv_info_t upsdrv_info = {
 #define I2C_READ_BYTE(fd, cmd, label) \
 	{ \
 		__s32 sData; \
-		if ((data = i2c_smbus_read_byte_data(upsfd, cmd)) < 0 ) { \
+		if ((sData = i2c_smbus_read_byte_data(upsfd, cmd)) < 0 ) { \
 			upsdebugx(2, "Failure reading the i2c bus [%s]", label); \
 			return; \
 		} ; \
