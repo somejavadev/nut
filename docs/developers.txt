@@ -141,9 +141,11 @@ function do_stuff(void)
 --------------------------------------------------------------------------------
 
 At this point NUT is expected to work correctly when built with a C99
-with POSIX extensions (`CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200112L"`)
+standard with common extensions (`CFLAGS="-std=c99 -D__EXTENSIONS__"`)
 or GNU99 (`CFLAGS="-std=gnu99"`) on Linux and other platforms supported
-by GCC or clang, or newer revisions of the  standards.
+by GCC or clang, or newer revisions of the standards.
+On some systems other additions to the C standard may be suitable, such
+as `-D_POSIX_C_SOURCE=200112L`.
 
 See the `.travis.yml` file in project sources for detailed matrix of
 `CFLAGS` and compiler versions currently known to work or to not (yet)
