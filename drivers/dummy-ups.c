@@ -194,7 +194,7 @@ void upsdrv_shutdown(void)
 }
 
 static int instcmd(const char *cmdname, const char *extra)
-{	
+{
 /*
 	if (!strcasecmp(cmdname, "test.battery.stop")) {
 		ser_send_buf(upsfd, ...);
@@ -399,6 +399,7 @@ static int is_valid_data(const char* varname)
 static int is_valid_value(const char* varname, const char *value)
 {
 	dummy_info_t *item;
+	NUT_UNUSED_VARIABLE(value);
 
 	if ( (item = find_info(varname)) != NULL)
 	{
@@ -423,13 +424,14 @@ static void upsconf_err(const char *errmsg)
 
 /* for dummy mode
  * parse the definition file and process its content
- */ 
+ */
 static int parse_data_file(int upsfd)
 {
 	char	fn[SMALLBUF];
 	char	*ptr, var_value[MAX_STRING_SIZE];
 	int		value_args = 0, counter;
 	time_t	now;
+	NUT_UNUSED_VARIABLE(upsfd);
 
 	time(&now);
 
@@ -531,7 +533,7 @@ static int parse_data_file(int upsfd)
 					ctx->arglist[0], var_value, ctx->errmsg);
 			}
 			else
-			{ 
+			{
 				upsdebugx(3, "parse_data_file: added \"%s\" with value \"%s\"",
 					ctx->arglist[0], var_value);
 			}

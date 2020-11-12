@@ -28,8 +28,8 @@
  *
  * -------------------------------------------------------------------------- */
 
-#ifndef NUT_LIBUSB_H
-#define NUT_LIBUSB_H
+#ifndef NUT_LIBUSB_H_SEEN
+#define NUT_LIBUSB_H_SEEN 1
 
 #include "main.h"	/* for subdrv_info_t */
 #include "usb-common.h"	/* for USBDevice_t and USBDeviceMatcher_t */
@@ -70,5 +70,4 @@ typedef struct usb_communication_subdriver_s {
 
 extern usb_communication_subdriver_t	usb_subdriver;
 
-#endif /* NUT_LIBUSB_H */
-
+#endif /* NUT_LIBUSB_H_SEEN */

@@ -231,7 +231,7 @@ int Get_USB_Packet(uint8_t *buffer)
 
 	if (err > 0)
 		upsdebugx(3, "read: %02X %02X %02X %02X %02X %02X %02X %02X", inBuf[0], inBuf[1], inBuf[2], inBuf[3], inBuf[4], inBuf[5], inBuf[6], inBuf[7]);
-	
+
 	if (err < 0){
 		upsdebugx(3, "USB: Get_USB_Packet: send_usb_packet, err = %d %s ", err, strerror(errno));
 		return err;
@@ -301,6 +301,8 @@ static int cypress_command(uint8_t *buffer, uint8_t *buf, uint16_t length, uint1
 
 static void *cypress_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &cypress_command;
 	return NULL;
 }
@@ -319,6 +321,8 @@ static usb_device_id_t riello_usb_id[] = {
 
 static int device_match_func(USBDevice_t *hd, void *privdata)
 {
+	NUT_UNUSED_VARIABLE(privdata);
+
 	if (subdriver_command) {
 		return 1;
 	}
@@ -354,10 +358,16 @@ static int driver_callback(usb_dev_handle *handle, USBDevice_t *device, unsigned
 {
 	int ret = 0;
 
-	/*if (usb_set_configuration(handle, 1) < 0) {
+	 NUT_UNUSED_VARIABLE(device);
+	 NUT_UNUSED_VARIABLE(rdbuf);
+	 NUT_UNUSED_VARIABLE(rdlen);
+
+/*
+	if (usb_set_configuration(handle, 1) < 0) {
 		upslogx(LOG_WARNING, "Can't set USB configuration: %s", usb_strerror());
 		return -1;
-	} */
+	}
+*/
 
 	if ((ret = usb_claim_interface(handle, 0)) < 0) {
 		upslogx(LOG_WARNING, "Can't claim USB interface: %s", nut_usb_strerror(ret));
@@ -382,10 +392,10 @@ int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t buflen)
 		ret = usb->open(&udev, &usbdevice, reopen_matcher, &driver_callback);
 
 		upsdebugx (3, "riello_command err udev NULL : %d ", ret);
-		if (ret < 0) 
+		if (ret < 0)
 			return ret;
-		
-		upsdrv_initinfo();	//reconekt usb cable 
+
+		upsdrv_initinfo();	//reconekt usb cable
 	}
 
 	ret = (*subdriver_command)(cmd, buf, length, buflen);
@@ -400,29 +410,37 @@ int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t buflen)
 	{
 	case ERROR_BUSY:		/* Device or resource busy */
 		fatal_with_errno(EXIT_FAILURE, "Got disconnected by another driver");
+		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
 
 #if WITH_LIBUSB_0_1 /* limit to libusb 0.1 implementation */
 	case -EPERM:		/* Operation not permitted */
 		fatal_with_errno(EXIT_FAILURE, "Permissions problem");
+		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
 #endif
 	case ERROR_PIPE:		/* Broken pipe */
+	case -EPIPE:		/* Broken pipe */
 		if (usb_clear_halt(udev, 0x81) == 0) {
 			upsdebugx(1, "Stall condition cleared");
 			break;
 		}
 #if ETIME && WITH_LIBUSB_0_1
+		goto fallthrough_case_etime;
 	case -ETIME:		/* Timer expired */
+	fallthrough_case_etime:
 #endif
 		if (usb_reset(udev) == 0) {
 			upsdebugx(1, "Device reset handled");
 		}
-	case ERROR_NO_DEVICE: /* No such device */
-	case ERROR_ACCESS:    /* Permission denied */
-	case ERROR_IO:        /* I/O error */
+		goto fallthrough_case_reconnect;
+
+	case ERROR_NO_DEVICE:	/* No such device */
+	case ERROR_ACCESS:	/* Permission denied */
+	case ERROR_IO:		/* I/O error */
 #if WITH_LIBUSB_0_1 /* limit to libusb 0.1 implementation */
 	case -ENXIO:		/* No such device or address */
 #endif
-	case ERROR_NOT_FOUND:		/* No such file or directory */
+	case ERROR_NOT_FOUND:	/* No such file or directory */
+	fallthrough_case_reconnect:
 		/* Uh oh, got to reconnect! */
 		usb->close(udev);
 		udev = NULL;
@@ -432,7 +450,8 @@ int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t buflen)
 		upsdebugx (3, "riello_command err: Resource temporarily unavailable");
 		break;
 
-	case ERROR_OVERFLOW: /* Value too large for defined data type */
+	case ERROR_OVERFLOW:	/* Value too large for defined data type */
+	case -EOVERFLOW:	/* Value too large for defined data type */
 #if EPROTO && WITH_LIBUSB_0_1
 	case -EPROTO:		/* Protocol error */
 #endif
@@ -440,7 +459,7 @@ int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t buflen)
 	default:
 		break;
 	}
-	
+
 	return ret;
 }
 
@@ -1129,11 +1148,11 @@ void upsdrv_updateinfo(void)
 
 	/* Boost */
 	if (riello_test_bit(&DevData.StatusCode[1], 1))
-		status_set("BOOST");	
+		status_set("BOOST");
 
 	/* Replace battery */
 	if (riello_test_bit(&DevData.StatusCode[2], 0))
-		status_set("RB");	
+		status_set("RB");
 
 	/* Charging battery */
 	if (riello_test_bit(&DevData.StatusCode[2], 2))

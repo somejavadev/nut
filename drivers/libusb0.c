@@ -175,8 +175,8 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 	libusb_close(*udevp);
 #endif
 
-	upsdebugx(3, "usb_busses=%p", usb_busses);
-	upsdebugx(3, "usb_get_busses()=%p", usb_get_busses());
+	upsdebugx(3, "usb_busses=%p", (void*)usb_busses);
+	upsdebugx(3, "usb_get_busses()=%p", (void*)usb_get_busses());
 
 	for (bus = usb_busses; bus; bus = bus->next) {
 //	for (bus = usb_get_busses(); bus; bus = bus->next) {

@@ -18,8 +18,11 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifndef NUT_DUMMY_UPS_H_SEEN
+#define NUT_DUMMY_UPS_H_SEEN 1
+
 /* This file lists all valid data with their type and info.
- * 
+ *
  * These are then enabled through a definition file, specified
  * as the "port" parameter (only the file name, not the path).
  *
@@ -234,3 +237,5 @@ beeper.disable
 	/* end of structure. */
 	{ NULL, 0, 0, NULL, DU_FLAG_NONE, NULL }
 };
+
+#endif	/* NUT_DUMMY_UPS_H_SEEN */

@@ -177,6 +177,8 @@ static usb_device_id_t tripplite_usb_device_table[] = {
 
 static int subdriver_match_func(USBDevice_t *hd, void *privdata)
 {
+	NUT_UNUSED_VARIABLE(privdata);
+
 	switch (is_usb_device_supported(tripplite_usb_device_table, hd))
 	{
 	case SUPPORTED:
@@ -187,6 +189,8 @@ static int subdriver_match_func(USBDevice_t *hd, void *privdata)
 		if (getval("productid")) {
 			return 1;
 		}
+		return 0;
+
 	case NOT_SUPPORTED:
 	default:
 		return 0;
@@ -553,6 +557,7 @@ void usb_comm_fail(int res, const char *msg)
  */
 static int send_cmd(const unsigned char *msg, size_t msg_len, unsigned char *reply, size_t reply_len)
 {
+	NUT_UNUSED_VARIABLE(reply_len);
 	unsigned char buffer_out[8];
 	unsigned char csum = 0;
 	int ret = 0, send_try, recv_try=0, done = 0;
@@ -589,7 +594,7 @@ static int send_cmd(const unsigned char *msg, size_t msg_len, unsigned char *rep
 		}
 
 #if ! defined(__FreeBSD__)
-		if(!done) { usleep(1000*100); /* TODO: nanosleep */ }
+		usleep(1000*100); /* TODO: nanosleep */
 #endif
 
 		for(recv_try=0; !done && recv_try < MAX_RECV_TRIES; recv_try++) {
@@ -1240,7 +1245,9 @@ void upsdrv_updateinfo(void)
 				status_set("RB");
 				break;
 			} /* else fall through: */
+			goto fallthrough_case_default;
 		default:
+		fallthrough_case_default:
 			upslogx(LOG_ERR, "Unknown value for s[1]: 0x%02x", s_value[1]);
 			dstate_datastale();
 			break;
@@ -1374,6 +1381,9 @@ void upsdrv_updateinfo(void)
 			break;
 		case TRIPP_LITE_SMARTPRO:
 			dstate_setinfo("ups.load", "%d", hex2d(l_value+1, 2));
+			break;
+		case TRIPP_LITE_SMART_3005:
+			dstate_setinfo("ups.load", "%d", hex_or_bin2d(l_value+1, 1));
 			break;
 		case TRIPP_LITE_SMART_0004:
 			dstate_setinfo("ups.load", "%d", hex2d(l_value+1, 2));

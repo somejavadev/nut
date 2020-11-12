@@ -93,6 +93,8 @@ static unsigned int	comm_failures = 0;
 
 static int device_match_func(USBDevice_t *device, void *privdata)
 {
+	NUT_UNUSED_VARIABLE(privdata);
+
 	switch (is_usb_device_supported(richcomm_usb_id, device))
 	{
 	case SUPPORTED:
@@ -191,7 +193,7 @@ static void usb_comm_good(void)
 		return;
 	}
 
-	upslogx(LOG_NOTICE, "Communications with UPS re-established");	
+	upslogx(LOG_NOTICE, "Communications with UPS re-established");
 	comm_failures = 0;
 }
 
@@ -204,6 +206,8 @@ static void usb_comm_good(void)
  */
 static int driver_callback(usb_dev_handle *handle, USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	if (usb_set_configuration(handle, 1) < 0) {
 		upsdebugx(5, "Can't set USB configuration");
 		return -1;
@@ -313,7 +317,7 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 
 			upsdebugx(3, "Checking USB device [%04x:%04x] (%s/%s)", dev->descriptor.idVendor,
 				dev->descriptor.idProduct, bus->dirname, dev->filename);
-			
+
 			/* supported vendors are now checked by the supplied matcher */
 
 			/* open the device */
@@ -354,12 +358,20 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 			device->VendorID = dev->descriptor.idVendor;
 			device->ProductID = dev->descriptor.idProduct;
 			device->Bus = xstrdup(bus->dirname);
+/*
+			device->Bus = strdup(bus->dirname);
+>>>>>>> opensource/master
+*/
 			iManufacturer = dev->descriptor.iManufacturer;
 			iProduct = dev->descriptor.iProduct;
 			iSerialNumber = dev->descriptor.iSerialNumber;
 #endif /* WITH_LIBUSB_1_0 */
 			
 			if (iManufacturer) {
+/*
+			if (dev->descriptor.iManufacturer) {
+>>>>>>> opensource/master
+*/
 				char	buf[SMALLBUF];
 				ret = usb_get_string_simple(handle, iManufacturer,
 					(usb_ctrl_char)buf, sizeof(buf));
@@ -412,7 +424,7 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 			upsdebugx(4, "- Bus          : %s", device->Bus ? device->Bus : "unknown");
 
 			for (m = matcher; m; m = m->next) {
-				
+
 				switch (m->match_function(device, m->privdata))
 				{
 				case 0:

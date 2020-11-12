@@ -91,6 +91,7 @@ static mib2nut_info_t *mib2nut[] = {
 	&huawei,
 	&tripplite_ietf,
 	&eaton_ats16,
+	&eaton_ats16_g2,
 	&apc_ats,
 	&raritan_px2,
 	&eaton_ats30,
@@ -113,6 +114,7 @@ struct snmp_session g_snmp_sess, *g_snmp_sess_p;
 const char *OID_pwr_status;
 int g_pwr_battery;
 int pollfreq; /* polling frequency */
+int quirk_symmetra_threephase = 0;
 /* Number of device(s): standard is "1", but daisychain means more than 1 */
 long devices_count = 1;
 int current_device_number = 0;      /* global var to handle daisychain iterations - changed by loops in snmp_ups_walk() and su_addcmd() */
@@ -128,7 +130,7 @@ const char *mibname;
 const char *mibvers;
 
 #define DRIVER_NAME	"Generic SNMP UPS driver"
-#define DRIVER_VERSION		"1.11"
+#define DRIVER_VERSION		"1.12"
 
 /* driver description structure */
 upsdrv_info_t	upsdrv_info = {
@@ -197,6 +199,11 @@ su_addcmd(su_info_p);
 
 	if (testvar("notransferoids"))
 		disable_transfer_oids();
+
+	if (testvar("symmetrathreephase"))
+		quirk_symmetra_threephase = 1;
+	else
+		quirk_symmetra_threephase = 0;
 
 	/* initialize all other INFO_ fields from list */
 	if (snmp_ups_walk(SU_WALKMODE_INIT) == TRUE)
@@ -301,6 +308,8 @@ void upsdrv_makevartable(void)
 		"Specifies the Net-SNMP timeout in seconds between retries (default=1)");
 	addvar(VAR_FLAG, "notransferoids",
 		"Disable transfer OIDs (use on APCC Symmetras)");
+	addvar(VAR_FLAG, "symmetrathreephase",
+		"Enable APCC three phase Symmetra quirks (use on APCC three phase Symmetras)");
 	addvar(VAR_VALUE, SU_VAR_SECLEVEL,
 		"Set the securityLevel used for SNMPv3 messages (default=noAuthNoPriv, allowed: authNoPriv,authPriv)");
 	addvar(VAR_VALUE | VAR_SENSITIVE, SU_VAR_SECNAME,
@@ -1229,13 +1238,14 @@ void su_alarm_set(snmp_info_t *su_info_p, long value)
 		if (info_type[0] == 'L') {
 			/* Extract phase number */
 			item_number = atoi(info_type+1);
+			char alarm_info_value_more[SU_LARGEBUF + 32]; /* can sprintf() SU_LARGEBUF plus markup into here */
 
 			upsdebugx(2, "%s: appending phase L%i", __func__, item_number);
 
 			/* Inject in the alarm string */
-			snprintf(alarm_info_value, sizeof(alarm_info_value),
+			snprintf(alarm_info_value_more, sizeof(alarm_info_value_more),
 				"phase L%i %s", item_number, info_value);
-			info_value = &alarm_info_value[0];
+			info_value = &alarm_info_value_more[0];
 		}
 
 		/* Set the alarm value */
@@ -1451,6 +1461,9 @@ bool_t load_mib2nut(const char *mib)
 	} else {
 		fatalx(EXIT_FAILURE, "No supported device detected");
 	}
+
+	/* Should not get here thanks to fatalx() above, but need to silence a warning */
+	return FALSE;
 }
 
 /* find the OID value matching that INFO_* value */
@@ -1550,7 +1563,7 @@ bool_t is_multiple_template(const char *OID_template)
  * Note: remember to adapt info_type, OID and optionaly dfl */
 snmp_info_t *instantiate_info(snmp_info_t *info_template, snmp_info_t *new_instance)
 {
-	upsdebugx(1, "%s(%s)", __func__, info_template->info_type);
+	upsdebugx(1, "%s(%s)", __func__, info_template ? info_template->info_type : "n/a");
 
 	/* sanity check */
 	if (info_template == NULL)
@@ -2561,6 +2574,17 @@ bool_t su_ups_get(snmp_info_t *su_info_p)
 
 	if (su_info_p->info_flags & ST_FLAG_STRING) {
 		status = nut_snmp_get_str(su_info_p->OID, buf, sizeof(buf), su_info_p->oid2info);
+		if (status == TRUE) {
+			if (quirk_symmetra_threephase) {
+				if (!strcasecmp(su_info_p->info_type, "input.transfer.low")
+				 || !strcasecmp(su_info_p->info_type, "input.transfer.high")) {
+					/* Convert from three phase line-to-line voltage to line-to-neutral voltage */
+					double value = atof(buf);
+					value = value * 0.707;
+					snprintf(buf, sizeof(buf), "%.2f", value);
+				}
+			}
+		}
 	} else {
 		status = nut_snmp_get_int(su_info_p->OID, &value);
 		if (status == TRUE) {
@@ -2791,29 +2815,43 @@ int su_setOID(int mode, const char *varname, const char *val)
 	}
 
 	/* set value into the device, using the provided one, or the default one otherwise */
+	if (mode==SU_MODE_INSTCMD) {
+		/* Sanity check: commands should either have a value or a default */
+		if ( (val == NULL) && (su_info_p->dfl == NULL) ) {
+			upsdebugx(1, "%s: cannot execute command '%s': a provided or default value is needed!", __func__, varname);
+			return STAT_SET_INVALID;
+		}
+	}
+
 	if (su_info_p->info_flags & ST_FLAG_STRING) {
 		status = nut_snmp_set_str(su_info_p->OID, val ? val : su_info_p->dfl);
-	} else {
+	}
+	else {
 		if (mode==SU_MODE_INSTCMD) {
-			/* Sanity check: commands should either have a value or a default */
-			if ( (val == NULL) && (su_info_p->dfl == NULL) ) {
-				upsdebugx(1, "%s: cannot execute command '%s': a provided or default value is needed!", __func__, varname);
+			if ( !str_to_long(val ? val : su_info_p->dfl, &value, 10) ) {
+				upsdebugx(1, "%s: cannot execute command '%s': value is not a number!", __func__, varname);
 				return STAT_SET_INVALID;
 			}
-			/* FIXME: switch to a generic nut_snmp_set(oid, char *value)
-			 * to simplify handling and avoid atoi(NULL) */
-			status = nut_snmp_set_int(su_info_p->OID, val ? atoi(val) : atoi(su_info_p->dfl));
 		}
 		else {
 			/* non string data may imply a value lookup */
 			if (su_info_p->oid2info) {
-				value = su_find_valinfo(su_info_p->oid2info, val);
+				value = su_find_valinfo(su_info_p->oid2info, val ? val : su_info_p->dfl);
 			}
 			else {
 				/* Convert value and apply multiplier */
-				value = atof(val) / su_info_p->info_len;
+				if ( !str_to_long(val, &value, 10) ) {
+					upsdebugx(1, "%s: cannot set '%s': value is not a number!", __func__, varname);
+					return STAT_SET_INVALID;
+				}
+				value = (long)((double)value / su_info_p->info_len);
 			}
-			/* Actually apply the new value */
+		}
+		/* Actually apply the new value */
+		if (su_info_p->flags & SU_TYPE_TIME) {
+			status = nut_snmp_set_time(su_info_p->OID, value);
+		}
+		else {
 			status = nut_snmp_set_int(su_info_p->OID, value);
 		}
 	}

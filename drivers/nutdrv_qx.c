@@ -1068,42 +1068,56 @@ static int	fuji_command(const char *cmd, char *buf, size_t buflen)
 
 static void	*cypress_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &cypress_command;
 	return NULL;
 }
 
 static void	*sgs_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &sgs_command;
 	return NULL;
 }
 
 static void	*ippon_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &ippon_command;
 	return NULL;
 }
 
 static void	*krauler_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &krauler_command;
 	return NULL;
 }
 
 static void	*phoenix_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &phoenix_command;
 	return NULL;
 }
 
 static void	*fabula_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &fabula_command;
 	return NULL;
 }
 
 static void	*fuji_subdriver(USBDevice_t *device)
 {
+	NUT_UNUSED_VARIABLE(device);
+
 	subdriver_command = &fuji_command;
 	return NULL;
 }
@@ -1173,6 +1187,8 @@ static int qx_is_usb_device_supported(qx_usb_device_id_t *usb_device_id_list, US
 
 static int	device_match_func(USBDevice_t *hd, void *privdata)
 {
+	NUT_UNUSED_VARIABLE(privdata);
+
 	if (subdriver_command) {
 		return 1;
 	}
@@ -2003,9 +2019,11 @@ void	upsdrv_initups(void)
 		/* Check for language ID workaround (#1) */
 		if (getval("langid_fix")) {
 			/* Skip "0x" prefix and set back to hexadecimal */
-			if (sscanf(getval("langid_fix") + 2, "%x", &langid_fix) != 1) {
+			unsigned int u_langid_fix;
+			if ( (sscanf(getval("langid_fix") + 2, "%x", &u_langid_fix) != 1) || (u_langid_fix > INT_MAX)) {
 				upslogx(LOG_NOTICE, "Error enabling language ID workaround");
 			} else {
+				langid_fix = u_langid_fix;
 				upsdebugx(2, "Language ID workaround enabled (using '0x%x')", langid_fix);
 			}
 		}
@@ -2185,10 +2203,12 @@ static int	qx_command(const char *cmd, char *buf, size_t buflen)
 		{
 		case ERROR_BUSY:	/* Device or resource busy */
 			fatal_with_errno(EXIT_FAILURE, "Got disconnected by another driver");
+			exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
 
 	#if WITH_LIBUSB_0_1			/* limit to libusb 0.1 implementation */
 		case -EPERM:		/* Operation not permitted */
 			fatal_with_errno(EXIT_FAILURE, "Permissions problem");
+			exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
 	#endif	/* WITH_LIBUSB_0_1 */
 
 		case ERROR_PIPE:	/* Broken pipe */
@@ -2197,11 +2217,16 @@ static int	qx_command(const char *cmd, char *buf, size_t buflen)
 				break;
 			}
 	#if ETIME && WITH_LIBUSB_0_1		/* limit to libusb 0.1 implementation */
+			goto fallthrough_case_ETIME;
+
 		case -ETIME:		/* Timer expired */
+		fallthrough_case_ETIME:
 	#endif	/* ETIME && WITH_LIBUSB_0_1 */
 			if (usb_reset(udev) == 0) {
 				upsdebugx(1, "Device reset handled");
 			}
+			goto fallthrough_case_reconnect;
+
 		case ERROR_NO_DEVICE:	/* No such device */
 		case ERROR_ACCESS:	/* Permission denied */
 		case ERROR_IO:		/* I/O error */
@@ -2209,6 +2234,7 @@ static int	qx_command(const char *cmd, char *buf, size_t buflen)
 		case -ENXIO:		/* No such device or address */
 	#endif	/* WITH_LIBUSB_0_1 */
 		case ERROR_NOT_FOUND:	/* No such file or directory */
+		fallthrough_case_reconnect:
 			/* Uh oh, got to reconnect! */
 			usb->close(udev);
 			udev = NULL;

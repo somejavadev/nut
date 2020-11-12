@@ -124,19 +124,19 @@ TODO List:
 
 /* driver description structure */
 upsdrv_info_t upsdrv_info = {
-        DRIVER_NAME,
-        DRIVER_VERSION,
-        "Martin Schroeder <emes@geomer.de>\n" \
-        "Kjell Claesson <kjell.claesson@epost.tidanet.se>\n" \
-        "Tore Ørpetveit <tore@orpetveit.net>\n" \
-        "Arnaud Quette <ArnaudQuette@Eaton.com>\n" \
-        "Wolfgang Ocker <weo@weo1.de>\n" \
-        "Oliver Wilcock\n" \
-        "Prachi Gandhi <prachisgandhi@eaton.com>\n" \
-        "Alf Høgemark <alf@i100>\n" \
-        "Gavrilov Igor",
-        DRV_STABLE,
-        { &comm_upsdrv_info, NULL }
+	DRIVER_NAME,
+	DRIVER_VERSION,
+	"Martin Schroeder <emes@geomer.de>\n" \
+	"Kjell Claesson <kjell.claesson@epost.tidanet.se>\n" \
+	"Tore Ørpetveit <tore@orpetveit.net>\n" \
+	"Arnaud Quette <ArnaudQuette@Eaton.com>\n" \
+	"Wolfgang Ocker <weo@weo1.de>\n" \
+	"Oliver Wilcock\n" \
+	"Prachi Gandhi <prachisgandhi@eaton.com>\n" \
+	"Alf Høgemark <alf@i100>\n" \
+	"Gavrilov Igor",
+	DRV_STABLE,
+	{ &comm_upsdrv_info, NULL }
 };
 
 static int get_word(const unsigned char*);
@@ -177,60 +177,60 @@ const char *horn_stat[3] = {"disabled", "enabled", "muted"};
 
 /* Battery test results */
 info_lkp_t batt_test_info[] = {
-	{ 0, "No test initiated", NULL },
-	{ 1, "In progress", NULL },
-	{ 2, "Done and passed", NULL },
-	{ 3, "Aborted", NULL },
-	{ 4, "Done and error", NULL },
-	{ 5, "Test scheduled", NULL },
+	{ 0, "No test initiated", NULL, NULL },
+	{ 1, "In progress", NULL, NULL },
+	{ 2, "Done and passed", NULL, NULL },
+	{ 3, "Aborted", NULL, NULL },
+	{ 4, "Done and error", NULL, NULL },
+	{ 5, "Test scheduled", NULL, NULL },
 	/* Not sure about the meaning of the below ones! */
-	{ 6, NULL, NULL }, /* The string was present but it has now been removed */
-	{ 7, NULL, NULL }, /* The string was not installed at the last power up */
-	{ 0, NULL, NULL }
+	{ 6, NULL, NULL, NULL }, /* The string was present but it has now been removed */
+	{ 7, NULL, NULL, NULL }, /* The string was not installed at the last power up */
+	{ 0, NULL, NULL, NULL }
 };
 
 /* Topology map results */
 info_lkp_t topology_info[] = {
-	{ BCMXCP_TOPOLOGY_OFFLINE_SWITCHER_1P, "Off-line switcher, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_LINEINT_UPS_1P, "Line-Interactive UPS, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_LINEINT_UPS_2P, "Line-Interactive UPS, Two Phase", NULL },
-	{ BCMXCP_TOPOLOGY_LINEINT_UPS_3P, "Line-Interactive UPS, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_1P, "Dual AC Input, On-Line UPS, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_2P, "Dual AC Input, On-Line UPS, Two Phase", NULL },
-	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_3P, "Dual AC Input, On-Line UPS, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_ONLINE_UPS_1P, "On-Line UPS, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_ONLINE_UPS_2P, "On-Line UPS, Two Phase", NULL },
-	{ BCMXCP_TOPOLOGY_ONLINE_UPS_3P, "On-Line UPS, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_1P, "Parallel Redundant On-Line UPS, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_2P, "Parallel Redundant On-Line UPS, Two Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_3P, "Parallel Redundant On-Line UPS, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_1P, "Parallel for Capacity On-Line UPS, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_2P, "Parallel for Capacity On-Line UPS, Two Phase", NULL },
-	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_3P, "Parallel for Capacity On-Line UPS, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_SYSTEM_BYPASS_MODULE_3P, "System Bypass Module, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_HOT_TIE_CABINET_3P, "Hot-Tie Cabinet, Three Phase", NULL },
-	{ BCMXCP_TOPOLOGY_OUTLET_CONTROLLER_1P, "Outlet Controller, Single Phase", NULL },
-	{ BCMXCP_TOPOLOGY_DUAL_AC_STATIC_SWITCH_3P, "Dual AC Input Static Switch Module, 3 Phase", NULL },
-	{ 0, NULL, NULL }
+	{ BCMXCP_TOPOLOGY_OFFLINE_SWITCHER_1P, "Off-line switcher, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_LINEINT_UPS_1P, "Line-Interactive UPS, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_LINEINT_UPS_2P, "Line-Interactive UPS, Two Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_LINEINT_UPS_3P, "Line-Interactive UPS, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_1P, "Dual AC Input, On-Line UPS, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_2P, "Dual AC Input, On-Line UPS, Two Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_DUAL_AC_ONLINE_UPS_3P, "Dual AC Input, On-Line UPS, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_ONLINE_UPS_1P, "On-Line UPS, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_ONLINE_UPS_2P, "On-Line UPS, Two Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_ONLINE_UPS_3P, "On-Line UPS, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_1P, "Parallel Redundant On-Line UPS, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_2P, "Parallel Redundant On-Line UPS, Two Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_REDUND_ONLINE_UPS_3P, "Parallel Redundant On-Line UPS, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_1P, "Parallel for Capacity On-Line UPS, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_2P, "Parallel for Capacity On-Line UPS, Two Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_PARA_CAPACITY_ONLINE_UPS_3P, "Parallel for Capacity On-Line UPS, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_SYSTEM_BYPASS_MODULE_3P, "System Bypass Module, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_HOT_TIE_CABINET_3P, "Hot-Tie Cabinet, Three Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_OUTLET_CONTROLLER_1P, "Outlet Controller, Single Phase", NULL, NULL },
+	{ BCMXCP_TOPOLOGY_DUAL_AC_STATIC_SWITCH_3P, "Dual AC Input Static Switch Module, 3 Phase", NULL, NULL },
+	{ 0, NULL, NULL, NULL }
 };
 
 /* Command map results */
 info_lkp_t command_map_info[] = {
-	{ PW_INIT_BAT_TEST, "test.battery.start", NULL },
-	{ PW_LOAD_OFF_RESTART, "shutdown.return", NULL },
-	{ PW_UPS_OFF, "shutdown.stayoff", NULL },
-	{ PW_UPS_ON, "load.on", NULL},
-	{ PW_GO_TO_BYPASS, "bypass.start", NULL},
-	{ 0, NULL, NULL }
+	{ PW_INIT_BAT_TEST, "test.battery.start", NULL, NULL },
+	{ PW_LOAD_OFF_RESTART, "shutdown.return", NULL, NULL },
+	{ PW_UPS_OFF, "shutdown.stayoff", NULL, NULL },
+	{ PW_UPS_ON, "load.on", NULL, NULL },
+	{ PW_GO_TO_BYPASS, "bypass.start", NULL, NULL },
+	{ 0, NULL, NULL, NULL }
 };
 
 /* System test capabilities results */
 info_lkp_t system_test_info[] = {
-	{ PW_SYS_TEST_GENERAL, "test.system.start", NULL },
-/*	{ PW_SYS_TEST_SCHEDULE_BATTERY_COMMISSION, "test.battery.start.delayed", NULL }, */
-/*	{ PW_SYS_TEST_ALTERNATE_AC_INPUT, "test.alternate_acinput.start", NULL }, */
-	{ PW_SYS_TEST_FLASH_LIGHTS, "test.panel.start", NULL },
-	{ 0, NULL, NULL }
+	{ PW_SYS_TEST_GENERAL, "test.system.start", NULL, NULL },
+/*	{ PW_SYS_TEST_SCHEDULE_BATTERY_COMMISSION, "test.battery.start.delayed", NULL, NULL }, */
+/*	{ PW_SYS_TEST_ALTERNATE_AC_INPUT, "test.alternate_acinput.start", NULL, NULL }, */
+	{ PW_SYS_TEST_FLASH_LIGHTS, "test.panel.start", NULL, NULL },
+	{ 0, NULL, NULL, NULL }
 };
 
 /* allocate storage for shared variables (extern in bcmxcp.h) */
@@ -782,7 +782,7 @@ bool_t init_command(int size)
 			for (ncounter = 0; ncounter < NumComms; ncounter++)
 			{
 				commandByte = answer[iIndex];
-				if(commandByte >= 0 && commandByte < BCMXCP_COMMAND_MAP_MAX) {
+				if(commandByte < BCMXCP_COMMAND_MAP_MAX) {
 					upsdebugx(2, "%03d\t%02x\t%s", ncounter, commandByte, bcmxcp_command_map[commandByte].command_desc);
 					bcmxcp_command_map[commandByte].command_byte = commandByte;
 				}
@@ -987,7 +987,7 @@ int init_outlet(unsigned char len)
 	int num_outlet, size_outlet;
 	int outlet_num, outlet_state;
 	short auto_dly_off, auto_dly_on;
-	char outlet_name[25];
+	char outlet_name[64];
 
 	res = command_read_sequence(PW_OUT_MON_BLOCK_REQ, answer);
 	if (res <= 0)
@@ -1040,7 +1040,7 @@ void init_ext_vars(void)
 
 	send_write_command(AUTHOR, 4);
 
-        sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+	sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
 	cbuf[0] = PW_SET_CONF_COMMAND;
 	cbuf[1] = PW_CONF_REQ;
@@ -1054,12 +1054,12 @@ void init_ext_vars(void)
 		return;
 	for( index=3; index < length; index++) {
 		switch(answer[index]){
-                        case PW_CONF_LOW_DEV_LIMIT:  dstate_setinfo("input.transfer.boost.high","%d",0);
+			case PW_CONF_LOW_DEV_LIMIT:  dstate_setinfo("input.transfer.boost.high","%d",0);
 						     dstate_setflags("input.transfer.boost.high", ST_FLAG_RW | ST_FLAG_STRING);
 						     dstate_setaux("input.transfer.boost.high", 3);
 						     break;
 
-                        case PW_CONF_HIGH_DEV_LIMIT:  dstate_setinfo("input.transfer.trim.low","%d",0);
+			case PW_CONF_HIGH_DEV_LIMIT:  dstate_setinfo("input.transfer.trim.low","%d",0);
 						      dstate_setflags("input.transfer.trim.low", ST_FLAG_RW | ST_FLAG_STRING);
 						      dstate_setaux("input.transfer.trim.low", 3);
 						      break;
@@ -1077,37 +1077,37 @@ void init_ext_vars(void)
 			case PW_CONF_RETURN_DELAY: dstate_setinfo("input.transfer.delay","%d",0);
 						dstate_setflags("input.transfer.delay", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("input.transfer.delay", 5);
-                                                break;
+						break;
 
 			case PW_CONF_RETURN_CAP: dstate_setinfo("battery.charge.restart","%d",0);
 						dstate_setflags("battery.charge.restart", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("battery.charge.restart", 3);
-                                                break;
+						break;
 
 			case PW_CONF_MAX_TEMP:  dstate_setinfo("ambient.temperature.high","%d",0);
 						dstate_setflags("ambient.temperature.high", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("ambient.temperature.high", 3);
-                                                break;
+						break;
 
 			case PW_CONF_NOMINAL_OUT_VOLTAGE: dstate_setinfo("output.voltage.nominal","%d",0);
 						dstate_setflags("output.voltage.nominal", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("output.voltage.nominal", 3);
-                                                break;
+						break;
 
 			case PW_CONF_SLEEP_TH_LOAD:	dstate_setinfo("battery.energysave.load","%d",0);
 						dstate_setflags("battery.energysave.load", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("battery.energysave.load", 3);
-                                                break;
+						break;
 
 			case PW_CONF_SLEEP_DELAY: dstate_setinfo("battery.energysave.delay","%d",0);
 						dstate_setflags("battery.energysave.delay", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("battery.energysave.delay", 3);
-                                                break;
+						break;
 
 			case PW_CONF_BATT_STRINGS: dstate_setinfo("battery.packs","%d",0);
 						dstate_setflags("battery.packs", ST_FLAG_RW | ST_FLAG_STRING);
 						dstate_setaux("battery.packs", 1);
-                                                break;
+						break;
 
 		}
 	}
@@ -1235,23 +1235,23 @@ void init_limit(void)
 		dstate_setinfo("ambient.temperature.high", "%d", value);
 	}
 
-        /*Sleep minimum load*/
-        value = answer[BCMXCP_EXT_LIMITS_BLOCK_SLEEP_TH_LOAD];
-        if (value != 0) {
+	/*Sleep minimum load*/
+	value = answer[BCMXCP_EXT_LIMITS_BLOCK_SLEEP_TH_LOAD];
+	if (value != 0) {
 		dstate_setinfo("battery.energysave.load", "%d", value);
-        }
+	}
 
 	/* Sleep delay*/
 	value = answer[BCMXCP_EXT_LIMITS_BLOCK_SLEEP_DELAY];
-        if (value != 0) {
+	if (value != 0) {
 		dstate_setinfo("battery.energysave.delay", "%d", value);
-        }
+	}
 
 	/* Low batt minutes warning*/
 	value = answer[BCMXCP_EXT_LIMITS_BLOCK_LOW_BATT_WARNING];
-        if (value != 0) {
+	if (value != 0) {
 		dstate_setinfo("battery.runtime.low", "%d", value);
-        }
+	}
 
 	/* Return to mains delay */
 	value = get_word(answer + BCMXCP_EXT_LIMITS_BLOCK_RETURN_STAB_DELAY);
@@ -1322,7 +1322,7 @@ void upsdrv_initinfo(void)
 {
 	unsigned char answer[PW_ANSWER_MAX_SIZE];
 	char *pTmp;
-	char outlet_name[27];
+	char outlet_name[64];
 	char power_rating[10];
 	int iRating = 0, iIndex = 0, res, len;
 	int ncpu = 0, buf;
@@ -1483,9 +1483,9 @@ void upsdrv_initinfo(void)
 			snprintf(outlet_name, sizeof(outlet_name)-1, "outlet.%d.shutdown.return", res);
 			dstate_addcmd(outlet_name);
 			snprintf(outlet_name, sizeof(outlet_name)-1, "outlet.%d.load.on", res);
-                        dstate_addcmd(outlet_name);
+			dstate_addcmd(outlet_name);
 			snprintf(outlet_name, sizeof(outlet_name)-1, "outlet.%d.load.off", res);
-                        dstate_addcmd(outlet_name);
+			dstate_addcmd(outlet_name);
 		}
 	}
 
@@ -1703,7 +1703,7 @@ void upsdrv_updateinfo(void)
 		else {
 			upsdebugx(1, "Failed to extract Battery Status from answer");
 		}
-	
+
     		/*Extracting internal batteries ABM status*/
 		/*Placed first in ABM statuses list. For examples above - on position BCMXCP_BATTDATA_BLOCK_NUMBER_OF_STRINGS (18):
 		PW5115RM - 0 - no external strings, no status bytes,
@@ -1712,7 +1712,7 @@ void upsdrv_updateinfo(void)
 		PW9130 - 1 - one external string, so one additional status byte (#19 - 00 - no test run), next(20) - number of ABM statuses,
 		next (21) - ABM Status for internal batteries.
 		*/
-		value=*(answer + BCMXCP_BATTDATA_BLOCK_NUMBER_OF_STRINGS + *(answer + BCMXCP_BATTDATA_BLOCK_NUMBER_OF_STRINGS)*1+2 ); 
+		value=*(answer + BCMXCP_BATTDATA_BLOCK_NUMBER_OF_STRINGS + *(answer + BCMXCP_BATTDATA_BLOCK_NUMBER_OF_STRINGS)*1+2 );
 			upsdebugx(2, "ABM Status = %d ",value);
 		if (value > 0 && value < 5)
 			dstate_setinfo("battery.charger.status","%s",ABMStatus[value-1]);
@@ -1720,9 +1720,9 @@ void upsdrv_updateinfo(void)
 
 
 	res = command_read_sequence(PW_LIMIT_BLOCK_REQ, answer);
-        if (res <= 0) {
-                upsdebugx(1, "Failed to read EXT LIMITs from UPS");
-        } else
+	if (res <= 0) {
+		upsdebugx(1, "Failed to read EXT LIMITs from UPS");
+	} else
 	{
 		/* Nominal input voltage */
 		value = get_word((answer + BCMXCP_EXT_LIMITS_BLOCK_NOMINAL_INPUT_VOLTAGE));
@@ -1816,7 +1816,7 @@ void upsdrv_updateinfo(void)
 			dstate_setinfo("output.voltage.nominal", "%d", value);
 		/*Number of EBM*/
 		value = (int) *(answer + BCMXCP_CONFIG_BLOCK_BATTERY_DATA_WORD3);
-		if (value != 0)        
+		if (value != 0)
 			dstate_setinfo("battery.packs", "%d", value);
 
 	}
@@ -1880,7 +1880,7 @@ static int instcmd(const char *cmdname, const char *extra)
 {
 	unsigned char answer[128], cbuf[6];
 	char success_msg[40];
-        char namebuf[MAX_NUT_NAME_LENGTH];
+	char namebuf[MAX_NUT_NAME_LENGTH];
 	char varname[32];
 	const char *varvalue = NULL;
 	int res, sec, outlet_num;
@@ -1983,87 +1983,87 @@ static int instcmd(const char *cmdname, const char *extra)
 	}
 
 	 if (!strcasecmp(cmdname, "beeper.disable") || !strcasecmp(cmdname, "beeper.enable") || !strcasecmp(cmdname, "beeper.mute")) {
-                send_write_command(AUTHOR, 4);
+		send_write_command(AUTHOR, 4);
 
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                cbuf[0] = PW_SET_CONF_COMMAND;
-                cbuf[1] = PW_CONF_BEEPER;
-                switch (cmdname[7]){
+		cbuf[0] = PW_SET_CONF_COMMAND;
+		cbuf[1] = PW_CONF_BEEPER;
+		switch (cmdname[7]){
 
-                        case 'd':
-                        case 'D': {
-                                cbuf[2] = 0x0;            /*disable beeper*/
-                                break;
-                                }
-                        case 'e':
-                        case 'E': {
-                                cbuf[2] = 0x1;          /*enable beeper*/
-                                break;
-                                }
-                        case 'm':
-                        case 'M': {
-                                cbuf[2] = 0x2;
-                                break;                  /*mute beeper*/
-                                }
-                }
-                cbuf[3] = 0x0;          /*padding*/
+			case 'd':
+			case 'D': {
+				cbuf[2] = 0x0;          /*disable beeper*/
+				break;
+				}
+			case 'e':
+			case 'E': {
+				cbuf[2] = 0x1;          /*enable beeper*/
+				break;
+				}
+			case 'm':
+			case 'M': {
+				cbuf[2] = 0x2;
+				break;                  /*mute beeper*/
+				}
+		}
+		cbuf[3] = 0x0;          /*padding*/
 
-                res = command_write_sequence(cbuf, 4, answer);
+		res = command_write_sequence(cbuf, 4, answer);
 		return decode_instcmd_exec(res, (unsigned char)answer[0], cmdname, "Beeper status changed");
 	}
 
-        strncpy(namebuf, cmdname, sizeof(namebuf));
-        namebuf[NUT_OUTLET_POSITION] = 'n'; /* Assumes a maximum of 9 outlets */
+	strncpy(namebuf, cmdname, sizeof(namebuf));
+	namebuf[NUT_OUTLET_POSITION] = 'n'; /* Assumes a maximum of 9 outlets */
 
-        if (!strcasecmp(namebuf, "outlet.n.shutdown.return")) {
-                send_write_command(AUTHOR, 4);
+	if (!strcasecmp(namebuf, "outlet.n.shutdown.return")) {
+		send_write_command(AUTHOR, 4);
 
-                sleep(PW_SLEEP); /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		sleep(PW_SLEEP); /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                /* Get the shutdown delay, if any */
-                snprintf(varname, sizeof(varname)-1, "outlet.%c.delay.shutdown", cmdname[NUT_OUTLET_POSITION]);
-                if ((varvalue = dstate_getinfo(varname)) != NULL) {
-                        sddelay = atoi(varvalue);
-                }
+		/* Get the shutdown delay, if any */
+		snprintf(varname, sizeof(varname)-1, "outlet.%c.delay.shutdown", cmdname[NUT_OUTLET_POSITION]);
+		if ((varvalue = dstate_getinfo(varname)) != NULL) {
+			sddelay = atoi(varvalue);
+		}
 
-                /*if -1 then use global shutdown_delay from ups.conf*/
-                if (sddelay == -1) sddelay=bcmxcp_status.shutdowndelay;
+		/*if -1 then use global shutdown_delay from ups.conf*/
+		if (sddelay == -1) sddelay=bcmxcp_status.shutdowndelay;
 
 		outlet_num = cmdname[NUT_OUTLET_POSITION] - '0';
 		if (outlet_num < 1 || outlet_num > 9)
 			return STAT_INSTCMD_FAILED;
 
-                cbuf[0] = PW_LOAD_OFF_RESTART;
-                cbuf[1] = sddelay & 0xff;
-                cbuf[2] = sddelay >> 8;     /* high byte of the 2 byte time argument */
-                cbuf[3] = outlet_num; /* which outlet load segment? Assumes outlet number at position 8 of the command string. */
+		cbuf[0] = PW_LOAD_OFF_RESTART;
+		cbuf[1] = sddelay & 0xff;
+		cbuf[2] = sddelay >> 8;     /* high byte of the 2 byte time argument */
+		cbuf[3] = outlet_num; /* which outlet load segment? Assumes outlet number at position 8 of the command string. */
 
-                res = command_write_sequence(cbuf, 4, answer);
+		res = command_write_sequence(cbuf, 4, answer);
 
-                sec = (256 * (unsigned char)answer[3]) + (unsigned char)answer[2];
-                snprintf(success_msg, sizeof(success_msg)-1, "Going down in %d sec", sec);
+		sec = (256 * (unsigned char)answer[3]) + (unsigned char)answer[2];
+		snprintf(success_msg, sizeof(success_msg)-1, "Going down in %d sec", sec);
 
-                return decode_instcmd_exec(res, (unsigned char)answer[0], cmdname, success_msg);
-        }
+		return decode_instcmd_exec(res, (unsigned char)answer[0], cmdname, success_msg);
+	}
 
 	if (!strcasecmp(namebuf,"outlet.n.load.on") || !strcasecmp(namebuf,"outlet.n.load.off")){
-                send_write_command(AUTHOR, 4);
+		send_write_command(AUTHOR, 4);
 
-                sleep(PW_SLEEP); /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		sleep(PW_SLEEP); /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                outlet_num = cmdname[NUT_OUTLET_POSITION] - '0';
-                if (outlet_num < 1 || outlet_num > 9)
-                        return STAT_INSTCMD_FAILED;
+		outlet_num = cmdname[NUT_OUTLET_POSITION] - '0';
+		if (outlet_num < 1 || outlet_num > 9)
+			return STAT_INSTCMD_FAILED;
 
 
 		cbuf[0] = (cmdname[NUT_OUTLET_POSITION+8] == 'n')?PW_UPS_ON:PW_UPS_OFF;        /* Cmd oN or not*/
-                cbuf[1] = outlet_num;                           /* Outlet number */
+		cbuf[1] = outlet_num;                           /* Outlet number */
 
-                res = command_write_sequence(cbuf, 2, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, "Outlet %d is  %s",outlet_num, (cmdname[NUT_OUTLET_POSITION+8] == 'n')?"On":"Off");
+		res = command_write_sequence(cbuf, 2, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, "Outlet %d is  %s",outlet_num, (cmdname[NUT_OUTLET_POSITION+8] == 'n')?"On":"Off");
 
-                return decode_instcmd_exec(res, (unsigned char)answer[0], cmdname, success_msg);
+		return decode_instcmd_exec(res, (unsigned char)answer[0], cmdname, success_msg);
 
 
 
@@ -2139,65 +2139,64 @@ int setvar (const char *varname, const char *val)
 {
 	unsigned char answer[128], cbuf[5];
 	char namebuf[MAX_NUT_NAME_LENGTH];
-	char success_msg[50];
+	char success_msg[SMALLBUF];
 	int res, sec, outlet_num,tmp;
 	int onOff_setting = PW_AUTO_OFF_DELAY;
 
 	upsdebugx(1, "entering setvar(%s, %s)", varname, val);
 
-	        if (!strcasecmp(varname, "input.transfer.boost.high")) {
+	if (!strcasecmp(varname, "input.transfer.boost.high")) {
 
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 460) {
-                        return STAT_SET_INVALID;
-                }
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 460) {
+			return STAT_SET_INVALID;
+		}
 
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_LOW_DEV_LIMIT;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=tmp>>8;
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_LOW_DEV_LIMIT;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=tmp>>8;
 
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " BOOST threshold volage set to %d V", tmp);
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " BOOST threshold volage set to %d V", tmp);
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
+	}
 
-        }
+	if (!strcasecmp(varname, "input.transfer.trim.low")) {
 
-         if (!strcasecmp(varname, "input.transfer.trim.low")) {
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		tmp=atoi(val);
+		if (tmp < 110 || tmp > 540) {
+			return STAT_SET_INVALID;
+		}
 
-                tmp=atoi(val);
-                if (tmp < 110 || tmp > 540) {
-                        return STAT_SET_INVALID;
-                }
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_HIGH_DEV_LIMIT;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=tmp>>8;
 
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_HIGH_DEV_LIMIT;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=tmp>>8;
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " TRIM threshold volage set to %d V", tmp);
 
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " TRIM threshold volage set to %d V", tmp);
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
-
-        }
+	}
 
 	if (!strcasecmp(varname, "battery.runtime.low")) {
 
 		send_write_command(AUTHOR, 4);
-	        sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
 		tmp=atoi(val);
 		if (tmp < 0 || tmp > 30) {
-	                return STAT_SET_INVALID;
+			return STAT_SET_INVALID;
 		}
 
 		cbuf[0]=PW_SET_CONF_COMMAND;
@@ -2205,171 +2204,167 @@ int setvar (const char *varname, const char *val)
 		cbuf[2]=tmp;
 		cbuf[3]=0x0;
 
-		 res = command_write_sequence(cbuf, 4, answer);
-	       snprintf(success_msg, sizeof(success_msg)-1, " Low battery warning time set to %d min", tmp);
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Low battery warning time set to %d min", tmp);
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
-        }
+	}
 
-        if (!strcasecmp(varname, "input.transfer.delay")) {
+	if (!strcasecmp(varname, "input.transfer.delay")) {
 
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                tmp=atoi(val);
-                if (tmp < 1 || tmp > 18000 ) {
-                        return STAT_SET_INVALID;
-                }
+		tmp=atoi(val);
+		if (tmp < 1 || tmp > 18000 ) {
+			return STAT_SET_INVALID;
+		}
 
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_RETURN_DELAY;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=tmp>>8;
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_RETURN_DELAY;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=tmp>>8;
 
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Mains return delay set to %d sec", tmp);
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Mains return delay set to %d sec", tmp);
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
-        }
+	}
 
-        if (!strcasecmp(varname, "battery.charge.restart")) {
+	if (!strcasecmp(varname, "battery.charge.restart")) {
 
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 100 ) {
-                        return STAT_SET_INVALID;
-                }
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 100 ) {
+			return STAT_SET_INVALID;
+		}
 
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_RETURN_CAP;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=0x0;
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_RETURN_CAP;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=0x0;
 
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Mains return minimum battery capacity set to %d %%", tmp);
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Mains return minimum battery capacity set to %d %%", tmp);
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
-        }
-
-
-        if (!strcasecmp(varname, "ambient.temperature.high")) {
-
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
-
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 100 ) {
-                        return STAT_SET_INVALID;
-                }
-
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_MAX_TEMP;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=0x0;
-
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Maximum temperature set to %d C", tmp);
-
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
-
-        }
-
-         if (!strcasecmp(varname, "output.voltage.nominal")) {
-
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
-
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 460) {
-                        return STAT_SET_INVALID;
-                }
-
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_NOMINAL_OUT_VOLTAGE;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=tmp>>8;
-
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Nominal output voltage set to %d V", tmp);
-
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
-
-        }
-
-         if (!strcasecmp(varname, "battery.energysave.load")) {
-
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
-
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 100) {
-                        return STAT_SET_INVALID;
-                }
-
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_SLEEP_TH_LOAD;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=0x0;
-
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Minimum load before sleep countdown set to %d %%", tmp);
-
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+	}
 
 
-        }
+	if (!strcasecmp(varname, "ambient.temperature.high")) {
+
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 100 ) {
+			return STAT_SET_INVALID;
+		}
+
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_MAX_TEMP;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=0x0;
+
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Maximum temperature set to %d C", tmp);
+
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+
+	}
+
+	 if (!strcasecmp(varname, "output.voltage.nominal")) {
+
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 460) {
+			return STAT_SET_INVALID;
+		}
+
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_NOMINAL_OUT_VOLTAGE;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=tmp>>8;
+
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Nominal output voltage set to %d V", tmp);
+
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+
+	}
+
+	if (!strcasecmp(varname, "battery.energysave.load")) {
+
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 100) {
+			return STAT_SET_INVALID;
+		}
+
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_SLEEP_TH_LOAD;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=0x0;
+
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Minimum load before sleep countdown set to %d %%", tmp);
+
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+
+	}
+
+	if (!strcasecmp(varname, "battery.energysave.delay")) {
+
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 255) {
+			return STAT_SET_INVALID;
+		}
+
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_SLEEP_DELAY;
+		cbuf[2]=tmp&0xff;
+		cbuf[3]=0x0;
+
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, " Delay before sleep shutdown set to %d min", tmp);
+
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
 
 
-         if (!strcasecmp(varname, "battery.energysave.delay")) {
+	}
 
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
+	if (!strcasecmp(varname, "battery.packs")) {
 
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 255) {
-                        return STAT_SET_INVALID;
-                }
+		send_write_command(AUTHOR, 4);
+		sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
 
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_SLEEP_DELAY;
-                cbuf[2]=tmp&0xff;
-                cbuf[3]=0x0;
+		tmp=atoi(val);
+		if (tmp < 0 || tmp > 5) {
+			return STAT_SET_INVALID;
+		}
 
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, " Delay before sleep shutdown set to %d min", tmp);
+		cbuf[0]=PW_SET_CONF_COMMAND;
+		cbuf[1]=PW_CONF_BATT_STRINGS;
+		cbuf[2]=tmp;
+		cbuf[3]=0x0;
 
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+		res = command_write_sequence(cbuf, 4, answer);
+		snprintf(success_msg, sizeof(success_msg)-1, "EBM Count set to %d ", tmp);
 
-
-        }
-
-	 if (!strcasecmp(varname, "battery.packs")) {
-
-                send_write_command(AUTHOR, 4);
-                sleep(PW_SLEEP);        /* Need to. Have to wait at least 0,25 sec max 16 sec */
-
-                tmp=atoi(val);
-                if (tmp < 0 || tmp > 5) {
-                        return STAT_SET_INVALID;
-                }
-
-                cbuf[0]=PW_SET_CONF_COMMAND;
-                cbuf[1]=PW_CONF_BATT_STRINGS;
-                cbuf[2]=tmp;
-                cbuf[3]=0x0;
-
-                 res = command_write_sequence(cbuf, 4, answer);
-                snprintf(success_msg, sizeof(success_msg)-1, "EBM Count set to %d ", tmp);
-
-       		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
-
-
-        }
+		return decode_setvar_exec(res, (unsigned char)answer[0], varname, success_msg);
+	}
 
 	strncpy(namebuf, varname, sizeof(namebuf));
 	namebuf[NUT_OUTLET_POSITION] = 'n'; /* Assumes a maximum of 9 outlets */

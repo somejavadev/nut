@@ -77,7 +77,7 @@ const struct option longopts[] =
 	{ "nut_debug_level", no_argument, NULL, 'D' },
 	{NULL,0,NULL,0}};
 #else
-#define getopt_long(a,b,c,d,e)	getopt(a,b,c) 
+#define getopt_long(a,b,c,d,e)	getopt(a,b,c)
 #endif /* HAVE_GETOPT_LONG */
 
 static nutscan_device_t *dev[TYPE_END];
@@ -91,8 +91,10 @@ static char * serial_ports = NULL;
 #ifdef HAVE_PTHREAD
 static pthread_t thread[TYPE_END];
 
-static void * run_usb(void * arg)
+static void * run_usb(void *arg)
 {
+	NUT_UNUSED_VARIABLE(arg);
+
 	dev[TYPE_USB] = nutscan_scan_usb();
 	return NULL;
 }
@@ -101,7 +103,7 @@ static void * run_snmp(void * arg)
 {
 	nutscan_snmp_t * sec = (nutscan_snmp_t *)arg;
 
-	dev[TYPE_SNMP] = nutscan_scan_snmp(start_ip,end_ip,timeout,sec);
+	dev[TYPE_SNMP] = nutscan_scan_snmp(start_ip, end_ip, timeout, sec);
 	return NULL;
 }
 
@@ -113,14 +115,18 @@ static void * run_xml(void * arg)
 	return NULL;
 }
 
-static void * run_nut_old(void * arg)
+static void * run_nut_old(void *arg)
 {
-	dev[TYPE_NUT] = nutscan_scan_nut(start_ip,end_ip,port,timeout);
+	NUT_UNUSED_VARIABLE(arg);
+
+	dev[TYPE_NUT] = nutscan_scan_nut(start_ip, end_ip, port, timeout);
 	return NULL;
 }
 
-static void * run_avahi(void * arg)
+static void * run_avahi(void *arg)
 {
+	NUT_UNUSED_VARIABLE(arg);
+
 	dev[TYPE_AVAHI] = nutscan_scan_avahi(timeout);
 	return NULL;
 }
@@ -129,13 +135,15 @@ static void * run_ipmi(void * arg)
 {
 	nutscan_ipmi_t * sec = (nutscan_ipmi_t *)arg;
 
-	dev[TYPE_IPMI] = nutscan_scan_ipmi(start_ip,end_ip,sec);
+	dev[TYPE_IPMI] = nutscan_scan_ipmi(start_ip, end_ip, sec);
 	return NULL;
 }
 
-static void * run_eaton_serial(void * arg)
+static void * run_eaton_serial(void *arg)
 {
-	dev[TYPE_EATON_SERIAL] = nutscan_scan_eaton_serial (serial_ports);
+	NUT_UNUSED_VARIABLE(arg);
+
+	dev[TYPE_EATON_SERIAL] = nutscan_scan_eaton_serial(serial_ports);
 	return NULL;
 }
 
@@ -223,7 +231,7 @@ int main(int argc, char *argv[])
 	int allow_oldnut = 0;
 	int allow_avahi = 0;
 	int allow_ipmi = 0;
-	int allow_eaton_serial = 0; /* MUST be requested explicitely! */
+	int allow_eaton_serial = 0; /* MUST be requested explicitly! */
 	int quiet = 0; /* The debugging level for certain upsdebugx() progress messages; 0 = print always, quiet==1 is to require at least one -D */
 	void (*display_func)(nutscan_device_t * device);
 	int ret_code = EXIT_SUCCESS;
@@ -446,6 +454,7 @@ int main(int argc, char *argv[])
 				exit(EXIT_SUCCESS);
 			case '?':
 				ret_code = ERR_BAD_OPTION;
+				goto display_help;
 				/* Fall through to usage and error exit */
 			case 'h':
 			default:

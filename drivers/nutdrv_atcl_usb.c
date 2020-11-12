@@ -124,10 +124,12 @@ static unsigned int	comm_failures = 0;
 static int device_match_func(USBDevice_t *device, void *privdata)
 {
 	char *requested_vendor;
+	NUT_UNUSED_VARIABLE(privdata);
+
 	switch (is_usb_device_supported(atcl_usb_id, device))
 	{
 	case SUPPORTED:
-		if(!device->Vendor) { 
+		if(!device->Vendor) {
 			upsdebugx(1, "Couldn't retrieve USB string descriptor for vendor. Check permissions?");
 			requested_vendor = getval("vendor");
 			if(requested_vendor) {
@@ -135,7 +137,7 @@ static int device_match_func(USBDevice_t *device, void *privdata)
 					upsdebugx(3, "Matched device with NULL vendor string.");
 					return 1;
 				}
-			}	
+			}
 			upsdebugx(1, "To keep trying (in case your device does not have a vendor string), use vendor=NULL");
 			return 0;
 		}
@@ -236,7 +238,7 @@ static void usb_comm_good(void)
 		return;
 	}
 
-	upslogx(LOG_NOTICE, "Communications with UPS re-established");	
+	upslogx(LOG_NOTICE, "Communications with UPS re-established");
 	comm_failures = 0;
 }
 
@@ -250,9 +252,15 @@ static void usb_comm_good(void)
 static int driver_callback(usb_dev_handle *handle, USBDevice_t *device)
 {
 	int ret;
+	NUT_UNUSED_VARIABLE(device);
 
 	if ((ret = usb_set_configuration(handle, 1)) < 0) {
 		upslogx(LOG_WARNING, "Can't set USB configuration: %s", nut_usb_strerror(ret));
+/*
+	if (usb_set_configuration(handle, 1) < 0) {
+		upslogx(LOG_WARNING, "Can't set USB configuration: %s", usb_strerror());
+>>>>>>> opensource/master
+*/
 		return -1;
 	}
 
@@ -343,7 +351,7 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 
 			upsdebugx(3, "Checking USB device [%04x:%04x] (%s/%s)", dev->descriptor.idVendor,
 				dev->descriptor.idProduct, bus->dirname, dev->filename);
-			
+
 			/* supported vendors are now checked by the supplied matcher */
 
 			/* open the device */
@@ -384,12 +392,20 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 			device->VendorID = dev->descriptor.idVendor;
 			device->ProductID = dev->descriptor.idProduct;
 			device->Bus = xstrdup(bus->dirname);
+/*
+			device->Bus = strdup(bus->dirname);
+//>>>>>>> opensource/master
+*/
 			iManufacturer = dev->descriptor.iManufacturer;
 			iProduct = dev->descriptor.iProduct;
 			iSerialNumber = dev->descriptor.iSerialNumber;
 #endif /* WITH_LIBUSB_1_0 */
 
 			if (iManufacturer) {
+/*
+			if (dev->descriptor.iManufacturer) {
+//>>>>>>> opensource/master
+*/
 				char	buf[SMALLBUF];
 				ret = usb_get_string_simple(handle, iManufacturer,
 					(usb_ctrl_char)buf, sizeof(buf));
@@ -442,7 +458,7 @@ static int usb_device_open(usb_dev_handle **handlep, USBDevice_t *device, USBDev
 			upsdebugx(4, "- Bus          : %s", device->Bus ? device->Bus : "unknown");
 
 			for (m = matcher; m; m = m->next) {
-				
+
 				switch (m->match_function(device, m->privdata))
 				{
 				case 0:
@@ -608,8 +624,12 @@ void upsdrv_updateinfo(void)
 		case 2:
 			upsdebugx(2, "reply[0] = 0x%02x -> LB", reply[0]);
 			status_set("LB");
+			goto fallthrough_LB_means_OB;
+			/* Note: the comment below existed for years, so wondering
+			 * if this device CAN set independently LB and OB? */
 			/* fall through */
 		case 1:
+		fallthrough_LB_means_OB:
 			upsdebugx(2, "reply[0] = 0x%02x -> OB", reply[0]);
 			status_set("OB");
 			break;

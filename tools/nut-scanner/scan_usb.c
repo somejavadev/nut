@@ -346,6 +346,11 @@ nutscan_device_t * nutscan_scan_usb()
 				if (iManufacturer) {
 					ret = (*nut_usb_get_string_simple)(udev,
 						iManufacturer, (char *)string, sizeof(string));
+/*
+						dev->descriptor.iManufacturer,
+						string, sizeof(string));
+//>>>>>>> opensource/master
+*/
 					if (ret > 0) {
 						vendor_name = strdup(str_rtrim(string, ' '));
 						if (vendor_name == NULL) {
