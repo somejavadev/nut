@@ -57,19 +57,19 @@ AC_DEFUN([NUT_STASH_WARNINGS],
 
 AC_DEFUN([NUT_POP_WARNINGS],
 [
-    AS_IF([test -n "${CFLAGS_STASHED_WARNINGS}"],[],[
+    AS_IF([test -n "${CFLAGS_STASHED_WARNINGS}"],[
             AC_MSG_NOTICE([Applying back the stashed CFLAGS warnings])
             CFLAGS="${CFLAGS} ${CFLAGS_STASHED_WARNINGS}"
             AC_MSG_NOTICE([Ended up with: '${CFLAGS}'])
         ])
 
-    AS_IF([test -n "${CPPFLAGS_STASHED_WARNINGS}"],[],[
+    AS_IF([test -n "${CPPFLAGS_STASHED_WARNINGS}"],[
             AC_MSG_NOTICE([Applying back the stashed CPPFLAGS warnings])
             CPPFLAGS="${CPPFLAGS} ${CPPFLAGS_STASHED_WARNINGS}"
             AC_MSG_NOTICE([Ended up with: '${CPPFLAGS}'])
         ])
 
-    AS_IF([test -n "${CXXFLAGS_STASHED_WARNINGS}"],[],[
+    AS_IF([test -n "${CXXFLAGS_STASHED_WARNINGS}"],[
             AC_MSG_NOTICE([Applying back the stashed CXXFLAGS warnings])
             CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_STASHED_WARNINGS}"
             AC_MSG_NOTICE([Ended up with: '${CXXFLAGS}'])
