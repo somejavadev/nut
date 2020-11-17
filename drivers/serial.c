@@ -21,6 +21,7 @@
 #include "timehead.h"
 #include "serial.h"
 #include "main.h"
+#include "attribute.h"
 
 #include <grp.h>
 #include <pwd.h>
@@ -37,6 +38,7 @@
 	static unsigned int	comm_failures = 0;
 
 static void ser_open_error(const char *port)
+	__attribute__((noreturn))
 {
 	struct	stat	fs;
 	struct	passwd	*user;
