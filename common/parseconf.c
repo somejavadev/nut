@@ -76,6 +76,8 @@
  *
  */
 
+#include "common.h"
+
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -86,6 +88,7 @@
 #include <fcntl.h>
 
 #include "parseconf.h"
+#include "attribute.h"
 
 /* possible states */
 
@@ -99,6 +102,7 @@
 #define STATE_PARSEERR		8
 
 static void pconf_fatal(PCONF_CTX_t *ctx, const char *errtxt)
+	__attribute__((noreturn))
 {
 	if (ctx->errhandler)
 		ctx->errhandler(errtxt);
