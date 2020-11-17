@@ -17,7 +17,7 @@ AC_DEFUN([NUT_STASH_WARNINGS],
             TMP=""
             for V in ${CFLAGS} ; do
                 case "$V" in
-                    -W*) CFLAGS_STASHED_WARNINGS="${CFLAGS_STASHED_WARNINGS} ${V}" ;;
+                    -W*|-*pedantic*) CFLAGS_STASHED_WARNINGS="${CFLAGS_STASHED_WARNINGS} ${V}" ;;
                     *) TMP="${TMP} ${V}" ;;
                 esac
             done
@@ -30,7 +30,7 @@ AC_DEFUN([NUT_STASH_WARNINGS],
             TMP=""
             for V in ${CPPFLAGS} ; do
                 case "$V" in
-                    -W*) CPPFLAGS_STASHED_WARNINGS="${CPPFLAGS_STASHED_WARNINGS} ${V}" ;;
+                    -W*|-*pedantic*) CPPFLAGS_STASHED_WARNINGS="${CPPFLAGS_STASHED_WARNINGS} ${V}" ;;
                     *) TMP="${TMP} ${V}" ;;
                 esac
             done
@@ -44,7 +44,7 @@ AC_DEFUN([NUT_STASH_WARNINGS],
             TMP=""
             for V in ${CXXFLAGS} ; do
                 case "$V" in
-                    -W*) CXXFLAGS_STASHED_WARNINGS="${CXXFLAGS_STASHED_WARNINGS} ${V}" ;;
+                    -W*|-*pedantic*) CXXFLAGS_STASHED_WARNINGS="${CXXFLAGS_STASHED_WARNINGS} ${V}" ;;
                     *) TMP="${TMP} ${V}" ;;
                 esac
             done
