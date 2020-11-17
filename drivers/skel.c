@@ -12,7 +12,9 @@
 	* or docs/snmp-subdrivers.txt for SNMP devices
 */
 
+#include "config.h"
 #include "main.h"
+#include "attribute.h"
 
 /* #include "serial.h" */
 
@@ -93,6 +95,7 @@ void upsdrv_updateinfo(void)
 }
 
 void upsdrv_shutdown(void)
+	__attribute__((noreturn))
 {
 	/* tell the UPS to shut down, then return - DO NOT SLEEP HERE */
 
