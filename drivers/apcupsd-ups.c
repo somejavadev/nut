@@ -16,6 +16,8 @@
 
 */
 
+#include "config.h"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -24,6 +26,7 @@
 
 #include "main.h"
 #include "apcupsd-ups.h"
+#include "attribute.h"
 
 #define DRIVER_NAME	"apcupsd network client UPS driver"
 #define DRIVER_VERSION	"0.5"
@@ -252,6 +255,7 @@ void upsdrv_updateinfo(void)
 }
 
 void upsdrv_shutdown(void)
+	__attribute__((noreturn))
 {
 	fatalx(EXIT_FAILURE, "shutdown not supported");
 }
