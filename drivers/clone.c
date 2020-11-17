@@ -18,8 +18,10 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "config.h"
 #include "main.h"
 #include "parseconf.h"
+#include "attribute.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -521,6 +523,7 @@ void upsdrv_updateinfo(void)
 
 
 void upsdrv_shutdown(void)
+	__attribute__((noreturn))
 {
 	fatalx(EXIT_FAILURE, "shutdown not supported");
 }
