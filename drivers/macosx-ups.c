@@ -18,7 +18,9 @@
  *
  */
 
+#include "config.h"
 #include "main.h"
+#include "attribute.h"
 
 #include <regex.h>
 
@@ -258,6 +260,7 @@ void upsdrv_updateinfo(void)
 }
 
 void upsdrv_shutdown(void)
+	__attribute__((noreturn))
 {
 	/* tell the UPS to shut down, then return - DO NOT SLEEP HERE */
 
