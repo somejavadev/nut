@@ -32,6 +32,7 @@
 #include "dstate.h"
 #include "state.h"
 #include "parseconf.h"
+#include "attribute.h"
 
 	static int	sockfd = -1, stale = 1, alarm_active = 0, ignorelb = 0;
 	static char	*sockfn = NULL;
@@ -43,6 +44,9 @@
 	struct ups_handler	upsh;
 
 /* this may be a frequent stumbling point for new users, so be verbose here */
+static void sock_fail(const char *fn)
+	__attribute__((noreturn));
+
 static void sock_fail(const char *fn)
 {
 	int	sockerr;
@@ -169,7 +173,15 @@ static void send_to_all(const char *fmt, ...)
 	conn_t	*conn, *cnext;
 
 	va_start(ap, fmt);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 	ret = vsnprintf(buf, sizeof(buf), fmt, ap);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic pop
+#endif
 	va_end(ap);
 
 	if (ret < 1) {
@@ -198,7 +210,15 @@ static int send_to_one(conn_t *conn, const char *fmt, ...)
 	char	buf[ST_SOCK_BUF_LEN];
 
 	va_start(ap, fmt);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 	ret = vsnprintf(buf, sizeof(buf), fmt, ap);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic pop
+#endif
 	va_end(ap);
 
 	upsdebugx(2, "%s: sending %.*s", __func__, (int)strcspn(buf, "\n"), buf);
@@ -310,7 +330,7 @@ static int st_tree_dump_conn(st_tree_t *node, conn_t *conn)
 
 	/* provide any auxiliary data */
 	if (node->aux) {
-		if (!send_to_one(conn, "SETAUX %s %d\n", node->var, node->aux)) {
+		if (!send_to_one(conn, "SETAUX %s %ld\n", node->var, node->aux)) {
 			return 0;
 		}
 	}
@@ -665,7 +685,15 @@ int dstate_setinfo(const char *var, const char *fmt, ...)
 	va_list	ap;
 
 	va_start(ap, fmt);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 	vsnprintf(value, sizeof(value), fmt, ap);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic pop
+#endif
 	va_end(ap);
 
 	ret = state_setinfo(&dtree_root, var, value);
@@ -684,7 +712,15 @@ int dstate_addenum(const char *var, const char *fmt, ...)
 	va_list	ap;
 
 	va_start(ap, fmt);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 	vsnprintf(value, sizeof(value), fmt, ap);
+#if defined (__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic pop
+#endif
 	va_end(ap);
 
 	ret = state_addenum(dtree_root, var, value);
@@ -790,7 +826,7 @@ void dstate_delflags(const char *var, const int delflags)
 	dstate_setflags(var, flags);
 }
 
-void dstate_setaux(const char *var, int aux)
+void dstate_setaux(const char *var, long aux)
 {
 	st_tree_t	*sttmp;
 
@@ -809,7 +845,7 @@ void dstate_setaux(const char *var, int aux)
 	sttmp->aux = aux;
 
 	/* update listeners */
-	send_to_all("SETAUX %s %d\n", var, aux);
+	send_to_all("SETAUX %s %ld\n", var, aux);
 }
 
 const char *dstate_getinfo(const char *var)
