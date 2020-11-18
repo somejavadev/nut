@@ -31,7 +31,7 @@ configure_nut() {
     || { RES=$?
         echo "FAILED ($RES) to configure nut, will dump config.log in a second to help troubleshoot CI" >&2
         echo "    (or press Ctrl+C to abort now if running interactively)" >&2
-        sleep 1
+        sleep 5
         echo "=========== DUMPING config.log :"; cat config.log || true ; echo "=========== END OF config.log"
         echo "FATAL: FAILED ($RES) to ./configure ${CONFIG_OPTS[*]}" >&2
         exit $RES
@@ -40,9 +40,15 @@ configure_nut() {
 
 build_to_only_catch_errors() {
     ( echo "`date`: Starting the parallel build attempt (quietly to build what we can)..."; \
-      $CI_TIME make VERBOSE=0 -k -j8 all >/dev/null 2>&1 ; ) || \
+      $CI_TIME make VERBOSE=0 -k -j8 all >/dev/null 2>&1 && echo "`date`: SUCCESS" ; ) || \
     ( echo "`date`: Starting the sequential build attempt (to list remaining files with errors considered fatal for this build configuration)..."; \
       $CI_TIME make VERBOSE=1 all -k ) || return $?
+
+    echo "`date`: Starting a 'make check' for quick sanity test of the products built with the current compiler and standards"
+    $CI_TIME make VERBOSE=0 check \
+	&& echo "`date`: SUCCESS" \
+    || return $?
+
     return 0
 }
 
@@ -156,7 +162,11 @@ default|default-alldrv|default-all-errors|default-spellcheck|default-shellcheck|
     CONFIG_OPTS+=("CPPFLAGS=-I${BUILD_PREFIX}/include ${CPPFLAGS}")
     CONFIG_OPTS+=("CXXFLAGS=-I${BUILD_PREFIX}/include ${CXXFLAGS}")
     CONFIG_OPTS+=("LDFLAGS=-L${BUILD_PREFIX}/lib")
-    CONFIG_OPTS+=("PKG_CONFIG_PATH=${BUILD_PREFIX}/lib/pkgconfig")
+    if [ -n "$PKG_CONFIG_PATH" ] ; then
+        CONFIG_OPTS+=("PKG_CONFIG_PATH=${BUILD_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}")
+    else
+        CONFIG_OPTS+=("PKG_CONFIG_PATH=${BUILD_PREFIX}/lib/pkgconfig")
+    fi
     CONFIG_OPTS+=("--prefix=${BUILD_PREFIX}")
     CONFIG_OPTS+=("--sysconfdir=${BUILD_PREFIX}/etc/nut")
     CONFIG_OPTS+=("--with-udev-dir=${BUILD_PREFIX}/etc/udev")
@@ -282,7 +292,9 @@ default|default-alldrv|default-all-errors|default-spellcheck|default-shellcheck|
         sudo dpkg -r --force all pkg-config
     fi
 
-    configure_nut
+    if [ "$BUILD_TYPE" != "default-all-errors" ] ; then
+        configure_nut
+    fi
 
     case "$BUILD_TYPE" in
         "default-tgt:"*) # Hook for matrix of custom distchecks primarily
@@ -326,7 +338,26 @@ default|default-alldrv|default-all-errors|default-spellcheck|default-shellcheck|
             ;;
         "default-all-errors")
             RES=0
-            build_to_only_catch_errors || RES=$?
+            if pkg-config --exists nss && pkg-config --exists openssl ; then
+                # Try builds for both cases as they are ifdef-ed
+
+                echo "=== Building with SSL=openssl..."
+                ( CONFIG_OPTS+=("--with-openssl")
+                  configure_nut
+                  build_to_only_catch_errors ) || RES=$?
+
+                echo "=== Clean the sandbox..."
+                make distclean -k || true
+
+                echo "=== Building with SSL=nss..."
+                ( CONFIG_OPTS+=("--with-nss")
+                  configure_nut
+                  build_to_only_catch_errors ) || RES=$?
+            else
+                # Build what we can configure
+                configure_nut
+                build_to_only_catch_errors || RES=$?
+            fi
             exit $RES
             ;;
     esac
