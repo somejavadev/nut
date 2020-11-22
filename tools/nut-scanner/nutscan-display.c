@@ -35,7 +35,7 @@ static char * nutscan_device_type_string[TYPE_END]= {
         "AVAHI",
         "EATON_SERIAL" };
 
-void nutscan_display_ups_conf(nutscan_device_t * device)
+static void nutscan_display_ups_conf(nutscan_device_t * device)
 {
 	nutscan_device_t * current_dev = device;
 	nutscan_options_t * opt;
@@ -76,7 +76,7 @@ void nutscan_display_ups_conf(nutscan_device_t * device)
 	while( current_dev != NULL );
 }
 
-void nutscan_display_parsable(nutscan_device_t * device)
+static void nutscan_display_parsable(nutscan_device_t * device)
 {
 	nutscan_device_t * current_dev = device;
 	nutscan_options_t * opt;
