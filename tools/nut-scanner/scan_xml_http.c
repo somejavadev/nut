@@ -64,7 +64,7 @@ static pthread_mutex_t dev_mutex;
 #endif
 
 /* return 0 on error */
-int nutscan_load_neon_library(const char *libname_path)
+static int nutscan_load_neon_library(const char *libname_path)
 {
 	if( dl_handle != NULL ) {
 		/* if previous init failed */
