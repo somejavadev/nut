@@ -41,7 +41,7 @@ int nutscan_load_avahi_library(const char *libname_path);
 int nutscan_load_ipmi_library(const char *libname_path);
 int nutscan_load_upsclient_library(const char *libname_path);
 
-void nutscan_init(void)
+static void nutscan_init(void)
 {
 	char *libname = NULL;
 #ifdef WITH_USB
@@ -93,7 +93,7 @@ void nutscan_init(void)
 	}
 }
 
-void nutscan_free(void)
+static void nutscan_free(void)
 {
 	if( nutscan_avail_usb ) {
 		lt_dlexit();
