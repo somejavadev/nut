@@ -27,12 +27,12 @@
 #include <stdio.h>
 #include <string.h>
 
-int nutscan_avail_avahi = 0;
-int nutscan_avail_ipmi = 0;
-int nutscan_avail_nut = 0;
-int nutscan_avail_snmp = 0;
-int nutscan_avail_usb = 0;
-int nutscan_avail_xml_http = 0;
+static int nutscan_avail_avahi = 0;
+static int nutscan_avail_ipmi = 0;
+static int nutscan_avail_nut = 0;
+static int nutscan_avail_snmp = 0;
+static int nutscan_avail_usb = 0;
+static int nutscan_avail_xml_http = 0;
 
 int nutscan_load_usb_library(const char *libname_path);
 int nutscan_load_snmp_library(const char *libname_path);
