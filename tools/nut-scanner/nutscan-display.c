@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include "nutscan-device.h"
 
-char * nutscan_device_type_string[TYPE_END]= {
+static char * nutscan_device_type_string[TYPE_END]= {
         "NONE",
         "USB",
         "SNMP",
