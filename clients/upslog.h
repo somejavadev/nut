@@ -37,7 +37,7 @@ static struct {
 	{ "TIME",	do_time			},
 	{ "VAR",	do_var			},
 	{ "ETIME",	do_etime		},
-	{ NULL,		(void(*)())(NULL)	}
+	{ NULL,		(void(*)(void))(NULL)	}
 };
 
 #ifdef __cplusplus
