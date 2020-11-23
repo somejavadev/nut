@@ -354,11 +354,10 @@ _matrix_linux_gnustd_nowarn_x86_32bit:
     os: linux
     arch: x86
     sudo: true
-    before_install:
-        - sudo dpkg --add-architecture i386 && sudo apt-get update
         # Perl is packaged poorly for multiarch, across several distro releases:
         # https://bugs.launchpad.net/ubuntu/+source/pkgbinarymangler/+bug/1574351
-        - sudo apt-get install libperl5.22 || true ; sudo rm -f /usr/share/doc/libperl5.22/changelog.Debian.gz ; sudo apt-get install -f ; sudo apt-get install libperl5.22:i386
+    before_install:
+        - sudo dpkg --add-architecture i386 && sudo apt-get update ; yes | sudo apt-get install -y --force-yes libperl5.22:i386 || true ; sudo rm -f /usr/share/doc/libperl5.22/changelog.Debian.gz ; yes | sudo apt-get install -y --force-yes libperl5.22
     services:
         - docker
     compiler: gcc
@@ -405,7 +404,10 @@ _matrix_linux_gnustd_nowarn_x86_32bit:
     sudo: true
     before_install:
         - sudo dpkg --add-architecture i386 && sudo apt-get update
-        - sudo apt-get install libperl5.22 || true ; sudo rm -f /usr/share/doc/libperl5.22/changelog.Debian.gz ; sudo apt-get install -f ; sudo apt-get install libperl5.22:i386
+        - yes | sudo apt-get install -y --force-yes libperl5.22 || true
+        - sudo rm -f /usr/share/doc/libperl5.22/changelog.Debian.gz
+        - sudo apt-get install -f
+        - yes | apt-get install -y --force-yes libperl5.22:i386
     services:
         - docker
     compiler: clang
