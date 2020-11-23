@@ -1090,7 +1090,8 @@ _matrix_fixbugs:
 jobs:
   fast_finish: true
   include:
-  - *_matrix_master
+#  - *_matrix_master
+  - *_matrix_linux_gnustd_nowarn_x86_32bit
 
 ###################################################################################
 # Note: "env" lines below must exactly describe a matrix option defined above
