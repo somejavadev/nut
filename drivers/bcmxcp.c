@@ -1801,7 +1801,7 @@ void upsdrv_updateinfo(void)
 		if (value != 0) {
 			dstate_setinfo("battery.charge.restart","%d",value);
 		}
-	};
+	}
 
 	res = command_read_sequence(PW_CONFIG_BLOCK_REQ, answer);
 	if (res <= 0) {
