@@ -489,9 +489,10 @@ int blazer_command(const char *cmd, char *buf, size_t buflen)
 		fatal_with_errno(EXIT_FAILURE, "Permissions problem");
 #ifndef HAVE___ATTRIBUTE__NORETURN
 		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
-#endif
+#endif	/* noreturn */
+#endif	/* usb */
 
-	case ERROR_PIPE:		/* Broken pipe */
+	/*case ERROR_PIPE:*/		/* Broken pipe */
 	case -EPIPE:		/* Broken pipe */
 		if (usb_clear_halt(udev, 0x81) == 0) {
 			upsdebugx(1, "Stall condition cleared");

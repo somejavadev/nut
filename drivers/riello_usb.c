@@ -412,7 +412,8 @@ static int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t 
 		fatal_with_errno(EXIT_FAILURE, "Permissions problem");
 #ifndef HAVE___ATTRIBUTE__NORETURN
 		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
-#endif
+#endif	/* noreturn */
+#endif	/* usb */
 
 	/*case ERROR_PIPE:*/		/* Broken pipe */
 	case -EPIPE:		/* Broken pipe */
