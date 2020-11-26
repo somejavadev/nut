@@ -458,15 +458,6 @@ static int	voltronic_qs_hex_battery_voltage(item_t *item, char *value, const siz
 	val1 = strtol(item->value, &str_end, 16);
 	val2 = strtol(str_end, NULL, 16);
 
-<<<<<<< HEAD
-#if defined (__GNUC__) || defined (__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#pragma GCC diagnostic ignored "-Wformat-security"
-#endif
-	snprintf(value, valuelen, item->dfl, (val1 * val2) / 510.0);
-#if defined (__GNUC__) || defined (__clang__)
-=======
 #ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
 #pragma GCC diagnostic push
 #endif
@@ -478,7 +469,6 @@ static int	voltronic_qs_hex_battery_voltage(item_t *item, char *value, const siz
 #endif
 	snprintf(value, valuelen, item->dfl, (val1 * val2) / 510.0);
 #ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
->>>>>>> origin/fightwarn
 #pragma GCC diagnostic pop
 #endif
 
@@ -548,15 +538,6 @@ static int	voltronic_qs_hex_process_ratings_bits(item_t *item, char *value, cons
 		return -1;
 	}
 
-<<<<<<< HEAD
-#if defined (__GNUC__) || defined (__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#pragma GCC diagnostic ignored "-Wformat-security"
-#endif
-	snprintf(value, valuelen, item->dfl, ret);
-#if defined (__GNUC__) || defined (__clang__)
-=======
 #ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
 #pragma GCC diagnostic push
 #endif
@@ -568,7 +549,6 @@ static int	voltronic_qs_hex_process_ratings_bits(item_t *item, char *value, cons
 #endif
 	snprintf(value, valuelen, item->dfl, ret);
 #ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
->>>>>>> origin/fightwarn
 #pragma GCC diagnostic pop
 #endif
 
