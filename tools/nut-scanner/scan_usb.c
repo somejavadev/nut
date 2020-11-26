@@ -68,7 +68,8 @@ static int (*nut_usb_get_string_simple)(libusb_device_handle *dev, int index,
  static char * (*nut_usb_strerror)(void);
 #endif
 
-/* return 0 on error */
+/* return 0 on error; visible externally */
+int nutscan_load_usb_library(const char *libname_path);
 int nutscan_load_usb_library(const char *libname_path)
 {
 	if( dl_handle != NULL ) {

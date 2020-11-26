@@ -20,7 +20,7 @@
 
 #include "main.h"
 
-#include <libpowerman.h>
+#include <libpowerman.h>	/* pm_err_t and other beasts */
 
 #define DRIVER_NAME	"Powerman PDU client driver"
 #define DRIVER_VERSION	"0.11"
@@ -38,8 +38,8 @@ upsdrv_info_t upsdrv_info = {
 static pm_err_t query_one(pm_handle_t arg_pm, char *s, int mode);
 static pm_err_t query_all(pm_handle_t arg_pm, int mode);
 
-pm_handle_t pm;
-char ebuf[64];
+static pm_handle_t pm;
+static char ebuf[64];
 
 /* modes to snmp_ups_walk. */
 #define WALKMODE_INIT	0
@@ -49,7 +49,7 @@ static int reconnect_ups(void);
 
 static int instcmd(const char *cmdname, const char *extra)
 {
-	pm_err_t rv = -1;
+	pm_err_t rv = PM_EBADARG;
 	char *cmdsuffix = NULL;
 	char *cmdindex = NULL;
 	char outletname[SMALLBUF];
@@ -132,6 +132,9 @@ void upsdrv_initinfo(void)
 	upsh.instcmd = instcmd;
 	/* FIXME: no need for setvar (ex for outlet.n.delay.*)!? */
 }
+
+void upsdrv_shutdown(void)
+	__attribute__((noreturn));
 
 void upsdrv_shutdown(void)
 {

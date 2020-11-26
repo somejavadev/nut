@@ -57,11 +57,11 @@ upsdrv_info_t upsdrv_info =
 #define MODE_REPEATER	2 /* use libupsclient to repeat an UPS */
 #define MODE_META		3 /* consolidate data from several UPSs (TBS) */
 
-int mode=MODE_NONE;
+static int mode = MODE_NONE;
 
 /* parseconf context, for dummy mode using a file */
-PCONF_CTX_t	*ctx=NULL;
-time_t		next_update = -1;
+static PCONF_CTX_t	*ctx = NULL;
+static time_t		next_update = -1;
 
 #define MAX_STRING_SIZE	128
 
@@ -139,10 +139,9 @@ void upsdrv_initinfo(void)
 			}
 			/* FIXME: commands and settable variable! */
 			break;
-		default:
 		case MODE_NONE:
+		default:
 			fatalx(EXIT_FAILURE, "no suitable definition found!");
-			break;
 	}
 	upsh.instcmd = instcmd;
 
@@ -187,6 +186,9 @@ void upsdrv_updateinfo(void)
 			break;
 	}
 }
+
+void upsdrv_shutdown(void)
+	__attribute__((noreturn));
 
 void upsdrv_shutdown(void)
 {

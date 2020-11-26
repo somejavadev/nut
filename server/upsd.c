@@ -48,38 +48,38 @@ int	allow_severity = LOG_INFO;
 int	deny_severity = LOG_WARNING;
 #endif	/* HAVE_WRAP */
 
-	/* externally-visible settings and pointers */
+/* externally-visible settings and pointers */
 
-	upstype_t	*firstups = NULL;
+upstype_t	*firstups = NULL;
 
-	/* default 15 seconds before data is marked stale */
-	int	maxage = 15;
+/* default 15 seconds before data is marked stale */
+int	maxage = 15;
 
-	/* default to 1h before cleaning up status tracking entries */
-	int	tracking_delay = 3600;
+/* default to 1h before cleaning up status tracking entries */
+int	tracking_delay = 3600;
 
-	/*
-	 * Preloaded to ALLOW_NO_DEVICE from upsd.conf or environment variable
-	 * (with higher prio for envvar); defaults to disabled for legacy compat.
-	 */
-	int allow_no_device = 0;
+/*
+ * Preloaded to ALLOW_NO_DEVICE from upsd.conf or environment variable
+ * (with higher prio for envvar); defaults to disabled for legacy compat.
+ */
+int allow_no_device = 0;
 
-	/* preloaded to {OPEN_MAX} in main, can be overridden via upsd.conf */
-	int	maxconn = 0;
+/* preloaded to {OPEN_MAX} in main, can be overridden via upsd.conf */
+int	maxconn = 0;
 
-	/* preloaded to STATEPATH in main, can be overridden via upsd.conf */
-	char	*statepath = NULL;
+/* preloaded to STATEPATH in main, can be overridden via upsd.conf */
+char	*statepath = NULL;
 
-	/* preloaded to DATADIR in main, can be overridden via upsd.conf */
-	char	*datapath = NULL;
+/* preloaded to DATADIR in main, can be overridden via upsd.conf */
+char	*datapath = NULL;
 
-	/* everything else */
-	const char	*progname;
+/* everything else */
+static const char	*progname;
 
 nut_ctype_t	*firstclient = NULL;
 /* static nut_ctype_t	*lastclient = NULL; */
 
-	/* default is to listen on all local interfaces */
+/* default is to listen on all local interfaces */
 static stype_t	*firstaddr = NULL;
 
 static int 	opt_af = AF_UNSPEC;
@@ -647,7 +647,7 @@ static void client_free(void)
 	}
 }
 
-void driver_free(void)
+static void driver_free(void)
 {
 	upstype_t	*ups, *unext;
 
@@ -696,7 +696,7 @@ static void upsd_cleanup(void)
 	free(handler);
 }
 
-void poll_reload(void)
+static void poll_reload(void)
 {
 	int	ret;
 
@@ -1075,6 +1075,9 @@ static void mainloop(void)
 }
 
 static void help(const char *arg_progname)
+	__attribute__((noreturn));
+
+static void help(const char *arg_progname)
 {
 	printf("Network server for UPS data.\n\n");
 	printf("usage: %s [OPTIONS]\n", arg_progname);
@@ -1167,16 +1170,14 @@ int main(int argc, char **argv)
 
 	while ((i = getopt(argc, argv, "+h46p:qr:i:fu:Vc:D")) != -1) {
 		switch (i) {
-			case 'h':
-				help(progname);
-				break;
-
 			case 'p':
 			case 'i':
 				fatalx(EXIT_FAILURE, "Specifying a listening addresses with '-i <address>' and '-p <port>'\n"
 					"is deprecated. Use 'LISTEN <address> [<port>]' in 'upsd.conf' instead.\n"
 					"See 'man 8 upsd.conf' for more information.");
+#ifndef HAVE___ATTRIBUTE__NORETURN
 					exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
+#endif
 
 			case 'q':
 				nut_log_level++;
@@ -1217,9 +1218,9 @@ int main(int argc, char **argv)
 				opt_af = AF_INET6;
 				break;
 
+			case 'h':
 			default:
 				help(progname);
-				break;
 		}
 	}
 

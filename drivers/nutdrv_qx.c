@@ -2208,12 +2208,30 @@ static int	qx_command(const char *cmd, char *buf, size_t buflen)
 		{
 		case ERROR_BUSY:	/* Device or resource busy */
 			fatal_with_errno(EXIT_FAILURE, "Got disconnected by another driver");
+#ifndef HAVE___ATTRIBUTE__NORETURN
+# if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_UNREACHABLE_CODE)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunreachable-code"
+# endif
 			exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
+# if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_UNREACHABLE_CODE)
+#  pragma GCC diagnostic pop
+# endif
+#endif
 
 	#if WITH_LIBUSB_0_1			/* limit to libusb 0.1 implementation */
 		case -EPERM:		/* Operation not permitted */
 			fatal_with_errno(EXIT_FAILURE, "Permissions problem");
+#ifndef HAVE___ATTRIBUTE__NORETURN
+# if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_UNREACHABLE_CODE)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunreachable-code"
+# endif
 			exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
+# if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_UNREACHABLE_CODE)
+#  pragma GCC diagnostic pop
+# endif
+#endif
 	#endif	/* WITH_LIBUSB_0_1 */
 
 		case ERROR_PIPE:	/* Broken pipe */
@@ -2843,20 +2861,29 @@ static int	qx_process_answer(item_t *item, const int len)
 /* See header file for details. */
 int	qx_process(item_t *item, const char *command)
 {
-	char	buf[sizeof(item->answer) - 1] = "",
-		cmd[command ? (strlen(command) >= SMALLBUF ? strlen(command) + 1 : SMALLBUF) : (item->command && strlen(item->command) >= SMALLBUF ? strlen(item->command) + 1 : SMALLBUF)];
+	char	buf[sizeof(item->answer) - 1] = "", *cmd;
 	int	len;
+	size_t cmdlen = command ?
+		(strlen(command) >= SMALLBUF ? strlen(command) + 1 : SMALLBUF) :
+		(item->command && strlen(item->command) >= SMALLBUF ? strlen(item->command) + 1 : SMALLBUF);
+	size_t cmdsz = (sizeof(char) * cmdlen); /* in bytes, to be pedantic */
+
+	if ( !(cmd = xmalloc(cmdsz)) ) {
+		upslogx(LOG_ERR, "qx_process() failed to allocate buffer");
+		return -1;
+	}
 
 	/* Prepare the command to be used */
-	memset(cmd, 0, sizeof(cmd));
-	snprintf(cmd, sizeof(cmd), "%s", command ? command : item->command);
+	memset(cmd, 0, cmdsz);
+	snprintf(cmd, cmdsz, "%s", command ? command : item->command);
 
 	/* Preprocess the command */
 	if (
 		item->preprocess_command != NULL &&
-		item->preprocess_command(item, cmd, sizeof(cmd)) == -1
+		item->preprocess_command(item, cmd, cmdsz) == -1
 	) {
 		upsdebugx(4, "%s: failed to preprocess command [%s]", __func__, item->info_type);
+		free (cmd);
 		return -1;
 	}
 
@@ -2873,9 +2900,12 @@ int	qx_process(item_t *item, const char *command)
 			upsdebugx(4, "%s: failed to preprocess answer [%s]", __func__, item->info_type);
 			/* Clear answer, preventing it from being reused by next items with same command */
 			memset(item->answer, 0, sizeof(item->answer));
+			free (cmd);
 			return -1;
 		}
 	}
+
+	free (cmd);
 
 	/* Process the answer to get the value */
 	return qx_process_answer(item, len);
@@ -2924,7 +2954,19 @@ int	ups_infoval_set(item_t *item)
 				return -1;
 			}
 
+#ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic push
+#endif
+#ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+#ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_FORMAT_SECURITY
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 			snprintf(value, sizeof(value), item->dfl, strtod(value, NULL));
+#ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic pop
+#endif
 		}
 
 	}

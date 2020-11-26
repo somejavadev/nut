@@ -963,10 +963,14 @@ void upsdrv_initups(void)
 		break;
 	case -1:
 		fatal_with_errno(EXIT_FAILURE, "HIDNewRegexMatcher()");
+#ifndef HAVE___ATTRIBUTE__NORETURN
 		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
+#endif
 	default:
 		fatalx(EXIT_FAILURE, "invalid regular expression: %s", regex_array[ret]);
+#ifndef HAVE___ATTRIBUTE__NORETURN
 		exit(EXIT_FAILURE);	/* Should not get here in practice, but compiler is afraid we can fall through */
+#endif
 	}
 
 	/* link the matchers */
@@ -1645,7 +1649,19 @@ upsdebugx(3,"ups_infoval_set(): BP1.3");
 		dstate_setinfo(item->info_type, "%s", nutvalue);
 	} else {
 upsdebugx(3,"ups_infoval_set(): BP2");
+#ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic push
+#endif
+#ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+#ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_FORMAT_SECURITY
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 		dstate_setinfo(item->info_type, item->dfl, value);
+#ifdef HAVE_PRAGMAS_FOR_GCC_DIAGNOSTIC_IGNORED_FORMAT_NONLITERAL
+#pragma GCC diagnostic pop
+#endif
 	}
 
 upsdebugx(3,"ups_infoval_set(): BP3");
