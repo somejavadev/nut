@@ -72,7 +72,7 @@ int state_delinfo(st_tree_t **root, const char *var);
 int state_delenum(st_tree_t *root, const char *var, const char *val);
 int state_delrange(st_tree_t *root, const char *var, const int min, const int max);
 
-const st_tree_t *state_tree_find(const st_tree_t *node, const char *var);
+st_tree_t *state_tree_find(const st_tree_t *node, const char *var);
 
 #ifdef __cplusplus
 /* *INDENT-OFF* */

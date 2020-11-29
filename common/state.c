@@ -598,7 +598,7 @@ int state_delrange(st_tree_t *root, const char *var, const int min, const int ma
 	return st_tree_del_range(&sttmp->range_list, min, max);
 }
 
-const st_tree_t *state_tree_find(const st_tree_t *node, const char *var)
+st_tree_t *state_tree_find(const st_tree_t *node, const char *var)
 {
 	while (node) {
 
