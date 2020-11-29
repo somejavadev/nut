@@ -334,7 +334,7 @@ int state_setaux(st_tree_t *root, const char *var, const char *auxs)
 	return 1;
 }
 
-const char *state_getinfo(st_tree_t *root, const char *var)
+const char *state_getinfo(const st_tree_t *root, const char *var)
 {
 	st_tree_t	*sttmp;
 
@@ -348,7 +348,7 @@ const char *state_getinfo(st_tree_t *root, const char *var)
 	return sttmp->val;
 }
 
-int state_getflags(st_tree_t *root, const char *var)
+int state_getflags(const st_tree_t *root, const char *var)
 {
 	st_tree_t	*sttmp;
 
@@ -362,7 +362,7 @@ int state_getflags(st_tree_t *root, const char *var)
 	return sttmp->flags;
 }
 
-int state_getaux(st_tree_t *root, const char *var)
+int state_getaux(const st_tree_t *root, const char *var)
 {
 	st_tree_t	*sttmp;
 
@@ -376,7 +376,7 @@ int state_getaux(st_tree_t *root, const char *var)
 	return sttmp->aux;
 }
 
-const enum_t *state_getenumlist(st_tree_t *root, const char *var)
+const enum_t *state_getenumlist(const st_tree_t *root, const char *var)
 {
 	st_tree_t	*sttmp;
 
@@ -390,7 +390,7 @@ const enum_t *state_getenumlist(st_tree_t *root, const char *var)
 	return sttmp->enum_list;
 }
 
-const range_t *state_getrangelist(st_tree_t *root, const char *var)
+const range_t *state_getrangelist(const st_tree_t *root, const char *var)
 {
 	st_tree_t	*sttmp;
 
@@ -598,7 +598,7 @@ int state_delrange(st_tree_t *root, const char *var, const int min, const int ma
 	return st_tree_del_range(&sttmp->range_list, min, max);
 }
 
-st_tree_t *state_tree_find(st_tree_t *node, const char *var)
+const st_tree_t *state_tree_find(const st_tree_t *node, const char *var)
 {
 	while (node) {
 

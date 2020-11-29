@@ -56,11 +56,13 @@ int state_setinfo(st_tree_t **nptr, const char *var, const char *val);
 int state_addenum(st_tree_t *root, const char *var, const char *val);
 int state_addrange(st_tree_t *root, const char *var, const int min, const int max);
 int state_setaux(st_tree_t *root, const char *var, const char *auxs);
-const char *state_getinfo(st_tree_t *root, const char *var);
-int state_getflags(st_tree_t *root, const char *var);
-int state_getaux(st_tree_t *root, const char *var);
-const enum_t *state_getenumlist(st_tree_t *root, const char *var);
-const range_t *state_getrangelist(st_tree_t *root, const char *var);
+
+const char *state_getinfo(const st_tree_t *root, const char *var);
+int state_getflags(const st_tree_t *root, const char *var);
+int state_getaux(const st_tree_t *root, const char *var);
+const enum_t *state_getenumlist(const st_tree_t *root, const char *var);
+const range_t *state_getrangelist(const st_tree_t *root, const char *var);
+
 void state_setflags(st_tree_t *root, const char *var, int numflags, char **flags);
 int state_addcmd(cmdlist_t **list, const char *cmd);
 void state_infofree(st_tree_t *node);
@@ -69,7 +71,8 @@ int state_delcmd(cmdlist_t **list, const char *cmd);
 int state_delinfo(st_tree_t **root, const char *var);
 int state_delenum(st_tree_t *root, const char *var, const char *val);
 int state_delrange(st_tree_t *root, const char *var, const int min, const int max);
-st_tree_t *state_tree_find(st_tree_t *node, const char *var);
+
+const st_tree_t *state_tree_find(const st_tree_t *node, const char *var);
 
 #ifdef __cplusplus
 /* *INDENT-OFF* */
