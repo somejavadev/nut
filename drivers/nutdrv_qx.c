@@ -1287,7 +1287,7 @@ int	setvar(const char *varname, const char *val)
 {
 	item_t		*item;
 	char		value[SMALLBUF];
-	st_tree_t	*root = (st_tree_t *)dstate_getroot();
+	const st_tree_t	*root = (const st_tree_t *)dstate_getroot();
 	int		ok = 0;
 
 	/* Retrieve variable */
