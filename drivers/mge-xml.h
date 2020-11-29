@@ -55,7 +55,7 @@ const char * vname_mge_xml2nut(const char *name);
  *
  *  \return NUT variable value
  */
-char *vvalue_mge_xml2nut(const char *name, const char *value, size_t len);
+const char *vvalue_mge_xml2nut(const char *name, const char *value, size_t len);
 
 /**
  *  \brief  Register set of R/W variables

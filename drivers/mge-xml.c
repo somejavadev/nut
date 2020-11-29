@@ -1543,7 +1543,7 @@ const char *vname_mge_xml2nut(const char *name) {
 	return NULL;
 }
 
-char *vvalue_mge_xml2nut(const char *name, const char *value, size_t len) {
+const char *vvalue_mge_xml2nut(const char *name, const char *value, size_t len) {
 	assert(NULL != name);
 
 	size_t i = 0;
@@ -1564,14 +1564,14 @@ char *vvalue_mge_xml2nut(const char *name, const char *value, size_t len) {
 
 				/* Convert */
 				if (NULL != info->convert) {
-					char *vconv = (char *)info->convert(vcpy);
+					const char *vconv = (const char *)info->convert(vcpy);
 
 					free(vcpy);
 
 					return vconv;
 				}
-				else
-					return vcpy;
+
+				return vcpy;
 			}
 	}
 
