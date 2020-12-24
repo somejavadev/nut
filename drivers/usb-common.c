@@ -75,9 +75,10 @@ static int strcmp_null(char *s1, char *s2)
 
 /* private callback function for exact matches
  */
-static int match_function_exact(USBDevice_t *hd, void *privdata)
+int match_function_exact(USBDevice_t *hd, void *privdata)
 {
 	USBDevice_t	*data = (USBDevice_t *)privdata;
+	upsdebugx(2, "%s: matching device...", __func__);
 
 	if (hd->VendorID != data->VendorID) {
 		upsdebugx(2, "%s: failed match of %s: %4x != %4x",
@@ -287,10 +288,11 @@ typedef struct regex_matcher_data_s {
 } regex_matcher_data_t;
 
 /* private callback function for regex matches */
-static int match_function_regex(USBDevice_t *hd, void *privdata)
+int match_function_regex(USBDevice_t *hd, void *privdata)
 {
 	regex_matcher_data_t	*data = (regex_matcher_data_t *)privdata;
 	int r;
+	upsdebugx(2, "%s: matching device...", __func__);
 
 	r = match_regex_hex(data->regex[0], hd->VendorID);
 	if (r != 1) {

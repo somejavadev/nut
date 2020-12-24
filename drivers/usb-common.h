@@ -67,6 +67,9 @@ typedef struct USBDeviceMatcher_s {
 	struct USBDeviceMatcher_s	*next;
 } USBDeviceMatcher_t;
 
+int match_function_exact(USBDevice_t *hd, void *privdata);
+int match_function_regex(USBDevice_t *hd, void *privdata);
+
 /* constructors and destructors for specific types of matchers. An
    exact matcher matches a specific usb_device_t structure (except for
    the Bus component, which is ignored). A regex matcher matches
