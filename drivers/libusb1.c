@@ -267,11 +267,11 @@ static int nut_libusb_open(libusb_device_handle **udevp, USBDevice_t *curDevice,
 			hid_desc_index = 1;
 		}
 
-		upsdebugx(2, "Trying to match device");
+		upsdebugx(2, "Trying to match device (libusb1)");
 		for (m = matcher; m; m=m->next) {
 			ret = matches(m, curDevice);
 			if (ret==0) {
-				upsdebugx(2, "Device does not match - skipping");
+				upsdebugx(2, "Device does not match - skipping (libusb1)");
 				goto next_device;
 			} else if (ret==-1) {
 				libusb_free_device_list(devlist, 1);

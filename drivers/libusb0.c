@@ -249,11 +249,11 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 				hid_desc_index = 1;
 			}
 
-			upsdebugx(2, "Trying to match device");
+			upsdebugx(2, "Trying to match device (libusb0)");
 			for (m = matcher; m; m=m->next) {
 				ret = matches(m, curDevice);
 				if (ret==0) {
-					upsdebugx(2, "Device does not match - skipping");
+					upsdebugx(2, "Device does not match - skipping (libusb0)");
 					goto next_device;
 				} else if (ret==-1) {
 					fatal_with_errno(EXIT_FAILURE, "matcher");
