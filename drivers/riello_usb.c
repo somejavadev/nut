@@ -449,7 +449,7 @@ static int riello_command(uint8_t *cmd, uint8_t *buf, uint16_t length, uint16_t 
 		break;
 
 	case ERROR_OVERFLOW:	/* Value too large for defined data type */
-	case -EOVERFLOW:	/* Value too large for defined data type */
+//	case -EOVERFLOW:	/* Value too large for defined data type */
 #if EPROTO && WITH_LIBUSB_0_1
 	case -EPROTO:		/* Protocol error */
 #endif
