@@ -216,4 +216,8 @@ int setvar(const char *varname, const char *val);
 
 void possibly_supported(const char *mfr, HIDDevice_t *hd);
 
+#ifndef SHUT_MODE
+int match_function_subdriver(HIDDevice_t *d, void *privdata);
+#endif
+
 #endif /* USBHID_UPS_H */
