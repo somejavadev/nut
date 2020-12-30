@@ -1,4 +1,4 @@
-def issueAnalysis = []
+//def issueAnalysis = []
 
 pipeline {
     agent none
@@ -275,6 +275,7 @@ pipeline {
                             warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
                                 sh """ BUILD_TYPE="${BUILD_TYPE}" ./ci_build.sh """
                             }
+/*
                             script {
                                 def id = "Distcheck:${BUILD_TYPE}@${PLATFORM}"
                                 def i = scanForIssues tool: gcc(name: id)
@@ -283,6 +284,7 @@ pipeline {
                                 //issueAnalysis << i
                                 publishIssues issues: [i], filters: [includePackage('io.jenkins.plugins.analysis.*')]
                             }
+*/
                         }
                     }
                 }
@@ -314,6 +316,7 @@ pipeline {
         } // obligatory one stage
     } // obligatory stages
 
+/*
     post {
         always {
             script {
@@ -325,6 +328,7 @@ pipeline {
             }
         }
     }
+*/
 
 } // pipeline
 
@@ -358,13 +362,14 @@ CC=gcc-${GCCVER} CXX=g++-${GCCVER} \
 ./ci_build.sh
 """
     } // warnError + sh
-
+/*
     script {
         def id = "GCC-${GCCVER}:STD=${STD}${STDVER}:WARN=${BUILD_WARNOPT}@${PLATFORM}"
         def i = scanForIssues tool: gcc(name: id)
         issueAnalysis << i
         publishIssues issues: [i], filters: [includePackage('io.jenkins.plugins.analysis.*')]
     }
+*/
 } // doMatrixGCC()
 
 
@@ -389,12 +394,14 @@ CC=clang-${CLANGVER} CXX=clang++-${CLANGVER} CPP=clang-cpp \
 ./ci_build.sh
 """
     }
+/*
     script {
         def id = "CLANG-${CLANGVER}:STD=${STD}${STDVER}:WARN=${BUILD_WARNOPT}@${PLATFORM}"
         def i = scanForIssues tool: clang(name: id)
         issueAnalysis << i
         publishIssues issues: [i], filters: [includePackage('io.jenkins.plugins.analysis.*')]
     }
+*/
 } // doMatrixCLANG()
 
 void unstashCleanNUTsrc() {
