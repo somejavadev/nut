@@ -1,66 +1,9 @@
-pipeline {
-    agent none
+// Pre-declare contents of large matrix setups so they are
+// in separate Groovy=>Java compilation scopes
+def runMatrices = [:]
 
-    parameters {
-        booleanParam (
-            name: 'DO_MATRIX_GCC',
-            defaultValue: true,
-            description: 'Check builds with GCC'
-        )
-        booleanParam (
-            name: 'DO_MATRIX_CLANG',
-            defaultValue: true,
-            description: 'Check builds with CLANG'
-        )
-        booleanParam (
-            name: 'DO_MATRIX_DISTCHECK',
-            defaultValue: true,
-            description: 'Check Makefile EXTRA_DIST and other nuances for usable dist archive creation'
-        )
-        booleanParam (
-            name: 'DO_MATRIX_SHELL',
-            defaultValue: true,
-            description: 'Check shell script syntax'
-        )
-        booleanParam (
-            name: 'DO_SPELLCHECK',
-            defaultValue: true,
-            description: 'Check spelling'
-        )
-    }
-
-    options {
-        skipDefaultCheckout()
-    }
-
-    stages {
-        stage("Stash source for workers") {
-/*
- * NOTE: For quicker builds, it is recommended to set up the pipeline job
- * using this Jenkinsfile to refer to a local copy of the NUT repository
- * maintained on the stashing worker (as a Reference Repo), and do just
- * shallow checkouts (depth=1). Longer history may make sense for release
- * builds with changelog generation, but not for quick test iterations.
- */
-            agent { label "master-worker" }
-            steps {
-                /* clean up our workspace */
-                deleteDir()
-                /* clean up tmp directory */
-                dir("${workspace}@tmp") {
-                    deleteDir()
-                }
-                /* clean up script directory */
-                dir("${workspace}@script") {
-                    deleteDir()
-                }
-                checkout scm
-                stash 'NUT-checkedout'
-            }
-        }
-
-        stage("BuildAndTest-GCC") {
-            when { expression { params.DO_MATRIX_GCC } }
+def matrixTestGCC = {
+        stage('BuildAndTest-GCC') {
             matrix {
                 agent { label "OS=${PLATFORM} && GCCVER=${GCCVER}" }
                 axes {
@@ -151,10 +94,11 @@ pipeline {
                     }
                 }
             }
-        } // stage for matrix BuildAndTest-GCC
+        }
+} // def matrixTestGCC
 
-        stage("BuildAndTest-CLANG") {
-            when { expression { params.DO_MATRIX_CLANG } }
+def matrixTestCLANG = {
+        stage('pick BuildAndTest-CLANG') {
             matrix {
                 agent { label "OS=${PLATFORM} && CLANGVER=${CLANGVER}" }
                 axes {
@@ -215,10 +159,41 @@ pipeline {
                     }
                 }
             }
-        } // stage for matrix BuildAndTest-CLANG
+        }
+} // def matrixTestCLANG
 
+def matrixTestDistcheck = {
+        stage('Distchecks') {
+            matrix {
+                agent { label "OS=${PLATFORM}" }
+                axes {
+                    axis {
+                        name 'PLATFORM'
+                        values 'linux', 'openindiana'
+                    }
+                    axis {
+                        name 'BUILD_TYPE'
+                        values 'default-tgt:distcheck-light', 'default-tgt:distcheck-valgrind'
+                    }
+                }
+                stages {
+                    stage('Unstash SRC') {
+                        steps {
+                            unstashCleanNUTsrc()
+                        }
+                    }
+                    stage('Test BUILD_TYPE') {
+                        steps {
+                            doMatrixDistcheck("${BUILD_TYPE}", "${PLATFORM}")
+                        }
+                    }
+                }
+            }
+        }
+} // def matrixTestDistcheck
+
+def matrixTestShellcheck = {
         stage('Shell-script checks') {
-            when { expression { params.DO_MATRIX_SHELL } }
             matrix {
                 agent { label "OS=${PLATFORM}" }
                 axes {
@@ -280,39 +255,108 @@ pipeline {
                     }
                 }
             }
-        } // stage for matrix Shell-script checks
+        }
+} // def matrixTestShellcheck
 
-        stage('Distchecks') {
-            when { expression { params.DO_MATRIX_DISTCHECK } }
-            matrix {
-                agent { label "OS=${PLATFORM}" }
-                axes {
-                    axis {
-                        name 'PLATFORM'
-                        values 'linux', 'openindiana'
-                    }
-                    axis {
-                        name 'BUILD_TYPE'
-                        values 'default-tgt:distcheck-light', 'default-tgt:distcheck-valgrind'
-                    }
+pipeline {
+    agent none
+
+    parameters {
+        booleanParam (
+            name: 'DO_MATRIX_GCC',
+            defaultValue: true,
+            description: 'Check builds with GCC'
+        )
+        booleanParam (
+            name: 'DO_MATRIX_CLANG',
+            defaultValue: true,
+            description: 'Check builds with CLANG'
+        )
+        booleanParam (
+            name: 'DO_MATRIX_DISTCHECK',
+            defaultValue: true,
+            description: 'Check Makefile EXTRA_DIST and other nuances for usable dist archive creation'
+        )
+        booleanParam (
+            name: 'DO_MATRIX_SHELL',
+            defaultValue: true,
+            description: 'Check shell script syntax'
+        )
+        booleanParam (
+            name: 'DO_SPELLCHECK',
+            defaultValue: true,
+            description: 'Check spelling'
+        )
+    }
+
+    options {
+        skipDefaultCheckout()
+    }
+
+    stages {
+        stage("Stash source for workers") {
+/*
+ * NOTE: For quicker builds, it is recommended to set up the pipeline job
+ * using this Jenkinsfile to refer to a local copy of the NUT repository
+ * maintained on the stashing worker (as a Reference Repo), and do just
+ * shallow checkouts (depth=1). Longer history may make sense for release
+ * builds with changelog generation, but not for quick test iterations.
+ */
+            agent { label "master-worker" }
+            steps {
+                /* clean up our workspace */
+                deleteDir()
+                /* clean up tmp directory */
+                dir("${workspace}@tmp") {
+                    deleteDir()
                 }
-                stages {
-                    stage('Unstash SRC') {
-                        steps {
-                            unstashCleanNUTsrc()
-                        }
-                    }
-                    stage('Test BUILD_TYPE') {
-                        steps {
-                            doMatrixDistcheck("${BUILD_TYPE}", "${PLATFORM}")
-                        }
-                    }
+                /* clean up script directory */
+                dir("${workspace}@script") {
+                    deleteDir()
                 }
+                checkout scm
+                stash 'NUT-checkedout'
             }
-        } // stage for matrix Distchecks
+        }
 
         stage('Unclassified tests') {
             parallel {
+
+                stage('pick BuildAndTest-GCC') {
+                    when { expression { params.DO_MATRIX_GCC } }
+                    steps {
+                        script {
+                            runMatrices["BuildAndTest-GCC"] = matrixTestGCC
+                        }
+                    }
+                } // stage for matrix BuildAndTest-GCC
+
+                stage('pick BuildAndTest-CLANG') {
+                    when { expression { params.DO_MATRIX_CLANG } }
+                    steps {
+                        script {
+                            runMatrices["BuildAndTest-CLANG"] = matrixTestCLANG
+                        }
+                    }
+                } // stage for matrix BuildAndTest-CLANG
+
+                stage('pick Shell-script checks') {
+                    when { expression { params.DO_MATRIX_SHELL } }
+                    steps {
+                        script {
+                            runMatrices["Shell-script checks"] = matrixTestShellcheck
+                        }
+                    }
+                } // stage for matrix Shell-script checks
+
+                stage('pick Distchecks') {
+                    when { expression { params.DO_MATRIX_DISTCHECK } }
+                    steps {
+                        script {
+                            runMatrices["Distchecks"] = matrixTestDistcheck
+                        }
+                    }
+                } // stage for matrix Distchecks
 
                 stage('Spellcheck') {
                     when { expression { params.DO_SPELLCHECK } }
@@ -459,4 +503,11 @@ void unstashCleanNUTsrc() {
     }
     unstash 'NUT-checkedout'
 } // unstashCleanNUTsrc()
+
+parallel runMatrices
+/*
+for (mat in runMatrices) {
+    mat
+}
+*/
 
