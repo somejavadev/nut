@@ -144,11 +144,13 @@ pipeline {
                             unstashCleanNUTsrc()
                         }
                     }
+/*
                     stage('GCC Build and test') {
                         steps {
                             doMatrixGCC("${GCCVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
                         }
                     }
+*/
                 }
             }
         } // stage for matrix BuildAndTest-GCC
@@ -208,11 +210,13 @@ pipeline {
                             unstashCleanNUTsrc()
                         }
                     }
+/*
                     stage('CLANG Build and test') {
                         steps {
                             doMatrixCLANG("${CLANGVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
                         }
                     }
+*/
                 }
             }
         } // stage for matrix BuildAndTest-CLANG
@@ -302,11 +306,13 @@ pipeline {
                             unstashCleanNUTsrc()
                         }
                     }
+/*
                     stage('Test BUILD_TYPE') {
                         steps {
                             doMatrixDistcheck("${BUILD_TYPE}", "${PLATFORM}")
                         }
                     }
+*/
                 }
             }
         } // stage for matrix Distchecks
