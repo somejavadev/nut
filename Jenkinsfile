@@ -1,3 +1,5 @@
+def arrTests = [:]
+
 pipeline {
     agent none
 
@@ -59,9 +61,8 @@ pipeline {
             }
         }
 
-        stage("BuildAndTest-GCC") {
+        stage("pick BuildAndTest-GCC?") {
             matrix {
-                when { expression { return params.DO_MATRIX_GCC } }
                 agent { label "OS=${PLATFORM} && GCCVER=${GCCVER}" }
                 axes {
                     axis {
@@ -139,25 +140,32 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Unstash SRC') {
+                    stage('Consider GCC Build and test') {
                         steps {
-                            unstashCleanNUTsrc()
+                            script {
+                                if (params.DO_MATRIX_GCC) {
+                                    arrTests["Warn-GCC-${GCCVER}-${STD}${STDVER}-${BUILD_WARNOPT}@${PLATFORM}"] = {
+                                        stage('Unstash SRC') {
+                                            steps {
+                                                unstashCleanNUTsrc()
+                                            }
+                                        }
+                                        stage('GCC Build and test') {
+                                            steps {
+                                                doMatrixGCC("${GCCVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-/*
-                    stage('GCC Build and test') {
-                        steps {
-                            doMatrixGCC("${GCCVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
-                        }
-                    }
-*/
                 }
             }
         } // stage for matrix BuildAndTest-GCC
 
-        stage("BuildAndTest-CLANG") {
+        stage("pick BuildAndTest-CLANG?") {
             matrix {
-                when { expression { return params.DO_MATRIX_CLANG } }
                 agent { label "OS=${PLATFORM} && CLANGVER=${CLANGVER}" }
                 axes {
                     axis {
@@ -205,25 +213,33 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Unstash SRC') {
+                    stage('Consider CLANG Build and test') {
                         steps {
-                            unstashCleanNUTsrc()
+                            script {
+                                if (params.DO_MATRIX_CLANG) {
+                                    arrTests["Warn-CLANG-${CLANGVER}-${STD}${STDVER}-${BUILD_WARNOPT}@${PLATFORM}"] = {
+                                        stage('Unstash SRC') {
+                                            steps {
+                                                unstashCleanNUTsrc()
+                                            }
+                                        }
+
+                                        stage('CLANG Build and test') {
+                                            steps {
+                                                doMatrixCLANG("${CLANGVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-/*
-                    stage('CLANG Build and test') {
-                        steps {
-                            doMatrixCLANG("${CLANGVER}", "${STD}", "${STDVER}", "${PLATFORM}", "${BUILD_WARNOPT}")
-                        }
-                    }
-*/
                 }
             }
         } // stage for matrix BuildAndTest-CLANG
 
-        stage('Shell-script checks') {
+        stage('pick Shell-script checks?') {
             matrix {
-                when { expression { return params.DO_MATRIX_SHELL } }
                 agent { label "OS=${PLATFORM}" }
                 axes {
                     axis {
@@ -258,27 +274,37 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Unstash SRC') {
+                    stage('Consider shell tests') {
                         steps {
-                            unstashCleanNUTsrc()
-                        }
-                    }
-                    stage('Shellcheck') {
-                        steps {
-                            warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
-                                /* Note: currently `make check-scripts-syntax`
-                                 * uses current system shell of the build/test
-                                 * host, or bash where script says explicitly.
-                                 * So currently SHELL_PROGS does not apply here.
-                                 */
-                                sh """ BUILD_TYPE=default-shellcheck ./ci_build.sh """
-                            }
-                        }
-                    }
-                    stage('NDE check') {
-                        steps {
-                            warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
-                                sh """ BUILD_TYPE=nut-driver-enumerator-test SHELL_PROGS="${SHELL_PROGS}" ./ci_build.sh """
+                            script {
+                                if (params.DO_MATRIX_SHELL) {
+                                    arrTests["Shell-${SHELL_PROGS}@${PLATFORM}"] = {
+                                        stage('Unstash SRC') {
+                                            steps {
+                                                unstashCleanNUTsrc()
+                                            }
+                                        }
+                                        stage('Shellcheck') {
+                                            steps {
+                                                warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
+                                                    /* Note: currently `make check-scripts-syntax`
+                                                     * uses current system shell of the build/test
+                                                     * host, or bash where script says explicitly.
+                                                     * So currently SHELL_PROGS does not apply here.
+                                                     */
+                                                    sh """ BUILD_TYPE=default-shellcheck ./ci_build.sh """
+                                                }
+                                            }
+                                        }
+                                        stage('NDE check') {
+                                            steps {
+                                                warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
+                                                    sh """ BUILD_TYPE=nut-driver-enumerator-test SHELL_PROGS="${SHELL_PROGS}" ./ci_build.sh """
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -286,9 +312,8 @@ pipeline {
             }
         } // stage for matrix Shell-script checks
 
-        stage('Distchecks') {
+        stage('pick Distchecks?') {
             matrix {
-                when { expression { return params.DO_MATRIX_DISTCHECK } }
                 agent { label "OS=${PLATFORM}" }
                 axes {
                     axis {
@@ -301,45 +326,60 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Unstash SRC') {
+                    stage('Consider distchecks') {
                         steps {
-                            unstashCleanNUTsrc()
+                            script {
+                                if (params.DO_MATRIX_DISTCHECK) {
+                                    arrTests["Distcheck-${BUILD_TYPE}@${PLATFORM}"] = {
+                                        stage('Unstash SRC') {
+                                            steps {
+                                                unstashCleanNUTsrc()
+                                            }
+                                        }
+
+                                        stage('Test BUILD_TYPE') {
+                                            steps {
+                                                doMatrixDistcheck("${BUILD_TYPE}", "${PLATFORM}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-/*
-                    stage('Test BUILD_TYPE') {
-                        steps {
-                            doMatrixDistcheck("${BUILD_TYPE}", "${PLATFORM}")
-                        }
-                    }
-*/
                 }
             }
         } // stage for matrix Distchecks
 
         stage('Unclassified tests') {
-            parallel {
+            steps {
+                script {
 
-                stage('Spellcheck') {
-                    when { expression { params.DO_SPELLCHECK } }
-                    agent { label "OS=openindiana" }
-                    stages {
-                        stage('Unstash SRC') {
-                            steps {
-                                unstashCleanNUTsrc()
-                            }
-                        }
-                        stage('Check') {
-                            steps {
-                                warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
-                                    sh """ BUILD_TYPE=default-spellcheck ./ci_build.sh """
+                    if (params.DO_SPELLCHECK) {
+                        arrTests["Spellcheck"] = {
+                            stage('Spellcheck') {
+                                agent { label "OS=openindiana" }
+                                stages {
+                                    stage('Unstash SRC') {
+                                        steps {
+                                            unstashCleanNUTsrc()
+                                        }
+                                    }
+                                    stage('Check') {
+                                        steps {
+                                            warnError(message: 'Build-and-check step failed, proceeding to cover whole matrix') {
+                                                sh """ BUILD_TYPE=default-spellcheck ./ci_build.sh """
+                                            }
+                                        }
+                                    }
                                 }
-                            }
+                            } // spellcheck
                         }
                     }
-                } // spellcheck
 
-            } // parallel
+                }
+            }
+
         } // obligatory one stage
     } // obligatory stages
 
@@ -465,4 +505,6 @@ void unstashCleanNUTsrc() {
     }
     unstash 'NUT-checkedout'
 } // unstashCleanNUTsrc()
+
+parallel arrTests
 
