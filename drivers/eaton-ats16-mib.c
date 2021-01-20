@@ -249,4 +249,4 @@ static snmp_info_t eaton_ats16_mib[] = {
 /*mib2nut_info_t  eaton_ats16 = { "eaton_ats16", EATON_ATS16_MIB_VERSION, NULL, EATON_ATS16_MODEL, eaton_ats16_mib, EATON_ATS16_SYSOID_GEN1, NULL }; */
 mib2nut_info_t	eaton_ats16 = { "eaton_ats16", EATON_ATS16_MIB_VERSION, NULL, EATON_ATS16_MODEL, eaton_ats16_mib, EATON_ATS16_SYSOID_GEN1, NULL };
 /*mib2nut_info_t	eaton_ats16_g2 = { "eaton_ats16_g2", EATON_ATS16_MIB_VERSION, NULL, EATON_ATS16_MODEL, eaton_ats16_mib, EATON_ATS16_SYSOID_GEN2, NULL };*/
-mib2nut_info_t	eaton_ats16_g2 = { "eaton_ats16", EATON_ATS16_MIB_VERSION, NULL, EATON_ATS16_MODEL, eaton_ats16_mib, EATON_ATS16_SYSOID_GEN2, NULL };
+mib2nut_info_t	eaton_ats16_g2 = { "eaton_ats16_g2", EATON_ATS16_MIB_VERSION, NULL, EATON_ATS16_MODEL, eaton_ats16_mib, EATON_ATS16_SYSOID_GEN2, NULL };
