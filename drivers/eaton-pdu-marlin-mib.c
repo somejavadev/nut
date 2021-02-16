@@ -117,6 +117,15 @@ static info_lkp_t g2_unit_outlet_switchability_info[] = {
 	}
 };
 
+/* Ugly hack for older G2 ePDU:
+ * having the matching OID present means that the outlet/unit is
+ * switchable. So, it should not require this value lookup */
+static info_lkp_t g2_unit_outlet_switchability_info[] = {
+	{ -1, "yes" },
+	{ 0, "yes" },
+	{ 0, NULL }
+};
+
 static info_lkp_t marlin_outlet_switchability_info[] = {
 	{ 1, "yes"
 #if WITH_SNMP_LKP_FUN
