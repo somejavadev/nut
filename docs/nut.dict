@@ -1,4 +1,4 @@
-personal_ws-1.1 en 2767 utf-8
+personal_ws-1.1 en 2773 utf-8
 AAS
 ACFAIL
 ACFREQ
@@ -1165,6 +1165,7 @@ UPStation
 UPower
 URI
 USBDEVFS
+USBDevice
 USERADDed
 USV
 USVs
@@ -1397,6 +1398,7 @@ baudrate
 baytech
 baz
 bbh
+bcdDevice
 bcmxcp
 bd
 beepertone
@@ -2453,6 +2455,7 @@ srv
 srw
 ss
 sshd
+ssize
 ssl
 stan
 startIP
@@ -2498,6 +2501,7 @@ subtree
 sudo
 suid
 superset
+suseconds
 sv
 svc
 svcadm
@@ -2592,6 +2596,7 @@ udev
 udevadm
 ufw
 ugen
+uint
 ukUNV
 ul
 un
@@ -2669,6 +2674,7 @@ usbups
 usbus
 usd
 usec
+useconds
 useradd
 userid
 usermap
