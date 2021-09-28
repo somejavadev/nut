@@ -141,7 +141,7 @@ static int nut_usb_set_altinterface(usb_dev_handle *udev)
  * (if any) will be tried, until there are no more devices left.
  */
 static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDeviceMatcher_t *matcher,
-	int (*callback)(usb_dev_handle *udev, USBDevice_t *hd, unsigned char *rdbuf, int rdlen))
+	int (*callback)(usb_dev_handle *udev, USBDevice_t *hd, unsigned char *rdbuf, size_t rdlen))
 {
 #ifdef HAVE_USB_DETACH_KERNEL_DRIVER_NP
 	int retries;
@@ -165,7 +165,7 @@ static int libusb_open(usb_dev_handle **udevp, USBDevice_t *curDevice, USBDevice
 
 	/* report descriptor */
 	unsigned char	rdbuf[MAX_REPORT_SIZE];
-	int		rdlen;
+	size_t		rdlen;
 
 	/* libusb base init */
 	usb_init();
@@ -484,7 +484,7 @@ static int libusb_strerror(const int ret, const char *desc)
  * return -1 on failure, report length on success
  */
 
-static int libusb_get_report(usb_dev_handle *udev, int ReportId, unsigned char *raw_buf, int ReportSize )
+static int libusb_get_report(usb_dev_handle *udev, int ReportId, unsigned char *raw_buf, size_t ReportSize )
 {
 	int	ret;
 
@@ -508,7 +508,7 @@ static int libusb_get_report(usb_dev_handle *udev, int ReportId, unsigned char *
 	return libusb_strerror(ret, __func__);
 }
 
-static int libusb_set_report(usb_dev_handle *udev, int ReportId, unsigned char *raw_buf, int ReportSize )
+static int libusb_set_report(usb_dev_handle *udev, int ReportId, unsigned char *raw_buf, size_t ReportSize )
 {
 	int	ret;
 
@@ -543,7 +543,7 @@ static int libusb_get_string(usb_dev_handle *udev, int StringIdx, char *buf, siz
 	return libusb_strerror(ret, __func__);
 }
 
-static int libusb_get_interrupt(usb_dev_handle *udev, unsigned char *buf, int bufsize, int timeout)
+static int libusb_get_interrupt(usb_dev_handle *udev, unsigned char *buf, size_t bufsize, int timeout)
 {
 	int ret;
 

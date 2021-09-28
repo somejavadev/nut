@@ -181,14 +181,14 @@ struct my_hid_descriptor {
  * SHUT functions for HID marshalling
  */
 static int shut_get_descriptor(int upsfd, unsigned char type,
-			unsigned char index, void *buf, int size);
+			unsigned char index, void *buf, size_t size);
 static int shut_get_string_simple(int upsfd, int index,
 			   char *buf, size_t buflen);
 static int libshut_get_report(int upsfd, int ReportId,
-			   unsigned char *raw_buf, int ReportSize );
-static int libshut_set_report(int upsfd, int id, unsigned char *pkt, int reportlen);
+			   unsigned char *raw_buf, size_t ReportSize );
+static int libshut_set_report(int upsfd, int id, unsigned char *pkt, size_t reportlen);
 static int libshut_get_interrupt(int upsfd, unsigned char *buf,
-			   int bufsize, int timeout);
+			   size_t bufsize, int timeout);
 static void libshut_close(int upsfd);
 
 /* FIXME */
@@ -267,7 +267,7 @@ static int shut_wait_ack(int upsfd);
 static int shut_interrupt_read(int upsfd, int ep, unsigned char *bytes,
                         int size, int timeout);
 static int shut_control_msg(int upsfd, int requesttype, int request, int value,
-                        int index, unsigned char *bytes, int size, int timeout);
+                        int index, unsigned char *bytes, size_t size, int timeout);
 
 /* Data portability */
 /* realign packet data according to Endianess */
@@ -293,7 +293,7 @@ static void align_request(struct shut_ctrltransfer_s *ctrl)
  */
 static int libshut_open(int *arg_upsfd, SHUTDevice_t *curDevice, char *arg_device_path,
                  int (*callback)(int arg_upsfd, SHUTDevice_t *hd,
-                 unsigned char *rdbuf, int rdlen))
+                 unsigned char *rdbuf, size_t rdlen))
 {
 	int ret, res;
 	/* Below we cast this buffer as sometimes containing entried of type
@@ -506,7 +506,7 @@ static void libshut_close(int arg_upsfd)
  * return -1 on failure, report length on success
  */
 static int libshut_get_report(int arg_upsfd, int ReportId,
-                       unsigned char *raw_buf, int ReportSize )
+                       unsigned char *raw_buf, size_t ReportSize )
 {
 	if (arg_upsfd < 1) {
 		return 0;
@@ -524,7 +524,7 @@ static int libshut_get_report(int arg_upsfd, int ReportId,
 
 /* return ReportSize upon success ; -1 otherwise */
 static int libshut_set_report(int arg_upsfd, int ReportId,
-                       unsigned char *raw_buf, int ReportSize )
+                       unsigned char *raw_buf, size_t ReportSize )
 {
 	int ret;
 
@@ -565,7 +565,7 @@ static int libshut_get_string(int arg_upsfd, int StringIdx, char *buf, size_t bu
 }
 
 static int libshut_get_interrupt(int arg_upsfd, unsigned char *buf,
-                          int bufsize, int timeout)
+                          size_t bufsize, int timeout)
 {
 	int ret;
 
@@ -862,7 +862,7 @@ static int shut_get_string_simple(int arg_upsfd, int index,
  *
  *********************************************************************/
 static int shut_get_descriptor(int arg_upsfd, unsigned char type,
-                        unsigned char index, void *buf, int size)
+                        unsigned char index, void *buf, size_t size)
 {
 	memset(buf, 0, size);
 
@@ -874,7 +874,7 @@ static int shut_get_descriptor(int arg_upsfd, unsigned char type,
 
 /* Take care of a SHUT transfer (sending and receiving data) */
 static int shut_control_msg(int arg_upsfd, int requesttype, int request,
-                     int value, int index, unsigned char *bytes, int size, int timeout)
+                     int value, int index, unsigned char *bytes, size_t size, int timeout)
 {
 	unsigned char shut_pkt[11];
 	short Retry=1, set_pass = -1;

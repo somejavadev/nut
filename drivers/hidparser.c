@@ -542,7 +542,7 @@ void SetValue(const HIDData_t *pData, unsigned char *Buf, long Value)
    Output: parsed data structure. Returns allocated HIDDesc structure
    on success, NULL on failure with errno set. Note: the value
    returned by this function must be freed with Free_ReportDesc(). */
-HIDDesc_t *Parse_ReportDesc(const unsigned char *ReportDesc, const int n)
+HIDDesc_t *Parse_ReportDesc(const unsigned char *ReportDesc, const size_t n)
 {
 	int		ret;
 	HIDDesc_t	*pDesc;

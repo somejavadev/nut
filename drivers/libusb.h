@@ -48,16 +48,16 @@ typedef struct usb_communication_subdriver_s {
 	int (*open)(usb_dev_handle **sdevp,	/* try to open the next available	*/
 		USBDevice_t *curDevice,		/* device matching USBDeviceMatcher_t	*/
 		USBDeviceMatcher_t *matcher,
-		int (*callback)(usb_dev_handle *udev, USBDevice_t *hd, unsigned char *rdbuf, int rdlen));
+		int (*callback)(usb_dev_handle *udev, USBDevice_t *hd, unsigned char *rdbuf, size_t rdlen));
 	void (*close)(usb_dev_handle *sdev);
 	int (*get_report)(usb_dev_handle *sdev, int ReportId,
-	unsigned char *raw_buf, int ReportSize );
+		unsigned char *raw_buf, size_t ReportSize );
 	int (*set_report)(usb_dev_handle *sdev, int ReportId,
-	unsigned char *raw_buf, int ReportSize );
+		unsigned char *raw_buf, size_t ReportSize );
 	int (*get_string)(usb_dev_handle *sdev,
-	int StringIdx, char *buf, size_t buflen);
+		int StringIdx, char *buf, size_t buflen);
 	int (*get_interrupt)(usb_dev_handle *sdev,
-	unsigned char *buf, int bufsize, int timeout);
+		unsigned char *buf, size_t bufsize, int timeout);
 } usb_communication_subdriver_t;
 
 extern usb_communication_subdriver_t	usb_subdriver;
