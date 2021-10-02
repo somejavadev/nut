@@ -78,26 +78,26 @@ int RunBuiltInTests(char *argv[]) {
 		long LogMin, LogMax;	/* logical minimum and maximum values */
 		long expectedValue;	/* the expected result of decoding the value in the buffer */
 	} testData[] = {
-		{.buf = "00 ff ff ff ff", .Offset = 0, .Size = 32, .LogMin = -1, .LogMax = 2147483647, .expectedValue = -1},
-		{.buf = "00 ff", .Offset = 0, .Size = 8, .LogMin = -1, .LogMax = 127, .expectedValue = -1},
-		{.buf = "00 ff", .Offset = 0, .Size = 8, .LogMin = 0, .LogMax = 127, .expectedValue = 127},
-		{.buf = "00 ff", .Offset = 0, .Size = 8, .LogMin = 0, .LogMax = 255, .expectedValue = 255},
-		{.buf = "33 00 0a 08 80", .Offset = 0, .Size = 32, .LogMin = 0, .LogMax = 65535, .expectedValue = 2560},
-		{.buf = "00 00 08 00 00", .Offset = 0, .Size = 32, .LogMin = 0, .LogMax = 65535, .expectedValue = 2048},
-		{.buf = "06 00 00 08", .Offset = 0, .Size = 8, .LogMin = 0, .LogMax = 255, .expectedValue = 0},
-		{.buf = "06 00 00 08", .Offset = 8, .Size = 8, .LogMin = 0, .LogMax = 255, .expectedValue = 0},
-		{.buf = "06 00 00 08", .Offset = 16, .Size = 8, .LogMin = 0, .LogMax = 255, .expectedValue = 8},
-		{.buf = "16 0c 00 00 00", .Offset = 0, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 1, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 2, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  1},
-		{.buf = "16 0c 00 00 00", .Offset = 3, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  1},
-		{.buf = "16 0c 00 00 00", .Offset = 4, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 5, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 6, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 7, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 8, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 9, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0},
-		{.buf = "16 0c 00 00 00", .Offset = 10, .Size = 1, .LogMin = 0, .LogMax = 1, .expectedValue =  0}
+		{"00 ff ff ff ff",	0,	32,	-1,	2147483647,	-1},
+		{"00 ff",	0,	8,	-1,	127,	-1},
+		{"00 ff",	0,	8,	0,	127,	127},
+		{"00 ff",	0,	8,	0,	255,	255},
+		{"33 00 0a 08 80",	0,	32,	0,	65535,	2560},
+		{"00 00 08 00 00",	0,	32,	0,	65535,	2048},
+		{"06 00 00 08",	0,	8,	0,	255,	0},
+		{"06 00 00 08",	8,	8,	0,	255,	0},
+		{"06 00 00 08",	16,	8,	0,	255,	8},
+		{"16 0c 00 00 00",	0,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	1,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	2,	1,	0,	1,	1},
+		{"16 0c 00 00 00",	3,	1,	0,	1,	1},
+		{"16 0c 00 00 00",	4,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	5,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	6,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	7,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	8,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	9,	1,	0,	1,	0},
+		{"16 0c 00 00 00",	10,	1,	0,	1,	0}
 	};
 
 	for (i = 0; i < sizeof(testData)/sizeof(testData[0]); i++) {
