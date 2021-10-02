@@ -62,8 +62,6 @@ void PrintBufAndData(uint8_t *buf, size_t bufSize, HIDData_t *pData) {
 }
 
 int RunBuiltInTests(char *argv[]) {
-	NUT_UNUSED_VARIABLE(argv);
-
 	int exitStatus = 0;
 	size_t i;
 	char *next;
@@ -99,6 +97,7 @@ int RunBuiltInTests(char *argv[]) {
 		{"16 0c 00 00 00",	9,	1,	0,	1,	0},
 		{"16 0c 00 00 00",	10,	1,	0,	1,	0}
 	};
+	NUT_UNUSED_VARIABLE(argv);
 
 	for (i = 0; i < sizeof(testData)/sizeof(testData[0]); i++) {
 		next = testData[i].buf;
