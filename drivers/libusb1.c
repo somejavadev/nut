@@ -627,7 +627,7 @@ static int nut_libusb_strerror(const int ret, const char *desc)
 
 /* Expected evaluated types for the API:
  * static int nut_libusb_get_report(libusb_device_handle *udev,
- *	int ReportId, unsigned char *raw_buf, int ReportSize )
+ *	int ReportId, unsigned char *raw_buf, int ReportSize)
  */
 static int nut_libusb_get_report(
 	libusb_device_handle *udev,
@@ -679,7 +679,7 @@ static int nut_libusb_get_report(
 
 /* Expected evaluated types for the API:
  * static int nut_libusb_set_report(libusb_device_handle *udev,
- *	int ReportId, unsigned char *raw_buf, int ReportSize )
+ *	int ReportId, unsigned char *raw_buf, int ReportSize)
  */
 static int nut_libusb_set_report(
 	libusb_device_handle *udev,
