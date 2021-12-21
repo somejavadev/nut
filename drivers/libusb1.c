@@ -639,7 +639,6 @@ static int nut_libusb_get_report(
 
 	upsdebugx(4, "Entering libusb_get_report");
 
-	if (!udev
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic push
 #endif
@@ -652,12 +651,13 @@ static int nut_libusb_get_report(
 #ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE
 # pragma GCC diagnostic ignored "-Wtautological-unsigned-zero-compare"
 #endif
+	if (!udev
 	|| ReportId < 0 || (uintmax_t)ReportId > UINT16_MAX
 	|| ReportSize < 0 || (uintmax_t)ReportSize > UINT16_MAX
+	) {
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic pop
 #endif
-	) {
 		return 0;
 	}
 
@@ -689,7 +689,6 @@ static int nut_libusb_set_report(
 {
 	int	ret;
 
-	if (!udev
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic push
 #endif
@@ -702,12 +701,13 @@ static int nut_libusb_set_report(
 #ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE
 # pragma GCC diagnostic ignored "-Wtautological-unsigned-zero-compare"
 #endif
+	if (!udev
 	|| ReportId < 0 || (uintmax_t)ReportId > UINT16_MAX
 	|| ReportSize < 0 || (uintmax_t)ReportSize > UINT16_MAX
+	) {
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic pop
 #endif
-	) {
 		return 0;
 	}
 
@@ -739,7 +739,6 @@ static int nut_libusb_get_string(
 {
 	int ret;
 
-	if (!udev
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic push
 #endif
@@ -752,12 +751,13 @@ static int nut_libusb_get_string(
 #ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE
 # pragma GCC diagnostic ignored "-Wtautological-unsigned-zero-compare"
 #endif
+	if (!udev
 	|| StringIdx < 0 || (uintmax_t)StringIdx > UINT8_MAX
 	|| buflen < 0 || (uintmax_t)buflen > (uintmax_t)INT_MAX
+	) {
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic pop
 #endif
-	) {
 		return -1;
 	}
 
@@ -779,7 +779,6 @@ static int nut_libusb_get_interrupt(
 {
 	int ret, tmpbufsize;
 
-	if (!udev
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic push
 #endif
@@ -792,11 +791,12 @@ static int nut_libusb_get_interrupt(
 #ifdef HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE
 # pragma GCC diagnostic ignored "-Wtautological-unsigned-zero-compare"
 #endif
+	if (!udev
 	||  bufsize < 0 || (uintmax_t)bufsize > (uintmax_t)INT_MAX
+	) {
 #if (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP) && ( (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TYPE_LIMITS) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_CONSTANT_OUT_OF_RANGE_COMPARE) || (defined HAVE_PRAGMA_GCC_DIAGNOSTIC_IGNORED_TAUTOLOGICAL_UNSIGNED_ZERO_COMPARE) )
 # pragma GCC diagnostic pop
 #endif
-	) {
 		return -1;
 	}
 
