@@ -327,13 +327,17 @@ static int main_arg(char *var, char *val)
 	 */
 	if (!strcmp(var, "user")) {
 		if (user_from_cmdline) {
-			upsdebugx(0, "User specified in driver section '%s' "
+			upsdebugx(0, "User '%s' specified in driver section "
 				"was ignored due to '%s' specified on command line",
 				val, user);
 		} else {
+			upsdebugx(1, "Overriding previously specified user '%s' "
+				"with '%s' specified for driver section",
+				user, val);
 			free(user);
 			user = xstrdup(val);
 		}
+		return 1;	/* handled */
 	}
 
 	if (!strcmp(var, "sddelay")) {
@@ -398,6 +402,9 @@ static void do_global_args(const char *var, const char *val)
 				"was ignored due to '%s' specified on command line",
 				val, user);
 		} else {
+			upsdebugx(1, "Overriding previously specified user '%s' "
+				"with '%s' specified in global section",
+				user, val);
 			free(user);
 			user = xstrdup(val);
 		}
