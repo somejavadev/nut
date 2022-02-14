@@ -30,6 +30,7 @@
 #include "common.h"
 #include "upsconf.h"
 #include "attribute.h"
+#include "nut_stdint.h"
 
 typedef struct {
 	char	*upsname;
@@ -326,7 +327,7 @@ static void start_driver(const ups_t *ups)
 #endif
 		/* Different platforms, different sizes, none fits all... */
 		/* can we fit this many 'D's? */
-		if ((uintmax_t)SIZE_MAX < (uintmax_t)nut_debug_level
+		if ((uintmax_t)SIZE_MAX > (uintmax_t)nut_debug_level /* else can't assign, requested debug level is huge */
 		&&  (size_t)nut_debug_level + 1 < m
 		) {
 #ifdef __clang__
@@ -581,14 +582,18 @@ int main(int argc, char **argv)
 			nut_debug_level = 2;
 	}
 
-	upsdebugx(2, "\n"
-		   "If you're not a NUT core developer, chances are that you're told to enable debugging\n"
-		   "to see why a driver isn't working for you. We're sorry for the confusion, but this is\n"
-		   "the 'upsdrvctl' wrapper, not the driver you're interested in.\n\n"
-		   "Below you'll find one or more lines starting with 'exec:' followed by an absolute\n"
-		   "path to the driver binary and some command line option. This is what the driver\n"
-		   "starts and you need to copy and paste that line and append the debug flags to that\n"
-		   "line (less the 'exec:' prefix).\n");
+	if (nut_debug_level_passthrough == 0) {
+		upsdebugx(2, "\n"
+			"If you're not a NUT core developer, chances are that you're told to enable debugging\n"
+			"to see why a driver isn't working for you. We're sorry for the confusion, but this is\n"
+			"the 'upsdrvctl' wrapper, not the driver you're interested in.\n\n"
+			"Below you'll find one or more lines starting with 'exec:' followed by an absolute\n"
+			"path to the driver binary and some command line option. This is what the driver\n"
+			"starts and you need to copy and paste that line and append the debug flags to that\n"
+			"line (less the 'exec:' prefix).\n\n"
+			"Alternately, provide an additional '-d' (lower-case) parameter to 'upsdrvctl' to\n"
+			"pass its current debug level to the launched driver.\n");
+	}
 
 	if (!strcmp(argv[0], "start"))
 		command = &start_driver;
