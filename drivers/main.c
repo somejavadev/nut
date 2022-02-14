@@ -48,6 +48,7 @@ static vartab_t	*vartab_h = NULL;
 /* variables possibly set by the global part of ups.conf */
 time_t	poll_interval = 2;
 static char	*chroot_path = NULL, *user = NULL;
+static int	user_from_cmdline = 0;
 
 /* signal handling */
 int	exit_flag = 0;
@@ -298,6 +299,20 @@ static int main_arg(char *var, char *val)
 		return 1;	/* handled */
 	}
 
+	/* user specified at the driver level overrides that on global level
+	 * or the built-in default
+	 */
+	if (!strcmp(var, "user")) {
+		if (user_from_cmdline) {
+			upsdebugx(0, "User specified in driver section '%s' "
+				"was ignored due to '%s' specified on command line",
+				val, user);
+		} else {
+			free(user);
+			user = xstrdup(val);
+		}
+	}
+
 	if (!strcmp(var, "sddelay")) {
 		upslogx(LOG_INFO, "Obsolete value sddelay found in ups.conf");
 		return 1;	/* handled */
@@ -342,8 +357,14 @@ static void do_global_args(const char *var, const char *val)
 	}
 
 	if (!strcmp(var, "user")) {
-		free(user);
-		user = xstrdup(val);
+		if (user_from_cmdline) {
+			upsdebugx(0, "User specified in global section '%s' "
+				"was ignored due to '%s' specified on command line",
+				val, user);
+		} else {
+			free(user);
+			user = xstrdup(val);
+		}
 	}
 
 	if (!strcmp(var, "synchronous")) {
@@ -591,8 +612,19 @@ int main(int argc, char **argv)
 				chroot_path = xstrdup(optarg);
 				break;
 			case 'u':
+				if (user_from_cmdline) {
+					upsdebugx(1, "Previously specified user for drivers '%s' "
+						"was ignored due to '%s' specified on command line"
+						" (again?)",
+						user, optarg);
+				} else {
+					upsdebugx(1, "Built-in default user for drivers '%s' "
+						"was ignored due to '%s' specified on command line",
+						user, optarg);
+				}
 				free(user);
 				user = xstrdup(optarg);
+				user_from_cmdline = 1;
 				break;
 			case 'V':
 				/* already printed the banner, so exit */
