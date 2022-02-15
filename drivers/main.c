@@ -298,6 +298,11 @@ static int main_arg(char *var, char *val)
 {
 	/* flags for main */
 
+	upsdebugx(3, "%s: var='%s' val='%s'",
+		__func__,
+		var ? var : "<null>", /* null should not happen... but... */
+		val ? val : "<null>");
+
 	if (!strcmp(var, "nolock")) {
 		do_lock_port = 0;
 		dstate_setinfo("driver.flag.nolock", "enabled");
@@ -311,7 +316,7 @@ static int main_arg(char *var, char *val)
 
 	/* any other flags are for the driver code */
 	if (!val)
-		return 0;
+		return 0;	/* unhandled, pass it through to the driver */
 
 	/* variables for main: port */
 
@@ -381,6 +386,11 @@ static int main_arg(char *var, char *val)
 
 static void do_global_args(const char *var, const char *val)
 {
+	upsdebugx(3, "%s: var='%s' val='%s'",
+		__func__,
+		var ? var : "<null>", /* null should not happen... but... */
+		val ? val : "<null>");
+
 	if (!strcmp(var, "pollinterval")) {
 		int ipv = atoi(val);
 		if (ipv > 0) {
@@ -678,8 +688,9 @@ int main(int argc, char **argv)
 						" (again?)",
 						user, optarg);
 				} else {
-					upsdebugx(1, "Built-in default user for drivers '%s' "
-						"was ignored due to '%s' specified on command line",
+					upsdebugx(1, "Built-in default or configured user "
+						"for drivers '%s' was ignored due to '%s' "
+						"specified on command line",
 						user, optarg);
 				}
 				free(user);
