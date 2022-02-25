@@ -632,7 +632,7 @@ static const char *marlin_outlet_group_phase_fun(void *raw_outlet_group_nb)
 			snprintf(marlin_scratch_buf, sizeof(marlin_scratch_buf), "L%i", phases_nb);
 			if (phases_nb < 1 || phases_nb > 3)
 				upsdebugx(3, "WARNING: %s got %i phases which is an unexpected amount",
-				        __func__, phases_nb);
+					__func__, phases_nb);
 
 			return marlin_scratch_buf;
 		}
@@ -850,6 +850,11 @@ static info_lkp_t marlin_device_count_info[] = {
 
 /* Snmp2NUT lookup table for Eaton Marlin MIB */
 static snmp_info_t eaton_marlin_mib[] = {
+
+	/* standard MIB items */
+	{ "device.description", ST_FLAG_STRING | ST_FLAG_RW, SU_INFOSIZE, ".1.3.6.1.2.1.1.1.0", NULL, SU_FLAG_OK, NULL },
+	{ "device.contact", ST_FLAG_STRING | ST_FLAG_RW, SU_INFOSIZE, ".1.3.6.1.2.1.1.4.0", NULL, SU_FLAG_OK, NULL },
+	{ "device.location", ST_FLAG_STRING | ST_FLAG_RW, SU_INFOSIZE, ".1.3.6.1.2.1.1.6.0", NULL, SU_FLAG_OK, NULL },
 
 	/* Device collection */
 	{ "device.mfr", ST_FLAG_STRING, SU_INFOSIZE, NULL, "EATON",

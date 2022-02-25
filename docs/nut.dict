@@ -1,4 +1,4 @@
-personal_ws-1.1 en 2918 utf-8
+personal_ws-1.1 en 2920 utf-8
 AAS
 ACFAIL
 ACFREQ
@@ -1874,6 +1874,7 @@ hh
 hibernate's
 hiddev
 hidparser
+hidtypes
 hidups
 highbattery
 highfrequency
@@ -2852,6 +2853,7 @@ vin
 virsh
 virtualenv
 virtualization
+vivo
 vo
 vod
 voltronic
