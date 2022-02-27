@@ -368,7 +368,7 @@ static info_lkp_t marlin_ambient_drycontacts_info[] = {
 		, NULL, NULL, NULL, NULL
 #endif
 	},
-	{ 0, "open"
+	{ 0, "opened"
 #if WITH_SNMP_LKP_FUN
 		, NULL, NULL, NULL, NULL
 #endif
