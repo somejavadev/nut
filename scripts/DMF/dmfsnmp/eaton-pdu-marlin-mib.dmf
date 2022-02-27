@@ -11,7 +11,7 @@
 	</lookup>
 	<lookup name="marlin_ambient_drycontacts_info">
 		<lookup_info oid="-1" value="unknown"/>
-		<lookup_info oid="0" value="open"/>
+		<lookup_info oid="0" value="opened"/>
 		<lookup_info oid="1" value="closed"/>
 	</lookup>
 	<lookup name="marlin_ambient_drycontacts_polarity_info">
