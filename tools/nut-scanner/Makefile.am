@@ -74,7 +74,7 @@ if WITH_DMF_LUA
 else !WITH_DMF_LUA
  CFLAGS_DMF_LUA = -DWITH_DMF_LUA=0
  LDFLAGS_DMF_LUA =
-endif WITH_DMF_LUA
+endif !WITH_DMF_LUA
 
 if WITH_NEON
 if WITH_SNMP
@@ -127,7 +127,7 @@ if HAVE_SEMAPHORE_LIBS
 libnutscan_la_LIBADD += $(SEMLIBS)
 endif HAVE_SEMAPHORE_LIBS
 
-libnutscan_la_LIBADD = $(SERLIBS)
+libnutscan_la_LIBADD += $(SERLIBS)
 
 libnutscan_la_LDFLAGS =
 if HAVE_WINDOWS
