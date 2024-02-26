@@ -71,10 +71,10 @@ LDFLAGS_LUA = $(LUA_LIB)
 if WITH_DMF_LUA
  CFLAGS_DMF_LUA = -DWITH_DMF_LUA=1 -DWITH_DMF_FUNCTIONS=1 $(CFLAGS_LUA)
  LDFLAGS_DMF_LUA = $(LDFLAGS_LUA)
-else
+else !WITH_DMF_LUA
  CFLAGS_DMF_LUA = -DWITH_DMF_LUA=0
  LDFLAGS_DMF_LUA =
-endif
+endif WITH_DMF_LUA
 
 if WITH_NEON
 if WITH_SNMP
@@ -97,19 +97,19 @@ if WITH_DMF
 if WITH_DMF_LUA
  nut_scanner_reindex_dmfsnmp_LDADD += $(LDFLAGS_DMF_LUA)
  nut_scanner_reindex_dmfsnmp_CFLAGS += $(CFLAGS_DMF_LUA)
-endif
+endif WITH_DMF_LUA
 if ! WITH_LIBLTDL
  nut_scanner_reindex_dmfsnmp_LDADD += $(LIBNEON_LIBS)
-endif
-endif
-endif
-endif
+endif ! WITH_LIBLTDL
+endif WITH_DMF
+endif WITH_SNMP
+endif WITH_NEON
 
 # Note: we only build nut-scanner, and its library, if libltdl was found (required ATM!)
 if WITH_NUT_SCANNER
  bin_PROGRAMS += nut-scanner
  lib_LTLIBRARIES += libnutscan.la
-endif
+endif WITH_NUT_SCANNER
 libnutscan_la_SOURCES = scan_nut.c scan_nut_simulation.c scan_ipmi.c \
 			nutscan-snmp.c \
 			nutscan-device.c nutscan-ip.c nutscan-display.c \
@@ -120,12 +120,12 @@ libnutscan_la_LIBADD = $(NETLIBS)
 libnutscan_la_LIBADD += $(top_builddir)/drivers/libserial-nutscan.la
 if WITH_LIBLTDL
 libnutscan_la_LIBADD += $(LIBLTDL_LIBS)
-endif
+endif WITH_LIBLTDL
 #libnutscan_la_LIBADD += $(top_builddir)/common/libcommonclient.la
 if HAVE_SEMAPHORE_LIBS
 # Are additional libraries needed for semaphore support?
 libnutscan_la_LIBADD += $(SEMLIBS)
-endif
+endif HAVE_SEMAPHORE_LIBS
 
 # FIXME: From old ages onward, SERLIBS are added here and not in LIBADD... why?
 libnutscan_la_LDFLAGS = $(SERLIBS)
@@ -133,7 +133,7 @@ libnutscan_la_LDFLAGS = $(SERLIBS)
 if HAVE_WINDOWS
   # Many versions of MingW seem to fail to build non-static DLL without this
   libnutscan_la_LDFLAGS += -no-undefined
-endif
+endif HAVE_WINDOWS
 
 #
 # Below we set API versions of public libraries
@@ -155,9 +155,9 @@ libnutscan_la_LDFLAGS += $(SERLIBS) -version-info 2:5:0
 # dynamic/shared libnutcommon (etc.)
 if WITH_DMF
 libnutscan_la_LDFLAGS += -export-symbols-regex '^((dmf)?nutscan_|uninit_snmp_device_table|nut_debug_level|s_upsdebugx|max_threads|curr_threads|nut_report_config_flags|upsdebugx_report_search_paths|nut_prepare_search_paths)'
-else
+else !WITH_DMF
 libnutscan_la_LDFLAGS += -export-symbols-regex '^(nutscan_|nut_debug_level|s_upsdebugx|max_threads|curr_threads|nut_report_config_flags|upsdebugx_report_search_paths|nut_prepare_search_paths)'
-endif
+endif !WITH_DMF
 libnutscan_la_CFLAGS = -I$(top_srcdir)/clients -I$(top_srcdir)/include \
 			$(LIBLTDL_CFLAGS) -I$(top_srcdir)/drivers
 
@@ -213,10 +213,10 @@ endif WITH_SNMP
 if WITH_SSL
   libnutscan_la_CFLAGS += $(LIBSSL_CFLAGS)
   libnutscan_la_LIBADD += $(LIBSSL_LIBS)
-endif
+endif WITH_SSL
 if WITH_USB
   libnutscan_la_CFLAGS += $(LIBUSB_CFLAGS)
-endif
+endif WITH_USB
 # Note: do not indent automake "if" lines
 if WITH_SNMP
   libnutscan_la_CFLAGS += $(LIBNETSNMP_CFLAGS)
@@ -236,13 +236,13 @@ endif WITH_SNMP_STATIC
 endif WITH_SNMP
 if WITH_NEON
   libnutscan_la_CFLAGS += $(LIBNEON_CFLAGS)
-endif
+endif WITH_NEON
 if WITH_AVAHI
   libnutscan_la_CFLAGS += $(LIBAVAHI_CFLAGS)
-endif
+endif WITH_AVAHI
 if WITH_IPMI
   libnutscan_la_CFLAGS += $(LIBIPMI_CFLAGS)
-endif
+endif WITH_IPMI
 
 # C is not a header, but there is no dist_noinst_SOURCES
 dist_noinst_HEADERS += $(NUT_SCANNER_DEPS_H) $(NUT_SCANNER_DEPS_C)
@@ -250,9 +250,9 @@ dist_noinst_HEADERS += $(NUT_SCANNER_DEPS_H) $(NUT_SCANNER_DEPS_C)
 # Optionally deliverable as part of NUT public API:
 if WITH_DEV
  include_HEADERS += nut-scan.h nutscan-device.h nutscan-ip.h nutscan-init.h nutscan-serial.h nutscan-snmp.h
-else
+else !WITH_DEV
  dist_noinst_HEADERS += nut-scan.h nutscan-device.h nutscan-ip.h nutscan-init.h nutscan-serial.h nutscan-snmp.h
-endif
+endif !WITH_DEV
 
 dummy:
 
