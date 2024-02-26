@@ -1,4 +1,4 @@
-personal_ws-1.1 en 3468 utf-8
+personal_ws-1.1 en 3469 utf-8
 AAC
 AAS
 ABI
@@ -3165,6 +3165,7 @@ tcsh
 td
 tdriver
 teknologist
+telnetlib
 tempmax
 tempmin
 terminal's

@@ -55,8 +55,47 @@
 # 2023-01-18 Jim Klimov <jimklimov+nut@gmail.com> - Version 1.6.0
 #            Added CheckUPSAvailable() method originally by Michal Hlavinka
 #            from 2013-01-07 RedHat/Fedora packaging
+#
+# 2024-02-26 Jim Klimov <jimklimov+nut@gmail.com> - Version 1.6.1
+#            Bumped to use telnetlib3 as an alternative to telnetlib
+#            (original project deprecated in Python 3.11, removed in 3.13+)
 
-import telnetlib
+telnetlib_mode = 1
+try:
+    # Before Python 3.13
+    import telnetlib
+except ImportError as ie:
+    # Since Python 3.7
+    import telnetlib3,asyncio
+    telnetlib_mode = 3
+
+
+class PyNUTTelnet :
+
+    def __init__(self):
+        self.__host = None
+        self.__port = None
+
+        # For paradigm of original telnetlib (legacy)
+        self.__srv_handler = None
+
+        # For paradigm of telnetlib3 per suggestions from
+        # https://stackoverflow.com/questions/75778543/python-telnetlib3-examples
+        # https://stackoverflow.com/questions/76414933/how-to-use-telnetlib3-to-write-and-read-to-from-a-telnet-connection-using-python
+        self.__reader = None
+        self.__writer = None
+
+    def open(self, host, port):
+        self.__host = host
+        self.__port = port
+
+        if telnetlib_mode == 1:
+            self.__srv_handler = telnetlib.Telnet( self.__host, self.__port )
+        elif telnetlib_mode == 3:
+            # Needs async annotation of the method? :\
+            self.__reader, self.__writer = await telnetlib3.open_connection( self.__host, self.__port )
+            # TOTHINK # self.__reader, self.__writer = await telnetlib3.TelnetClient.open_connection( self.__host, self.__port )
+
 
 class PyNUTError( Exception ) :
     """ Base class for custom exceptions """
@@ -73,8 +112,8 @@ class PyNUTClient :
     __timeout     = None
     __srv_handler = None
 
-    __version     = "1.6.0"
-    __release     = "2023-01-18"
+    __version     = "1.6.1"
+    __release     = "2024-02-26"
 
 
     def __init__( self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5 ) :
@@ -119,7 +158,9 @@ if something goes wrong.
         if self.__debug :
             print( "[DEBUG] Connecting to host" )
 
-        self.__srv_handler = telnetlib.Telnet( self.__host, self.__port )
+        if telnetlib_mode == 1:
+            self.__srv_handler = telnetlib.Telnet( self.__host, self.__port )
+        else:
 
         if self.__login != None :
             self.__srv_handler.write( ("USERNAME %s\n" % self.__login).encode('ascii') )

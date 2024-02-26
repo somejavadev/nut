@@ -30,7 +30,8 @@ setup(
     #data_files =	[('', ['tox.ini'])],
     #scripts    =	['PyNUTClient/test_nutclient.py', 'PyNUTClient/__init__.py'],
     python_requires =	'>=2.6',
-    # install_requires =	['telnetlib'],	# NOTE: telnetlib.py is part of Python core for tested 2.x and 3.x versions, not something 'pip' can download
+    # NOTE: telnetlib.py is part of Python core for tested 2.x and 3.x versions, not something 'pip' can download
+    # install_requires =	['telnetlib'],	# Or "telnetlib3,asyncio" for Python >= 3.11, required for 3.13+
     keywords =	['pypi', 'cicd', 'python', 'nut', 'Network UPS Tools'],
     classifiers = [
         "Development Status :: 5 - Production/Stable",

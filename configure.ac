@@ -2355,7 +2355,7 @@ if test x"${nut_with_pynut}" != xno \
     if test -n "${PYTHON2}" \
     && (command -v ${PYTHON2} || which ${PYTHON2}) >/dev/null 2>/dev/null \
     ; then
-        if ${PYTHON2} -c "import telnetlib" \
+        if ${PYTHON2} -c "import telnetlib" || ${PYTHON2} -c "import telnetlib3,asyncio" \
         ; then
             nut_with_pynut_py2="yes"
         fi
@@ -2364,7 +2364,7 @@ if test x"${nut_with_pynut}" != xno \
     if test -n "${PYTHON3}" \
     && (command -v ${PYTHON3} || which ${PYTHON3}) >/dev/null 2>/dev/null \
     ; then
-        if ${PYTHON3} -c "import telnetlib" \
+        if ${PYTHON3} -c "import telnetlib" || ${PYTHON3} -c "import telnetlib3,asyncio" \
         ; then
             nut_with_pynut_py3="yes"
         fi
@@ -2375,7 +2375,7 @@ if test x"${nut_with_pynut}" != xno \
     && (command -v ${PYTHON} || which ${PYTHON}) >/dev/null 2>/dev/null \
     && test "${PYTHON}" != "${PYTHON2}" -a "${PYTHON}" != "${PYTHON3}" \
     ; then
-        if ${PYTHON} -c "import telnetlib" \
+        if ${PYTHON} -c "import telnetlib" || ${PYTHON} -c "import telnetlib3,asyncio" \
         ; then
             nut_with_pynut_py="yes"
         fi
