@@ -1068,7 +1068,7 @@ static int _apc_modbus_usb_callback(const modbus_usb_device_t *device)
 	size_t i;
 	HIDData_t *hid_cur_item, *hid_rtu_rx = NULL, *hid_rtu_tx = NULL;
 	HIDNode_t hid_cur_usage;
-	USBDeviceMatcher_t *current_matcher;
+	USBDeviceMatcher_t *current_matcher = NULL;
 
 	if (device == NULL) {
 		upslogx(LOG_ERR, "%s: NULL device passed", __func__);

@@ -32,6 +32,9 @@
 #include "nut_libusb.h"
 #include "nut_stdint.h"
 
+#include <sys/resource.h>
+#include <errno.h>
+
 #define USB_DRIVER_NAME		"USB communication driver (libusb 1.0)"
 #define USB_DRIVER_VERSION	"0.46"
 
@@ -188,6 +191,15 @@ static int nut_libusb_open(libusb_device_handle **udevp,
 	/* report descriptor */
 	unsigned char	rdbuf[MAX_REPORT_SIZE];
 	int32_t		rdlen;
+
+	struct rusage memory;
+
+	errno = 0;
+	getrusage(RUSAGE_SELF, &memory);
+	upsdebugx(0, "%s: memory usage: udevp=%p *udevp=%p ixrss=%ld isrss=%ld idrss=%ld maxrss=%ld errno=%d: %s",
+		__func__, (void*)udevp, udevp ? (void*)(*udevp) : udevp,
+		memory.ru_ixrss, memory.ru_isrss, memory.ru_idrss, memory.ru_maxrss,
+		errno, strerror(errno));
 
 	/* libusb base init */
 	if (libusb_init(NULL) < 0) {

@@ -130,6 +130,9 @@ typedef enum {
 
 
 /* == Global vars == */
+
+extern int exit_flag;
+
 /* Pointer to the active subdriver object (changed in subdriver_matcher() function) */
 static subdriver_t	*subdriver = NULL;
 
@@ -1932,6 +1935,11 @@ static void load_armac_endpoint_cache(void)
 #endif	/* !WITH_LIBUSB_1_0 */
 }
 
+static int	null_command(const char *cmd, char *buf, size_t buflen)
+{
+	return 1;
+}
+
 /* Armac communication subdriver
  *
  * This reproduces a communication protocol used by an old PowerManagerII
@@ -2227,6 +2235,16 @@ static void	*armac_subdriver(USBDevice_t *device)
 	return NULL;
 }
 
+
+
+static void	*null_subdriver(USBDevice_t *device)
+{
+	NUT_UNUSED_VARIABLE(device);
+
+	subdriver_command = &qx_command;
+	return NULL;
+}
+
 /* USB device match structure */
 typedef struct {
 	const int	vendorID;		/* USB device's VendorID */
@@ -2258,6 +2276,8 @@ static qx_usb_device_id_t	qx_usb_id[] = {
 	{ USB_DEVICE(0x0001, 0x0000),	NULL,		NULL,			&krauler_subdriver },	/* Krauler UP-M500VA */
 	{ USB_DEVICE(0x0001, 0x0000),	NULL,		"MEC0003",		&snr_subdriver },	/* SNR-UPS-LID-XXXX UPSes */
 	{ USB_DEVICE(0x0925, 0x1234),	NULL,		NULL,					&armac_subdriver },	/* Armac UPS and maybe other richcomm-like or using old PowerManagerII software */
+	
+	{ USB_DEVICE(0x0463, 0xFFFF), NULL, NULL, &null_subdriver },
 	/* End of list */
 	{ -1,	-1,	NULL,	NULL,	NULL }
 };
@@ -2889,6 +2909,7 @@ void	upsdrv_shutdown(void)
 			{ "snr", &snr_command },
 			{ "ablerex", &ablerex_command },
 			{ "armac", &armac_command },
+			{ "null", &null_command },
 			{ NULL, NULL }
 		};
 	#endif
@@ -3030,6 +3051,7 @@ void	upsdrv_updateinfo(void)
 		alarm_init();
 
 		if (qx_ups_walk(QX_WALKMODE_FULL_UPDATE) == FALSE) {
+			upsdebugx(1, "qx walk full failed");
 
 			if (retry < MAXTRIES || retry == MAXTRIES) {
 				upsdebugx(1,
@@ -3039,7 +3061,7 @@ void	upsdrv_updateinfo(void)
 				dstate_datastale();
 			}
 
-			return;
+			//return;
 		}
 
 		lastpoll = now;
@@ -3054,6 +3076,7 @@ void	upsdrv_updateinfo(void)
 
 		/* Quick poll data only to see if the UPS is still connected */
 		if (qx_ups_walk(QX_WALKMODE_QUICK_UPDATE) == FALSE) {
+			upsdebugx(1, "qx walk quick failed");
 
 			if (retry < MAXTRIES || retry == MAXTRIES) {
 				upsdebugx(1,
@@ -3063,7 +3086,7 @@ void	upsdrv_updateinfo(void)
 				dstate_datastale();
 			}
 
-			return;
+			//return;
 		}
 
 	}
@@ -3091,6 +3114,7 @@ void	upsdrv_initinfo(void)
 
 	/* Initialise data */
 	if (qx_ups_walk(QX_WALKMODE_INIT) == FALSE) {
+	return;
 		fatalx(EXIT_FAILURE, "Can't initialise data from the UPS");
 	}
 
@@ -3488,6 +3512,8 @@ static ssize_t	qx_command(const char *cmd, char *buf, size_t buflen)
 	NUT_UNUSED_VARIABLE(buf);
 	NUT_UNUSED_VARIABLE(buflen);
 
+upsdebugx(1, "%s", __func__);
+
 #ifndef TESTING
 
 # ifdef QX_USB
@@ -3509,7 +3535,10 @@ static ssize_t	qx_command(const char *cmd, char *buf, size_t buflen)
 			dstate_setinfo("driver.state", "reconnect.updateinfo");
 		}
 
-		ret = (*subdriver_command)(cmd, buf, buflen);
+		ret = LIBUSB_ERROR_PIPE; //LIBUSB_ERROR_IO; //(*subdriver_command)(cmd, buf, buflen);
+
+if (exit_flag != 0)
+	return -1;
 
 		if (ret >= 0) {
 			return ret;
@@ -3720,6 +3749,9 @@ static int	subdriver_matcher(void)
 	const char	*protocol = getval("protocol");
 	int		i;
 
+subdriver=&q1_subdriver;
+return 1;
+
 	/* Select the subdriver for this device */
 	for (i = 0; subdriver_list[i] != NULL; i++) {
 
@@ -3897,6 +3929,8 @@ static bool_t	qx_ups_walk(walkmode_t mode)
 	/* Device data walk */
 	for (item = subdriver->qx2nut; item->info_type != NULL; item++) {
 
+			retcode = qx_process(item, NULL);
+
 		/* Skip this item */
 		if (item->qxflags & QX_FLAG_SKIP)
 			continue;
@@ -3989,6 +4023,9 @@ static bool_t	qx_ups_walk(walkmode_t mode)
 #endif
 
 		}
+
+			retcode = qx_process(item, NULL);
+
 
 		/* Instant commands */
 		if (item->qxflags & QX_FLAG_CMD) {
@@ -4262,7 +4299,7 @@ static int	qx_process_answer(item_t *item, const size_t len)
 	if (item->answer_len && len < item->answer_len) {
 		upsdebugx(2, "%s: short reply (%s)",
 			__func__, item->info_type);
-		return -1;
+		return 0;
 	}
 
 	/* Wrong leading character */
@@ -4270,7 +4307,7 @@ static int	qx_process_answer(item_t *item, const size_t len)
 		upsdebugx(2,
 			"%s: %s - invalid start character [%02x], expected [%02x]",
 			__func__, item->info_type, item->answer[0], item->leading);
-		return -1;
+		return 0;
 	}
 
 	/* Check boundaries */
@@ -4279,7 +4316,7 @@ static int	qx_process_answer(item_t *item, const size_t len)
 			"%s: in %s, starting char's position (%d) "
 			"follows ending char's one (%d)",
 			__func__, item->info_type, item->from, item->to);
-		return -1;
+		return 0;
 	}
 
 	/* Get value */
@@ -4312,6 +4349,8 @@ int	qx_process(item_t *item, const char *command)
 	/* Prepare the command to be used */
 	memset(cmd, 0, cmdsz);
 	snprintf(cmd, cmdsz, "%s", command ? command : item->command);
+
+upsdebugx(1, "%s", __func__);
 
 	/* Preprocess the command */
 	if (
@@ -4370,7 +4409,7 @@ int	ups_infoval_set(item_t *item)
 		if (item->preprocess(item, value, sizeof(value))) {
 			upsdebugx(4, "%s: failed to preprocess value [%s: %s]",
 				__func__, item->info_type, item->value);
-			return -1;
+			return 0;
 		}
 
 		/* Deal with status items */
