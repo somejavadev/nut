@@ -4,6 +4,7 @@
 	2003		Russell Kroll <rkroll@exploits.org>
 	2008		Arjen de Korte <adkorte-guest@alioth.debian.org>
 	2012 - 2017	Arnaud Quette <arnaud.quette@free.fr>
+	2020 - 2024	Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -495,12 +496,18 @@ static void sock_connect(TYPE_FD sock)
 			return;
 		}
 
-		ret = fcntl(fd, F_SETFL, ret | O_NDELAY);
+		ret = fcntl(fd, F_SETFL, ret | O_NONBLOCK);
 
 		if (ret < 0) {
-			upslog_with_errno(LOG_ERR, "fcntl set O_NDELAY on unix fd failed");
-			close(fd);
-			return;
+			upslog_with_errno(LOG_ERR, "fcntl set O_NONBLOCK on unix fd failed%s",
+				O_NONBLOCK == O_NDELAY ? "" :", retry with older O_NDELAY");
+
+			if (O_NONBLOCK == O_NDELAY || (ret = fcntl(fd, F_SETFL, ret | O_NDELAY)) < 0) {
+				if (O_NONBLOCK != O_NDELAY)
+					upslog_with_errno(LOG_ERR, "fcntl set O_NDELAY on unix fd failed");
+				close(fd);
+				return;
+			}
 		}
 	}
 	else {

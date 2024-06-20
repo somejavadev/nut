@@ -90,12 +90,17 @@ udq_pipe_conn_t *upsdrvquery_connect(const char *sockfn) {
 		return NULL;
 	}
 
-	if (fcntl(conn->sockfd, F_SETFL, ret | O_NDELAY) < 0) {
+	if (fcntl(conn->sockfd, F_SETFL, ret | O_NONBLOCK) < 0) {
 		if (nut_debug_level > 0 || nut_upsdrvquery_debug_level >= NUT_UPSDRVQUERY_DEBUG_LEVEL_CONNECT)
-			upslog_with_errno(LOG_ERR, "fcntl set O_NDELAY on driver socket %s failed", sockfn);
-		close(conn->sockfd);
-		free(conn);
-		return NULL;
+			upslog_with_errno(LOG_ERR, "fcntl set O_NONBLOCK on driver socket %s failed%s",
+				sockfn, O_NONBLOCK == O_NDELAY ? "" : ", retry with older O_NDELAY");
+		if (O_NONBLOCK == O_NDELAY || fcntl(conn->sockfd, F_SETFL, ret | O_NDELAY) < 0) {
+			if (O_NONBLOCK != O_NDELAY && (nut_debug_level > 0 || nut_upsdrvquery_debug_level >= NUT_UPSDRVQUERY_DEBUG_LEVEL_CONNECT))
+				upslog_with_errno(LOG_ERR, "fcntl set O_NDELAY on driver socket %s failed", sockfn);
+			close(conn->sockfd);
+			free(conn);
+			return NULL;
+		}
 	}
 #else
 	BOOL	result = WaitNamedPipe(sockfn, NMPWAIT_USE_DEFAULT_WAIT);
