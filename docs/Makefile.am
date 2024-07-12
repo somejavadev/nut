@@ -321,7 +321,7 @@ DOCBUILD_FILTER_GITHUB_LINKS = { \
 
 # The $< is okay here, it is used in a suffix rule below
 DOCBUILD_CONVERT_GITHUB_LINKS = { \
-    echo "  DOC-ASCIIDOC-GITHUB-LINKS    Parsing GitHub link patterns $< => $@"; \
+    echo "  DOC-ASCIIDOC-GITHUB-LINKS    Parsing GitHub link patterns $< => $@" >&2; \
     cat "$<" | $(DOCBUILD_FILTER_GITHUB_LINKS) > "$@.tmp.$$$$" \
     && mv -f "$@.tmp.$$$$" "$@" \
 ; }
@@ -331,7 +331,7 @@ DOCBUILD_CONVERT_GITHUB_LINKS = { \
 
 dummy:
 $(top_builddir)/ChangeLog: dummy
-	+@echo "  DOC-CHANGELOG-GENERATE	$@ : call parent Makefile" \
+	+@echo "  DOC-CHANGELOG-GENERATE	$@ : call parent Makefile" >&2 \
 	 && cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) $(@F)
 
 # BSD Make dislikes the path resolution here and does not always populate "$<"
@@ -354,7 +354,7 @@ $(top_builddir)/ChangeLog.adoc: $(top_builddir)/ChangeLog
 	     test -n "$@" && { printf '=== Failed to generate the ChangeLog\n\n%s\n\nNOTE: See https://github.com/networkupstools/nut/commits/master for change history.\n\n' "$${MSG}" > "$@" ; } ; \
 	     exit ; \
 	 } ; \
-	 echo "  DOC-CHANGELOG-ASCIIDOC	$${INPUT} => $@" \
+	 echo "  DOC-CHANGELOG-ASCIIDOC	$${INPUT} => $@" >&2 \
 	 && printf "ifdef::txt[]\n== Very detailed Change Log\n"$(A2X_ASCII_IDS)"endif::txt[]\n\n" > "$@.tmp.$$$$" \
 	 && TABCHAR="`printf '\t'`" \
 	 && $(SED) \
@@ -486,7 +486,7 @@ DOCBUILD_END = { \
 *.html: common.xsl xhtml.xsl
 .txt-prepped.html:
 	+A2X_OUTDIR="tmp/html-single.$(@F).$$$$" ; \
-	 echo "  DOC-HTML Generating $@"; \
+	 echo "  DOC-HTML Generating $@" >&2; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=xhtml11_format --format=xhtml --xsl-file=$(srcdir)/xhtml.xsl "$(<D)/`basename '$(<F)' -prepped`" || RES=$$? ; \
 	 $(DOCBUILD_END) ; \
@@ -494,7 +494,7 @@ DOCBUILD_END = { \
 	    *ChangeLog*) if [ -s '$(top_builddir)/ChangeLog' ] ; then \
 	            $(MAKE) $(AM_MAKEFLAGS) "`basename '$(@F)'`"-contentchecked || RES=$$? ; \
 	            if [ "$$RES" != 0 ] ; then \
-	                echo "  DOC-HTML Generating $@ (retry once)"; \
+	                echo "  DOC-HTML Generating $@ (retry once)" >&2; \
 	                A2X_OUTDIR="tmp/html-single.$(@F).$$$$-retry" ; \
 	                $(DOCBUILD_BEGIN) ; RES=0; rm -f "`basename '$(@F)'`"-contentchecked || true ; \
 	                $(A2X) $(A2X_COMMON_OPTS) --attribute=xhtml11_format --format=xhtml --xsl-file=$(srcdir)/xhtml.xsl "$(<D)/`basename '$(<F)' -prepped`" || RES=$$? ; \
@@ -508,7 +508,7 @@ DOCBUILD_END = { \
 *.chunked: common.xsl chunked.xsl
 .txt-prepped.chunked:
 	A2X_OUTDIR="tmp/html-chunked.$(@F).$$$$" ; \
-	 echo "  DOC-HTML-CHUNKED Generating $@"; \
+	 echo "  DOC-HTML-CHUNKED Generating $@" >&2; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=chunked_format --format=chunked --xsl-file=$(srcdir)/chunked.xsl "$(<D)/`basename '$(<F)' -prepped`" || RES=$$? ; \
 	 $(DOCBUILD_END) ; exit $$RES
@@ -517,7 +517,7 @@ DOCBUILD_END = { \
 *.pdf: docinfo.xml
 .txt-prepped.pdf:
 	A2X_OUTDIR="tmp/pdf.$(@F).$$$$" ; \
-	 echo "  DOC-PDF  Generating $@"; \
+	 echo "  DOC-PDF  Generating $@" >&2; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=pdf_format --format=pdf -a docinfo1 "$(<D)/`basename '$(<F)' -prepped`" || RES=$$? ; \
 	 $(DOCBUILD_END) ; exit $$RES
