@@ -330,7 +330,7 @@ A2X_ASCII_IDS = ":ascii-ids:\n"
 endif !WITH_PDF_NONASCII_TITLES
 
 $(top_builddir)/ChangeLog.adoc: $(top_builddir)/ChangeLog
-	@INPUT="$?"; \
+	INPUT="$?"; \
 	 test -n "$${INPUT}" || INPUT="$$(top_builddir)/ChangeLog" ; \
 	 test -n "$${INPUT}" && test -n "$@" && test -s "$${INPUT}" \
 	 || { \
@@ -470,7 +470,7 @@ DOCBUILD_END = { \
 
 *.html: common.xsl xhtml.xsl
 .txt-prepped.html:
-	+@A2X_OUTDIR="tmp/html-single.$(@F).$$$$" ; \
+	+A2X_OUTDIR="tmp/html-single.$(@F).$$$$" ; \
 	 echo "  DOC-HTML Generating $@"; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=xhtml11_format --format=xhtml --xsl-file=$(srcdir)/xhtml.xsl "$(<D)/`basename "$(<F)" -prepped`" || RES=$$? ; \
@@ -492,7 +492,7 @@ DOCBUILD_END = { \
 
 *.chunked: common.xsl chunked.xsl
 .txt-prepped.chunked:
-	@A2X_OUTDIR="tmp/html-chunked.$(@F).$$$$" ; \
+	A2X_OUTDIR="tmp/html-chunked.$(@F).$$$$" ; \
 	 echo "  DOC-HTML-CHUNKED Generating $@"; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=chunked_format --format=chunked --xsl-file=$(srcdir)/chunked.xsl "$(<D)/`basename "$(<F)" -prepped`" || RES=$$? ; \
@@ -501,7 +501,7 @@ DOCBUILD_END = { \
 # Note: non-HTML a2x modes may ignore the destination directory
 *.pdf: docinfo.xml
 .txt-prepped.pdf:
-	@A2X_OUTDIR="tmp/pdf.$(@F).$$$$" ; \
+	A2X_OUTDIR="tmp/pdf.$(@F).$$$$" ; \
 	 echo "  DOC-PDF  Generating $@"; \
 	 $(DOCBUILD_BEGIN) ; RES=0; \
 	 $(A2X) $(A2X_COMMON_OPTS) --attribute=pdf_format --format=pdf -a docinfo1 "$(<D)/`basename "$(<F)" -prepped`" || RES=$$? ; \

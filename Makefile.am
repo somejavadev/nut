@@ -339,7 +339,7 @@ GITLOG_START_POINT=v2.6.0
 # The script itself is generated from a template, so resides in builddir.
 dummy-stamp:
 ChangeLog: dummy-stamp
-	+@$(MAKE) $(AM_MAKEFLAGS) $(abs_top_builddir)/ChangeLog
+	+$(MAKE) $(AM_MAKEFLAGS) $(abs_top_builddir)/ChangeLog
 
 if WITH_PDF_NONASCII_TITLES
 WITH_PDF_NONASCII_TITLES_ENVVAR = WITH_PDF_NONASCII_TITLES=yes
@@ -361,7 +361,7 @@ endif
 # bit of time researching the FS in vain, and go on to re-generate the
 # ChangeLog when maybe we should not have - oh well:
 $(abs_top_builddir)/ChangeLog: tools/gitlog2changelog.py dummy-stamp
-	@cd $(abs_top_srcdir) && \
+	cd $(abs_top_srcdir) && \
 	    if test -e .git ; then \
 	        NUT_GITDIR=".git" ; if test -r "$${NUT_GITDIR}" -a ! -d "$${NUT_GITDIR}" ; then GD="`grep -E '^gitdir:' "$${NUT_GITDIR}" | sed 's/^gitdir: *//'`" && test -n "$$GD" -a -d "$$GD" && NUT_GITDIR="$$GD" ; fi ; \
 	        if test -s "$@" -a -d "$${NUT_GITDIR}" && test -z "`find "$${NUT_GITDIR}" -newer "$@" 2>/dev/null`" ; then \
