@@ -82,6 +82,28 @@ hardware support to a driver without recompiling.
 This is already handled by autoconf, so just `#include "timehead.h"` and
 you will get the right headers on every system.
 
+Boolean types and values
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The C language standard since C99 requires a `_Bool` type as a built-in,
+with the `<stdbool.h>` providing a `bool` as an alias and `true`/`false`
+definitions as macros. Note that C++ implementations should include the
+lower-cased type and values as part of the language; while a `<cstdbool>`
+header is provided for peace of mind, it may be removed since C++23.
+
+These definitions can be not available on some platforms NUT gets built
+for, or their equivalents can have a different spelling or casing.
+
+To hide such possible discrepancies, NUT provides a `nut_bool.h` header
+which delivers a `nut_bool_t` type definition and lower-cased `true` and
+`false` values (ideally as aliases or re-use of what `stdbool.h` has).
+We also have unit tests to make sure the chosen definitions behave
+reasonably on various platforms.
+
+Developers are asked to use this header and type and value spellings
+for a consistent NUT code base, and to avoid defining their own types
+and values for Boolean concepts.
+
 Device drivers -- main.c
 ------------------------
 

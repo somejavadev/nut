@@ -1,4 +1,4 @@
-personal_ws-1.1 en 3194 utf-8
+personal_ws-1.1 en 3196 utf-8
 AAC
 AAS
 ABI
@@ -1696,6 +1696,7 @@ csh
 cshdelay
 csi
 css
+cstdbool
 cstdint
 ctime
 ctrl
@@ -2819,6 +2820,7 @@ startdelay
 startup
 statepath
 stayoff
+stdbool
 stderr
 stdlib
 stdout
