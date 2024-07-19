@@ -90,6 +90,22 @@ extern "C" {
 # endif
 #endif
 
+
+/* use explicit booleans */
+/* // stashed from DMF scan-snmp variant
+#if !(defined HAVE_BOOL_T) || !HAVE_BOOL_T
+# ifndef FALSE
+typedef enum ebool { FALSE = 0, TRUE } bool_t;
+# else
+typedef int bool_t;
+# endif
+# ifdef HAVE_BOOL_T
+#  undef HAVE_BOOL_T
+# endif
+# define HAVE_BOOL_T 1
+#endif
+*/
+
 #ifdef __cplusplus
 /* *INDENT-OFF* */
 }
