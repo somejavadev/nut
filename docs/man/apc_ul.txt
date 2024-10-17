@@ -1,0 +1,61 @@
+APC_UL(8)
+=========
+
+NAME
+----
+
+apc_ul - Driver for APC Smart-UPS Microlink protocol UPSes
+
+SYNOPSIS
+--------
+
+*apc_ul* -h
+
+*apc_ul* -a 'UPS_NAME' ['OPTIONS']
+
+
+SUPPORTED HARDWARE
+------------------
+
+Works over serial with any Microlink capable APC UPS, most models that 
+have an RJ50 port which is not labelled "USB" should work.
+
+Recommended to only use it with units that have 2 or less outlet groups 
+as some with more don't accept shutdown commands properly.
+
+Driver is experimental and uses a completely undefined / undocumented
+protocol so may break at any time, especially after updating firmware. 
+Use at your own risk. 
+
+EXTRA ARGUMENTS
+---------------
+
+Nothing documented here yet.
+
+BUGS
+----
+
+Shutdown does not work on models with 3 outlets.
+
+Unit may timeout if communication goes silent for too long. If this 
+happens, try increasing the poll interval (1 second is recommended, 
+lower is better). It essentiall needs to be constantly polling the 
+device.
+
+AUTHORS
+-------
+
+Thomas Eldon <tom@tomeldon.com>
+
+SEE ALSO
+--------
+
+The core driver:
+~~~~~~~~~~~~~~~~
+
+linkman:nutupsdrv[8], linkman:ups.conf[5]
+
+Internet resources
+~~~~~~~~~~~~~~~~~~
+
+The NUT (Network UPS Tools) home page: https://www.networkupstools.org/
