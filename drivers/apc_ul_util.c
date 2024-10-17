@@ -37,7 +37,7 @@ void fletcher16Sum(uint8_t *packet, int length, uint8_t *ret_cs)
 	ret_cs[1] = (uint8_t)sum2;
 }
 
-// Use ret_cs in the calculation of the checksum instead of starting with 0
+/*  Use ret_cs in the calculation of the checksum instead of starting with 0 */
 void fletcher16SumContinue(uint8_t *packet, int length, uint8_t *ret_cs)
 {
 	uint8_t sum1 = ret_cs[0];
