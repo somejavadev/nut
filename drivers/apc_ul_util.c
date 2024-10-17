@@ -354,7 +354,6 @@ int parseDatastore(uint8_t *data_block, uint8_t number_of_rows,
 	size_t data_location = (data_block[10] * 16) + data_block[11];
 
 	int currentPosition = 12;
-	int skip_next_usage = 0;
 
 	int size = 2;
 
@@ -396,7 +395,6 @@ int parseDatastore(uint8_t *data_block, uint8_t number_of_rows,
 			return -1;
 			break;
 		case 0xf5: /* 245 */
-			skip_next_usage = 1;
 			break;
 		case 0xf6: /* 246 End of descriptor */
 			upsdebugx(2, "Finished reading descriptor!");

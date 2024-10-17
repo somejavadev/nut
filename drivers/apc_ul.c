@@ -1195,6 +1195,8 @@ void upsdrv_shutdown(void)
 
 static int instcmd(const char *cmdname, const char *extra)
 {
+	NUT_UNUSED_VARIABLE(extra);
+	
 	if (state != ul_state_authenticated)
 	{
 		return STAT_INSTCMD_FAILED;
