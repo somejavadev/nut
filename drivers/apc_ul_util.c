@@ -296,7 +296,7 @@ void exitNamespaceCollection(void)
 			return;
 		}
 
-		for (uint8_t i = 1; i < exited.array_length; i++)
+		for (int i = 1; i < exited.array_length; i++)
 		{
 			for (unsigned int j = start; j < end; j++)
 			{
