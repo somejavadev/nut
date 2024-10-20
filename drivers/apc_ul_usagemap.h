@@ -3,7 +3,7 @@
  *                     definitions and mappings from usages to NUT directives 
  *                     and instcmds
  *
- *  Copyright (C) 
+ *  Copyright (C)
  *    2024 Thomas Eldon <tom@tomeldon.com>
  *
  *  This program is free software; you can redistribute it and/or modify

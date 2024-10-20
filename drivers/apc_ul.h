@@ -1,7 +1,7 @@
 /*
  * apc_ul.h - APC Microlink driver compatible with APC Microlink units
  *
- *  Copyright (C) 
+ *  Copyright (C)
  *    2024 Thomas Eldon <tom@tomeldon.com>
  *
  *  This program is free software; you can redistribute it and/or modify

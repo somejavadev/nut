@@ -27,17 +27,17 @@
 #include "apc_ul.h"
 #include "main.h"
 
-#define MAX_USAGES 512
+#define MAX_USAGES	512
 
-#define MAX_FQIDS 8
+#define MAX_FQIDS	8
 
-#define FQUN_AS_STRING_MAX_LENGTH (13 * MAX_FQIDS) + 1
-#define USAGE_AS_STRING_MAX_LENGTH (FQUN_AS_STRING_MAX_LENGTH + 63)
+#define FQUN_AS_STRING_MAX_LENGTH	(13 * MAX_FQIDS) + 1
+#define USAGE_AS_STRING_MAX_LENGTH	(FQUN_AS_STRING_MAX_LENGTH + 63)
 
-#define COLLECTION_IGNORE_LENGTH -2
+#define COLLECTION_IGNORE_LENGTH	-2
 
-#define FQID(id_i, type_i) {.id = (id_i), .type = (type_i), .array_index = -1, .array_length = -1}
-#define FQID_INDEX(id_i, type_i, index_i, length_i) {.id = (id_i), .type = (type_i), .array_index = (index_i), .array_length = (length_i)}
+#define FQID(id_i, type_i)	{.id = (id_i), .type = (type_i), .array_index = -1, .array_length = -1}
+#define FQID_INDEX(id_i, type_i, index_i, length_i)	{.id = (id_i), .type = (type_i), .array_index = (index_i), .array_length = (length_i)}
 
 #define FQUN(...) \
 	{__VA_ARGS__}
@@ -60,14 +60,14 @@ typedef struct
 
 typedef struct
 {
-	fqid_t fqun[MAX_FQIDS]; /* Fixed array of fqids, designed to be used as the */
-	size_t fqun_stack_size; /* Current number of valid fqids in the stack */
+	fqid_t fqun[MAX_FQIDS];	/* Fixed array of fqids, designed to be used as the */
+	size_t fqun_stack_size;	/* Current number of valid fqids in the stack */
 
-	size_t data_location; /* Data location of the Usage (in the data block) */
+	size_t data_location;	/* Data location of the Usage (in the data block) */
 
-	size_t bitmask_location; /* Data location for the mask */
-	size_t min_location;	 /* Data location for the minimum value */
-	size_t max_location;	 /* Data location for the maximum value */
+	size_t bitmask_location;/* Data location for the mask */
+	size_t min_location;	/* Data location for the minimum value */
+	size_t max_location;	/* Data location for the maximum value */
 
 	uint8_t data_size;
 } usage_t;
@@ -136,9 +136,9 @@ typedef union
 	bitfield_info_t bitfield_info_t;
 } usage_type_info_t;
 
-#define APC_UL_FLAG_SETVAR (1 << 0)
-#define APC_UL_FLAG_BITMASK_EXCLUSIVE (1 << 1)
-#define APC_UL_FLAG_IGNORE_MISSING (1 << 2)
+#define APC_UL_FLAG_SETVAR		(1 << 0)
+#define APC_UL_FLAG_BITMASK_EXCLUSIVE	(1 << 1)
+#define APC_UL_FLAG_IGNORE_MISSING	(1 << 2)
 
 typedef struct
 {
