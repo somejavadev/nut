@@ -114,7 +114,7 @@ int fqun_to_string(const fqid_t *fqun, char *dest)
 		case fqid_collection:
 			if (current_fqid.array_length > 0)
 			{
-				snprintf(dest + ptr_string, 12, "[%-3i, %-3i]", current_fqid.array_index % 256, current_fqid.array_length % 256);
+				snprintf(dest + ptr_string, 13, "[%-3i, %-3i]", current_fqid.array_index % 256, current_fqid.array_length % 256);
 				ptr_string += 10;
 			}
 			dest[ptr_string++] = '.';
