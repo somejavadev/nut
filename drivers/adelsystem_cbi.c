@@ -190,6 +190,7 @@ void upsdrv_initinfo(void)
 	upslogx(LOG_INFO, "ups.model = %s", ds->product.name);
 
 	/* register instant commands */
+	dstate_addcmd("shutdown.default");
 	dstate_addcmd("load.off");
 
 	/* FIXME: Check with the device what this instcmd
@@ -480,9 +481,7 @@ void upsdrv_shutdown(void)
 	 * a limitation (on some platforms) of the interface/media
 	 * used for these devices.
 	 */
-	int	ret = loop_shutdown_commands("shutdown.stayoff", NULL);
-	if (handling_upsdrv_shutdown > 0)
-		set_exit_flag(ret == STAT_INSTCMD_HANDLED ? EF_EXIT_SUCCESS : EF_EXIT_FAILURE);
+	upsdrv_shutdown_default("shutdown.stayoff", NULL);
 }
 
 /* print driver usage info */
@@ -807,7 +806,9 @@ int upscmd(const char *cmd, const char *arg)
 	int rval;
 	int data;
 
-	if (!strcasecmp(cmd, "load.off")) {
+	if (!strcasecmp(cmd, "shutdown.default")) {
+		return upscmd("shutdown.stayoff", arg);
+	} else if (!strcasecmp(cmd, "load.off")) {
 		data = 1;
 		rval = register_write(mbctx, regs[FSD].xaddr, regs[FSD].type, &data);
 		if (rval == -1) {

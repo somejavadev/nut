@@ -1063,45 +1063,7 @@ static void upsdrv_shutdown_advanced(long status)
 /* power down the attached load immediately */
 void upsdrv_shutdown(void)
 {
-	char	temp[32];
-	ssize_t	ret;
-	long	status;
-
-	/* FIXME: Make a name for default original shutdown */
-	if (device_sdcommands) {
-		int	sdret = loop_shutdown_commands(NULL, NULL);
-		if (handling_upsdrv_shutdown > 0)
-			set_exit_flag(sdret == STAT_INSTCMD_HANDLED ? EF_EXIT_SUCCESS : EF_EXIT_FAILURE);
-		return;
-	}
-
-	if (!smartmode())
-		upsdebugx(1, "SM detection failed. Trying a shutdown command anyway");
-
-	/* check the line status */
-
-	ret = ser_send_char(upsfd, APC_STATUS);
-
-	if (ret == 1) {
-		ret = ser_get_line(upsfd, temp, sizeof(temp), ENDCHAR,
-			IGNCHARS, SER_WAIT_SEC, SER_WAIT_USEC);
-
-		if (ret < 1) {
-			upsdebugx(1, "Status read failed ! Assuming on battery state");
-			status = APC_STAT_LB | APC_STAT_OB;
-		} else {
-			status = strtol(temp, 0, 16);
-		}
-
-	} else {
-		upsdebugx(1, "Status request failed; assuming on battery state");
-		status = APC_STAT_LB | APC_STAT_OB;
-	}
-
-	if (testvar("advorder") && strcasecmp(getval("advorder"), "no"))
-		upsdrv_shutdown_advanced(status);
-	else
-		upsdrv_shutdown_simple(status);
+	upsdrv_shutdown_default(NULL, NULL);
 }
 
 /* 940-0095B support: set DTR, lower RTS */
@@ -1413,9 +1375,46 @@ static int instcmd_chktime(apc_cmdtab_t *ct)
 static int instcmd(const char *cmdname, const char *extra)
 {
 	int	i;
-	apc_cmdtab_t	*ct;
+	apc_cmdtab_t	*ct = NULL;
 
-	ct = NULL;
+	if (!strcasecmp(cmdname, "shutdown.default")) {
+		/* NOTE: got no direct equivalent in apc_cmdtab[]
+		 * defined above, as used for instcmd() in the loop below.
+		 */
+		char	temp[32];
+		ssize_t	ret;
+		long	status;
+
+		if (!smartmode())
+			upsdebugx(1, "SM detection failed. Trying a shutdown command anyway");
+
+		/* check the line status */
+
+		ret = ser_send_char(upsfd, APC_STATUS);
+
+		if (ret == 1) {
+			ret = ser_get_line(upsfd, temp, sizeof(temp), ENDCHAR,
+				IGNCHARS, SER_WAIT_SEC, SER_WAIT_USEC);
+
+			if (ret < 1) {
+				upsdebugx(1, "Status read failed ! Assuming on battery state");
+				status = APC_STAT_LB | APC_STAT_OB;
+			} else {
+				status = strtol(temp, 0, 16);
+			}
+
+		} else {
+			upsdebugx(1, "Status request failed; assuming on battery state");
+			status = APC_STAT_LB | APC_STAT_OB;
+		}
+
+		if (testvar("advorder") && strcasecmp(getval("advorder"), "no"))
+			upsdrv_shutdown_advanced(status);
+		else
+			upsdrv_shutdown_simple(status);
+
+		return STAT_INSTCMD_HANDLED;
+	}
 
 	for (i = 0; apc_cmdtab[i].name != NULL; i++)
 		if (!strcasecmp(apc_cmdtab[i].name, cmdname))
@@ -1449,6 +1448,8 @@ static int instcmd(const char *cmdname, const char *extra)
 /* install pointers to functions for msg handlers called from msgparse */
 static void setuphandlers(void)
 {
+	dstate_addcmd("shutdown.default");
+
 	upsh.setvar = setvar;
 	upsh.instcmd = instcmd;
 }
