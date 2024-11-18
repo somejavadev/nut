@@ -1414,6 +1414,19 @@ static int _apc_modbus_instcmd(const char *nut_cmdname, const char *extra)
 
 	NUT_UNUSED_VARIABLE(extra);
 
+	if (!strcasecmp(nut_cmdname, "shutdown.default")) {
+		/* FIXME: got no direct equivalent in apc_modbus_command_map[]
+		 *  defined above, as used for instcmd() in the loop below.
+		 *  Research if "default" can be made an entry in that table?
+		 */
+		modbus_write_register(
+			modbus_ctx,
+			APC_MODBUS_OUTLETCOMMAND_BF_REG,
+			APC_MODBUS_OUTLETCOMMAND_BF_CMD_OUTPUT_SHUTDOWN | APC_MODBUS_OUTLETCOMMAND_BF_TARGET_MAIN_OUTLET_GROUP);
+
+		return STAT_INSTCMD_HANDLED;
+	}
+
 	for (i = 0; apc_modbus_command_map[i].nut_command_name; i++) {
 		if (!strcasecmp(nut_cmdname, apc_modbus_command_map[i].nut_command_name)) {
 			apc_command = &apc_modbus_command_map[i];
@@ -1459,6 +1472,8 @@ void upsdrv_initinfo(void)
 	for (i = 0; apc_modbus_command_map[i].nut_command_name; i++) {
 		dstate_addcmd(apc_modbus_command_map[i].nut_command_name);
 	}
+
+	dstate_addcmd("shutdown.default");
 
 	upsh.setvar = _apc_modbus_setvar;
 	upsh.instcmd = _apc_modbus_instcmd;
@@ -1581,20 +1596,7 @@ void upsdrv_shutdown(void)
 	 * a limitation (on some platforms) of the interface/media
 	 * used for these devices.
 	 */
-
-	/* FIXME: Make a name for default original shutdown */
-	if (device_sdcommands) {
-		int	ret = loop_shutdown_commands(NULL, NULL);
-		if (handling_upsdrv_shutdown > 0)
-			set_exit_flag(ret == STAT_INSTCMD_HANDLED ? EF_EXIT_SUCCESS : EF_EXIT_FAILURE);
-		return;
-	}
-
-	/* FIXME: Make a name for default original shutdown:
-	 *  got no direct equivalent in apc_modbus_command_map[]
-	 *  used for instcmd above
-	 */
-	modbus_write_register(modbus_ctx, APC_MODBUS_OUTLETCOMMAND_BF_REG, APC_MODBUS_OUTLETCOMMAND_BF_CMD_OUTPUT_SHUTDOWN | APC_MODBUS_OUTLETCOMMAND_BF_TARGET_MAIN_OUTLET_GROUP);
+	upsdrv_shutdown_default(NULL, NULL);
 }
 
 void upsdrv_help(void)
