@@ -1753,37 +1753,7 @@ static void upsdrv_shutdown_advanced(void)
 /* power down the attached load immediately */
 void upsdrv_shutdown(void)
 {
-	char	temp[APC_LBUF];
-
-	/* FIXME: Make a name for default original shutdown */
-	if (device_sdcommands) {
-		int	ret = loop_shutdown_commands(NULL, NULL);
-		if (handling_upsdrv_shutdown > 0)
-			set_exit_flag(ret == STAT_INSTCMD_HANDLED ? EF_EXIT_SUCCESS : EF_EXIT_FAILURE);
-		return;
-	}
-
-	if (!smartmode(1))
-		upslogx(LOG_WARNING, "%s: %s", __func__, "setting SmartMode failed !");
-
-	/* check the line status */
-
-	if (apc_write(APC_STATUS) == 1) {
-		if (apc_read(temp, sizeof(temp), SER_D1) == 1) {
-			ups_status = strtol(temp, 0, 16);
-		} else {
-			upslogx(LOG_WARNING, "%s: %s", __func__, "status read failed, assuming LB+OB");
-			ups_status = APC_STAT_LB | APC_STAT_OB;
-		}
-	} else {
-		upslogx(LOG_WARNING, "%s: %s", __func__, "status write failed, assuming LB+OB");
-		ups_status = APC_STAT_LB | APC_STAT_OB;
-	}
-
-	if (testvar("advorder") && toupper((size_t)*getval("advorder")) != 'N')
-		upsdrv_shutdown_advanced();
-	else
-		upsdrv_shutdown_simple();
+	upsdrv_shutdown_default(NULL, NULL);
 }
 
 static int update_info(int all)
@@ -2056,6 +2026,37 @@ static int instcmd(const char *cmd, const char *ext)
 	int i;
 	apc_cmdtab_t *ct = NULL;
 
+	if (!strcasecmp(cmd, "shutdown.default")) {
+		/* NOTE: got no direct equivalent in apc_cmdtab[]
+		 * defined above, as used for instcmd() in the loop below.
+		 */
+		char	temp[APC_LBUF];
+
+		if (!smartmode(1))
+			upslogx(LOG_WARNING, "%s: %s", __func__, "setting SmartMode failed !");
+
+		/* check the line status */
+
+		if (apc_write(APC_STATUS) == 1) {
+			if (apc_read(temp, sizeof(temp), SER_D1) == 1) {
+				ups_status = strtol(temp, 0, 16);
+			} else {
+				upslogx(LOG_WARNING, "%s: %s", __func__, "status read failed, assuming LB+OB");
+				ups_status = APC_STAT_LB | APC_STAT_OB;
+			}
+		} else {
+			upslogx(LOG_WARNING, "%s: %s", __func__, "status write failed, assuming LB+OB");
+			ups_status = APC_STAT_LB | APC_STAT_OB;
+		}
+
+		if (testvar("advorder") && toupper((size_t)*getval("advorder")) != 'N')
+			upsdrv_shutdown_advanced();
+		else
+			upsdrv_shutdown_simple();
+
+		return STAT_INSTCMD_HANDLED;
+	}
+
 	for (i = 0; apc_cmdtab[i].name != NULL; i++) {
 		/* cmd must match */
 		if (strcasecmp(apc_cmdtab[i].name, cmd))
@@ -2125,6 +2126,8 @@ static int instcmd(const char *cmd, const char *ext)
 /* install pointers to functions for msg handlers called from msgparse */
 static void setuphandlers(void)
 {
+	dstate_addcmd("shutdown.default");
+
 	upsh.setvar = setvar;
 	upsh.instcmd = instcmd;
 }
