@@ -1,4 +1,4 @@
-personal_ws-1.1 en 3246 utf-8
+personal_ws-1.1 en 3270 utf-8
 AAC
 AAS
 ABI
@@ -129,6 +129,7 @@ BlackOut
 BladeUPS
 BlueOcean
 Bo
+Bocchi
 Bohe
 Borns
 Borri
@@ -338,6 +339,7 @@ Effekta
 Egys
 Ekkehard
 Electrys
+Eletronicos
 Elio
 Elizarov
 Eltek
@@ -551,6 +553,7 @@ KOLFF
 KRT
 KRTL
 KRTS
+KSTAR
 KTTS
 Kain
 Kaminski
@@ -605,6 +608,7 @@ LOADPCT
 LOCKFN
 LOCKNAME
 LOTRANS
+LTDA
 LTS
 LUA
 LVM
@@ -752,6 +756,7 @@ NOTIFYFLAG
 NOTIFYFLAGS
 NOTIFYMSG
 NOTOFF
+NOTOTHER
 NQA
 NTP
 NUT's
@@ -777,6 +782,7 @@ Neus
 Niels
 Niklas
 Niro
+Nobreak
 Nobreaks
 Nom
 NotePad
@@ -1377,6 +1383,7 @@ Wextra
 WhizBang
 WiX
 Wikipedia
+Willian
 WinMerge
 WinNUT
 WinPower
@@ -1713,6 +1720,7 @@ cpqpower
 cpsups
 cr
 crestfactor
+crit
 criticality
 crlf
 cron
@@ -1779,6 +1787,7 @@ desc
 deschis
 descr
 desde
+designator
 dev
 devctl
 devd
@@ -2047,6 +2056,7 @@ huawei
 hudson
 hunnox
 hwdb
+hwinfo
 hwmon
 hwmonX
 hypervisor
@@ -2056,6 +2066,7 @@ iDialog
 iDowell
 iManufacturer
 iPlug
+iProduct
 iSerial
 iUSB
 ib
@@ -2099,6 +2110,7 @@ initups
 inline
 inlined
 innotech
+innovart
 inode
 inplace
 installable
@@ -2436,6 +2448,7 @@ newvictronups
 nf
 ng
 nhnl
+nhs
 nielchiano
 nitram
 nl
@@ -2447,6 +2460,7 @@ nn
 nnn
 noAuthNoPriv
 nobody's
+nobreak
 nobt
 nodev
 nodownload
@@ -2480,6 +2494,7 @@ nuget
 num
 numOfBytesFromUPS
 numa
+numbatteries
 numlogins
 numq
 nutclient
@@ -2560,6 +2575,7 @@ pe
 peasy
 peername
 pem
+perc
 perl
 pfSense
 pfexec
@@ -2753,6 +2769,7 @@ screenshots
 scriptname
 sd
 sdcmd
+sdcommands
 sddelay
 sdk
 sdl
@@ -2775,6 +2792,7 @@ sendmail
 sendsignal
 sendsignalfn
 sendsignalpid
+senoidal
 sequentialized
 ser
 seria
@@ -2905,6 +2923,7 @@ subdirectories
 subdirectory
 subdriver
 subdriver's
+subdrivername
 subdrivers
 subdrv
 sublicense
@@ -2974,8 +2993,10 @@ th
 timeframe
 timehead
 timername
+timespec
 timestamp
 timeticks
+timeval
 tios
 tmp
 tmpfiles
@@ -3074,6 +3095,7 @@ upsdebugx
 upsdev
 upsdrv
 upsdrvctl
+upsdrvquery
 upsdrvsvcctl
 upserror
 upsfetch
@@ -3112,6 +3134,8 @@ usbhid
 usbif
 usbinfo
 usbmisc
+usbsubdriver
+usbsubdrvname
 usbups
 usbus
 usd
@@ -3145,6 +3169,7 @@ variadic
 varlow
 varname
 varvalue
+vbat
 vbatt
 vc
 vendorid
