@@ -810,24 +810,26 @@ protected:
 	 *  \param[in]   section  Section name
 	 *  \param[in]   entry    Entry name
 	 *  \param[out]  params   Configuration parameters
+	 *  \param[in]   caseSensitive  Use case-sensitive entry name matching? (default: true)
 	 *
 	 *  \retval true  if the entry was found
 	 *  \retval false otherwise
 	 */
-	bool get(const std::string & section, const std::string & entry, ConfigParamList & params) const;
+	bool get(const std::string & section, const std::string & entry, ConfigParamList & params, bool caseSensitive = true) const;
 
 	/**
 	 *  \brief  Global scope configuration parameters getter
 	 *
 	 *  \param[in]   entry    Entry name
 	 *  \param[out]  params   Configuration parameters
+	 *  \param[in]   caseSensitive  Use case-sensitive entry name matching? (default: true)
 	 *
 	 *  \retval true  if the entry was found
 	 *  \retval false otherwise
 	 */
-	inline bool get(const std::string & entry, ConfigParamList & params) const
+	inline bool get(const std::string & entry, ConfigParamList & params, bool caseSensitive = true) const
 	{
-		return get("", entry, params);
+		return get("", entry, params, caseSensitive);
 	}
 
 	/**
@@ -926,12 +928,34 @@ protected:
 	 *
 	 *  \param  section  Section name
 	 *  \param  entry    Entry name
+	 *  \param  caseSensitive  Use case-sensitive entry name matching? (default: true)
 	 *
 	 *  \return Configuration parameter as string
 	 */
 	std::string getStr(
 		const std::string & section,
-		const std::string & entry) const;
+		const std::string & entry,
+		bool                caseSensitive = true) const;
+
+	/**
+	 *  \brief  Configuration string getter
+	 *
+	 *  Empty string is returned if the section or entry doesn't exist.
+	 *
+	 *  \param  section  Section name
+	 *  \param  entry    Entry name (as C char array or string literal)
+	 *  \param  caseSensitive  Use case-sensitive entry name matching? (default: true)
+	 *
+	 *  \return Configuration parameter as string
+	 */
+	std::string getStr(
+		const std::string & section,
+		const char        * entry,
+		bool                caseSensitive = true) const
+	{
+		std::string sEntry{entry};
+		return getStr(section, sEntry, caseSensitive);
+	}
 
 	/**
 	 *  \brief  Global scope configuration string getter
@@ -939,12 +963,15 @@ protected:
 	 *  Empty string is returned if the entry doesn't exist.
 	 *
 	 *  \param  entry  Entry name
+	 *  \param  caseSensitive  Use case-sensitive entry name matching? (default: true)
 	 *
 	 *  \return Configuration parameter as string
 	 */
-	inline std::string getStr(const std::string & entry) const
+	inline std::string getStr(
+		const std::string & entry,
+		bool                caseSensitive = true) const
 	{
-		return getStr("", entry);
+		return getStr("", entry, caseSensitive);
 	}
 
 	/**
@@ -1470,6 +1497,13 @@ public:
 		NOTIFY_NOTOFF,
 		NOTIFY_BYPASS,
 		NOTIFY_NOTBYPASS,
+		NOTIFY_ECO,
+		NOTIFY_NOTECO,
+		NOTIFY_ALARM,
+		NOTIFY_NOTALARM,
+
+		NOTIFY_OTHER = 28,
+		NOTIFY_NOTOTHER,
 
 		NOTIFY_SUSPEND_STARTING = 30,
 		NOTIFY_SUSPEND_FINISHED,
@@ -1659,6 +1693,7 @@ public:
 
 	inline std::string getChroot()     const { return getStr("chroot"); }
 	inline std::string getDriverPath() const { return getStr("driverpath"); }
+	inline std::string getStatePath()  const { return getStr("statepath", false); }	// NOTE: accept it case-insensitively
 	inline std::string getGroup()      const { return getStr("group"); }
 	inline std::string getSynchronous() const { return getStr("synchronous"); }
 	inline std::string getUser()       const { return getStr("user"); }
@@ -1675,6 +1710,7 @@ public:
 
 	inline void setChroot(const std::string & path)     { setStr("chroot",     path); }
 	inline void setDriverPath(const std::string & path) { setStr("driverpath", path); }
+	inline void setStatePath(const std::string & path)  { setStr("statepath", path); }
 	inline void setGroup(const std::string & group)     { setStr("group",      group); }
 	inline void setSynchronous(const std::string & val) { setStr("synchronous", val); }
 	inline void setUser(const std::string & user)       { setStr("user",       user); }
@@ -1857,6 +1893,7 @@ public:
 	inline long long int getI2C_address(const std::string & ups)               const { return getInt(ups, "i2c_address"); }
 	inline long long int getIdleLoad(const std::string & ups)                  const { return getInt(ups, "idleload"); }            // CHECKME
 	inline long long int getInputTimeout(const std::string & ups)              const { return getInt(ups, "input_timeout"); }       // CHECKME
+	inline long long int getInterruptPipeNoEventsTolerance(const std::string & ups)       const { return getInt(ups, "interrupt_pipe_no_events_tolerance"); }
 	inline long long int getInterruptSize(const std::string & ups)             const { return getInt(ups, "interruptsize"); }
 	inline long long int getLineVoltage(const std::string & ups)               const { return getInt(ups, "linevoltage"); }         // CHECKME
 	inline long long int getLoadpercentage(const std::string & ups)            const { return getInt(ups, "loadPercentage"); }      // CHECKME
@@ -2071,6 +2108,7 @@ public:
 	inline void setI2C_address(const std::string & ups, long long int val)                    { setInt(ups, "i2c_address",         val); }
 	inline void setIdleLoad(const std::string & ups, long long int idleload)                  { setInt(ups, "idleload",            idleload); }     // CHECKME
 	inline void setInputTimeout(const std::string & ups, long long int timeout)               { setInt(ups, "input_timeout",       timeout); }      // CHECKME
+	inline void setInterruptPipeNoEventsTolerance(const std::string & ups, long long int val) { setInt(ups, "interrupt_pipe_no_events_tolerance", val); }
 	inline void setInterruptSize(const std::string & ups, long long int val)                  { setInt(ups, "interruptsize",       val); }
 	inline void setLineVoltage(const std::string & ups, long long int linevoltage)            { setInt(ups, "linevoltage",         linevoltage); }  // CHECKME
 	inline void setLoadpercentage(const std::string & ups, long long int load)                { setInt(ups, "loadPercentage",      load); }         // CHECKME
